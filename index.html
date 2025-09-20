@@ -1079,13 +1079,28 @@ Merci de votre confiance !`);
                 })
                 .catch((error) => {
                     debugLog('Double envoi EMAIL ERROR', error);
+                    
+                    // Message d'erreur plus détaillé
+                    let errorMessage = 'Erreur lors de l\'envoi';
+                    if (error && error.details) {
+                        errorMessage = error.details;
+                    } else if (error && error.fullError) {
+                        errorMessage = `Détails: ${error.fullError}`;
+                    }
+                    
                     showNotification(`❌ Erreur lors de l'envoi de votre demande.
 
-Veuillez réessayer dans quelques instants ou nous contacter directement:
+Code d'erreur: ${errorMessage}
+
+Solutions possibles:
+• Vérifiez votre connexion internet
+• Réessayez dans quelques instants
+• Contactez-nous directement si le problème persiste
+
 📞 01 23 45 67 89
 📧 contact@monentreprise.fr
 
-Code d'erreur: ${error.message || 'DOUBLE_EMAIL_ERROR'}`, 'error');
+⚠️ Activez les logs de debug pour plus d'infos (F12 > Console)`, 'error');
                 })
                 .finally(() => {
                     // Restaurer le bouton
@@ -1148,11 +1163,22 @@ Code d'erreur: ${error.message || 'DOUBLE_EMAIL_ERROR'}`, 'error');
                     })
                     .catch((error) => {
                         debugLog('Erreur lors de l\'envoi des emails', error);
-                        // Déterminer quel email a échoué
+                        
+                        // Essayer de déterminer quel email a échoué
+                        let errorDetails = 'Erreur inconnue';
+                        if (error && error.text) {
+                            errorDetails = error.text;
+                        } else if (error && error.message) {
+                            errorDetails = error.message;
+                        } else if (typeof error === 'string') {
+                            errorDetails = error;
+                        }
+                        
                         reject({
                             message: 'Erreur envoi email',
                             error: error,
-                            details: 'Un ou plusieurs emails n\'ont pas pu être envoyés'
+                            details: errorDetails,
+                            fullError: JSON.stringify(error)
                         });
                     });
                 } catch (error) {
@@ -1424,7 +1450,76 @@ Code d'erreur: ${error.message || 'DOUBLE_EMAIL_ERROR'}`, 'error');
             }
 
             debugLog('Initialisation terminée avec système double email');
+            
+            // Ajouter bouton de test en mode debug
+            if (debugMode) {
+                const testBtn = document.createElement('button');
+                testBtn.textContent = 'TEST EMAIL';
+                testBtn.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    right: 20px;
+                    background: #ff6b6b;
+                    color: white;
+                    border: none;
+                    padding: 10px;
+                    border-radius: 5px;
+                    z-index: 9999;
+                    cursor: pointer;
+                `;
+                testBtn.onclick = testEmailSystem;
+                document.body.appendChild(testBtn);
+            }
         });
+
+        // Fonction de test pour diagnostiquer les erreurs
+        function testEmailSystem() {
+            debugLog('=== TEST EMAIL SYSTEM ===');
+            
+            // Test 1: Vérifier EmailJS
+            if (typeof emailjs === 'undefined') {
+                debugLog('ECHEC: EmailJS non chargé');
+                alert('EmailJS non chargé !');
+                return;
+            }
+            debugLog('OK: EmailJS disponible');
+            
+            // Test 2: Configuration
+            debugLog('Configuration EMAIL_CONFIG:', EMAIL_CONFIG);
+            
+            // Test 3: Envoi simple admin
+            const testParams = {
+                client_name: 'Test User',
+                client_email: 'test@example.com',
+                service_type: 'Test',
+                request_id: 'TEST-123',
+                admin_email: EMAIL_CONFIG.adminEmail
+            };
+            
+            debugLog('Test envoi admin avec params:', testParams);
+            
+            emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.templateId, testParams)
+                .then((response) => {
+                    debugLog('Test admin REUSSI:', response);
+                    alert('Test admin réussi ! Status: ' + response.status);
+                    
+                    // Test envoi client
+                    const clientParams = {
+                        ...testParams,
+                        to_email: 'test@example.com'
+                    };
+                    
+                    return emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.clientTemplateId, clientParams);
+                })
+                .then((response) => {
+                    debugLog('Test client REUSSI:', response);
+                    alert('Test client réussi ! Status: ' + response.status);
+                })
+                .catch((error) => {
+                    debugLog('Test ECHEC:', error);
+                    alert('Test échoué: ' + JSON.stringify(error));
+                });
+        }
 
         // Chat simulation
         function openChat() {
