@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MonEntreprise.fr - Services Micro-Entreprise & Démarches en Ligne</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 120px 0 80px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Services Section */
+        .services {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #333;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .service-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 4px solid #667eea;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .service-card h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .service-list {
+            list-style: none;
+            margin-top: 1rem;
+        }
+
+        .service-list li {
+            padding: 0.3rem 0;
+            color: #666;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .service-list li:before {
+            content: "✓";
+            color: #4CAF50;
+            position: absolute;
+            left: 0;
+        }
+
+        /* Process Section */
+        .process {
+            padding: 80px 0;
+            background: #f8f9fa;
+        }
+
+        .process-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+        }
+
+        /* Pricing Section */
+        .pricing {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .pricing-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .pricing-card:hover {
+            transform: scale(1.05);
+        }
+
+        .pricing-card.featured {
+            border: 3px solid #667eea;
+        }
+
+        .featured::before {
+            content: "POPULAIRE";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #667eea;
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .price {
+            font-size: 2.5rem;
+            color: #667eea;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+
+        /* Form Section */
+        .contact-form {
+            padding: 80px 0;
+            background: #f8f9fa;
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* Footer */
+        footer {
+            background: #2c3e50;
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+
+        .footer-section a {
+            color: #bdc3c7;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .services-grid,
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .service-card {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">MonEntreprise.fr</div>
+            <ul class="nav-links">
+                <li><a href="#accueil">Accueil</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#processus">Comment ça marche</a></li>
+                <li><a href="#tarifs">Tarifs</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="accueil" class="hero">
+        <div class="container">
+            <h1>Créez votre Micro-Entreprise en 24h</h1>
+            <p>Tous vos services administratifs et démarches en ligne simplifiés</p>
+            <div class="cta-buttons">
+                <a href="#" class="btn btn-primary" onclick="openModal('createModal')">Créer ma Micro-Entreprise</a>
+                <a href="#services" class="btn btn-secondary">Découvrir nos Services</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services">
+        <div class="container">
+            <h2 class="section-title">Nos Services Complets</h2>
+            
+            <div class="services-grid">
+                <!-- Micro-Entreprise Services -->
+                <div class="service-card">
+                    <h3>🏢 Création Micro-Entreprise</h3>
+                    <p>Créez votre micro-entreprise rapidement et facilement</p>
+                    <ul class="service-list">
+                        <li>Déclaration de début d'activité</li>
+                        <li>Immatriculation SIRENE</li>
+                        <li>Choix du régime fiscal</li>
+                        <li>Demande ACCRE/ACRE</li>
+                        <li>Ouverture compte bancaire dédié</li>
+                        <li>Assurance responsabilité civile</li>
+                    </ul>
+                </div>
+
+                <!-- Administrative Services -->
+                <div class="service-card">
+                    <h3>📋 Démarches Administratives</h3>
+                    <p>Toutes vos démarches administratives du quotidien</p>
+                    <ul class="service-list">
+                        <li>Demande/Renouvellement titre de séjour</li>
+                        <li>Rendez-vous préfecture</li>
+                        <li>Demande de naturalisation</li>
+                        <li>Changement d'adresse officiel</li>
+                        <li>Demande d'extrait de casier judiciaire</li>
+                        <li>Apostille de documents</li>
+                    </ul>
+                </div>
+
+                <!-- Civil Status Services -->
+                <div class="service-card">
+                    <h3>👥 État Civil & Famille</h3>
+                    <p>Services liés à l'état civil et aux démarches familiales</p>
+                    <ul class="service-list">
+                        <li>Demande d'acte de naissance</li>
+                        <li>Demande d'acte de mariage</li>
+                        <li>Demande d'acte de décès</li>
+                        <li>PACS - Déclaration/Dissolution</li>
+                        <li>Reconnaissance de paternité</li>
+                        <li>Changement de nom/prénom</li>
+                    </ul>
+                </div>
+
+                <!-- Social Services -->
+                <div class="service-card">
+                    <h3>🏥 Sécurité Sociale & Santé</h3>
+                    <p>Démarches santé et protection sociale</p>
+                    <ul class="service-list">
+                        <li>Ouverture de droits CPAM</li>
+                        <li>Demande de carte Vitale</li>
+                        <li>Demande CMU-C/CSS</li>
+                        <li>Déclaration médecin traitant</li>
+                        <li>Remboursement frais médicaux</li>
+                        <li>Arrêt maladie en ligne</li>
+                    </ul>
+                </div>
+
+                <!-- Housing Services -->
+                <div class="service-card">
+                    <h3>🏠 Logement & Habitat</h3>
+                    <p>Toutes les démarches liées au logement</p>
+                    <ul class="service-list">
+                        <li>Demande de logement social</li>
+                        <li>Demande APL/ALS</li>
+                        <li>Dossier locataire complet</li>
+                        <li>Attestation d'assurance habitation</li>
+                        <li>Résiliation contrats (EDF, GDF, Internet)</li>
+                        <li>Changement d'adresse multi-services</li>
+                    </ul>
+                </div>
+
+                <!-- Employment Services -->
+                <div class="service-card">
+                    <h3>💼 Emploi & Formation</h3>
+                    <p>Services emploi, formation et carrière</p>
+                    <ul class="service-list">
+                        <li>Inscription Pôle Emploi</li>
+                        <li>Demande ARE/RSA</li>
+                        <li>Création compte CPF</li>
+                        <li>Demande de formation</li>
+                        <li>Validation des acquis (VAE)</li>
+                        <li>Bilan de compétences</li>
+                    </ul>
+                </div>
+
+                <!-- Transport Services -->
+                <div class="service-card">
+                    <h3>🚗 Transport & Mobilité</h3>
+                    <p>Démarches liées aux transports</p>
+                    <ul class="service-list">
+                        <li>Demande/Renouvellement permis</li>
+                        <li>Échange permis étranger</li>
+                        <li>Immatriculation véhicule</li>
+                        <li>Changement de propriétaire</li>
+                        <li>Carte de transport</li>
+                        <li>Contestation PV</li>
+                    </ul>
+                </div>
+
+                <!-- Tax Services -->
+                <div class="service-card">
+                    <h3>💰 Fiscalité & Impôts</h3>
+                    <p>Gestion fiscale et déclarations</p>
+                    <ul class="service-list">
+                        <li>Déclaration revenus micro-BNC/BIC</li>
+                        <li>Télédéclaration TVA</li>
+                        <li>Demande d'avis de non-imposition</li>
+                        <li>Échéancier de paiement</li>
+                        <li>Réclamation fiscale</li>
+                        <li>Optimisation fiscale légale</li>
+                    </ul>
+                </div>
+
+                <!-- Digital Services -->
+                <div class="service-card">
+                    <h3>💻 Services Numériques</h3>
+                    <p>Aide aux démarches numériques</p>
+                    <ul class="service-list">
+                        <li>Création compte France Connect</li>
+                        <li>Activation signature électronique</li>
+                        <li>Coffre-fort numérique</li>
+                        <li>Dématérialisation documents</li>
+                        <li>Aide utilisation services publics</li>
+                        <li>Sécurisation identité numérique</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section id="processus" class="process">
+        <div class="container">
+            <h2 class="section-title">Comment ça marche ?</h2>
+            <div class="process-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Choisissez votre service</h3>
+                    <p>Sélectionnez le service dont vous avez besoin parmi notre large gamme</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Remplissez le formulaire</h3>
+                    <p>Complétez notre formulaire simplifié avec vos informations</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Validation et traitement</h3>
+                    <p>Nos experts vérifient et traitent votre demande</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Suivi en temps réel</h3>
+                    <p>Suivez l'avancement de vos démarches depuis votre espace client</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="tarifs" class="pricing">
+        <div class="container">
+            <h2 class="section-title">Nos Tarifs Transparents</h2>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Essentiel</h3>
+                    <div class="price">29€</div>
+                    <p>Pour les démarches simples</p>
+                    <ul class="service-list">
+                        <li>1 démarche administrative</li>
+                        <li>Support par email</li>
+                        <li>Traitement sous 48h</li>
+                        <li>Suivi en ligne</li>
+                    </ul>
+                    <a href="#" class="btn btn-primary" onclick="openModal('orderModal')">Commander</a>
+                </div>
+
+                <div class="pricing-card featured">
+                    <h3>Premium</h3>
+                    <div class="price">79€</div>
+                    <p>Pour les créateurs d'entreprise</p>
+                    <ul class="service-list">
+                        <li>Création micro-entreprise complète</li>
+                        <li>Support téléphonique</li>
+                        <li>Traitement prioritaire 24h</li>
+                        <li>Conseils personnalisés</li>
+                        <li>Kit de démarrage inclus</li>
+                    </ul>
+                    <a href="#" class="btn btn-primary" onclick="openModal('orderModal')">Commander</a>
+                </div>
+
+                <div class="pricing-card">
+                    <h3>Pro</h3>
+                    <div class="price">149€</div>
+                    <p>Accompagnement complet</p>
+                    <ul class="service-list">
+                        <li>Jusqu'à 5 démarches</li>
+                        <li>Support dédié 7j/7</li>
+                        <li>Traitement express</li>
+                        <li>Rendez-vous visio</li>
+                        <li>Garantie résultat</li>
+                    </ul>
+                    <a href="#" class="btn btn-primary" onclick="openModal('orderModal')">Commander</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form -->
+    <section id="contact" class="contact-form">
+        <div class="container">
+            <h2 class="section-title">Commencez maintenant</h2>
+            <div class="form-container">
+                <form id="mainForm">
+                    <div class="form-group">
+                        <label for="service">Type de service souhaité *</label>
+                        <select id="service" name="service" required>
+                            <option value="">Sélectionnez un service</option>
+                            <option value="micro-entreprise">Création micro-entreprise</option>
+                            <option value="titre-sejour">Titre de séjour</option>
+                            <option value="prefecture">Rendez-vous préfecture</option>
+                            <option value="etat-civil">État civil</option>
+                            <option value="securite-sociale">Sécurité sociale</option>
+                            <option value="logement">Démarches logement</option>
+                            <option value="emploi">Emploi et formation</option>
+                            <option value="transport">Transport</option>
+                            <option value="fiscalite">Fiscalité</option>
+                            <option value="numerique">Services numériques</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prenom">Prénom *</label>
+                        <input type="text" id="prenom" name="prenom" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nom">Nom *</label>
+                        <input type="text" id="nom" name="nom" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="telephone">Téléphone</label>
+                        <input type="tel" id="telephone" name="telephone">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Décrivez votre demande</label>
+                        <textarea id="message" name="message" rows="4" placeholder="Détaillez votre besoin..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="urgence">Niveau d'urgence</label>
+                        <select id="urgence" name="urgence">
+                            <option value="normal">Normal (72h)</option>
+                            <option value="rapide">Rapide (48h)</option>
+                            <option value="express">Express (24h)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Envoyer ma demande</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Services</h3>
+                    <a href="#">Micro-entreprise</a>
+                    <a href="#">Démarches administratives</a>
+                    <a href="#">État civil</a>
+                    <a href="#">Fiscalité</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Support</h3>
+                    <a href="#">Aide en ligne</a>
+                    <a href="#">FAQ</a>
+                    <a href="#">Contact</a>
+                    <a href="#">Tutoriels</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Légal</h3>
+                    <a href="#">Mentions légales</a>
+                    <a href="#">CGV</a>
+                    <a href="#">Confidentialité</a>
+                    <a href="#">Cookies</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p>📧 contact@monentreprise.fr</p>
+                    <p>📞 01 23 45 67 89</p>
+                    <p>📍 Paris, France</p>
+                </div>
+            </div>
+            <p>&copy; 2025 MonEntreprise.fr - Tous droits réservés</p>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <div id="createModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('createModal')">&times;</span>
+            <h2>Créer ma Micro-Entreprise</h2>
+            <form id="createForm">
+                <div class="form-group">
+                    <label for="activite">Type d'activité *</label>
+                    <select id="activite" name="activite" required>
+                        <option value="">Choisissez votre activité</option>
+                        <option value="commerciale">Activité commerciale</option>
+                        <option value="artisanale">Activité artisanale</option>
+                        <option value="liberale">Profession libérale</option>
+                        <option value="mixte">Activité mixte</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="denomination">Dénomination sociale</label>
+                    <input type="text" id="denomination" name="denomination">
+                </div>
+                <div class="form-group">
+                    <label for="adresse">Adresse du siège social *</label>
+                    <input type="text" id="adresse" name="adresse" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Démarrer la création</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('orderModal')">&times;</span>
+            <h2>Commander un service</h2>
+            <p>Merci pour votre intérêt ! Un conseiller va vous contacter dans les plus brefs délais pour finaliser votre commande.</p>
+            <button class="btn btn-primary" onclick="closeModal('orderModal')">Fermer</button>
+        </div>
+    </div>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Form submissions
+        document.getElementById('mainForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Votre demande a été envoyée ! Nous vous contacterons rapidement.');
+            this.reset();
+        });
+
+        document.getElementById('createForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Votre demande de création a été initiée ! Un expert va vous accompagner.');
+            closeModal('createModal');
+            this.reset();
+        });
+
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Add animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all service cards
+        document.querySelectorAll('.service-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+
+        // Dynamic pricing based on service selection
+        document.getElementById('service').addEventListener('change', function() {
+            const selectedService = this.value;
+            let recommendedPrice = '';
+            
+            switch(selectedService) {
+                case 'micro-entreprise':
+                    recommendedPrice = 'Pack Premium (79€) recommandé';
+                    break;
+                case 'titre-sejour':
+                case 'prefecture':
+                    recommendedPrice = 'Pack Essentiel (29€) suffisant';
+                    break;
+                case 'etat-civil':
+                case 'securite-sociale':
+                    recommendedPrice = 'Pack Essentiel (29€) recommandé';
+                    break;
+                default:
+                    recommendedPrice = 'Voir nos tarifs ci-dessus';
+            }
+            
+            // Show price recommendation
+            let priceHint = document.getElementById('priceHint');
+            if (!priceHint) {
+                priceHint = document.createElement('p');
+                priceHint.id = 'priceHint';
+                priceHint.style.color = '#667eea';
+                priceHint.style.fontSize = '0.9rem';
+                priceHint.style.marginTop = '5px';
+                this.parentNode.appendChild(priceHint);
+            }
+            priceHint.textContent = recommendedPrice;
+        });
+
+        // Add loading animation for form submissions
+        function showLoading(formId) {
+            const form = document.getElementById(formId);
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Traitement...';
+            
+            setTimeout(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }, 2000);
+        }
+
+        // Enhanced form validation
+        function validateForm(formData) {
+            const errors = [];
+            
+            if (!formData.get('prenom') || formData.get('prenom').length < 2) {
+                errors.push('Le prénom doit contenir au moins 2 caractères');
+            }
+            
+            if (!formData.get('nom') || formData.get('nom').length < 2) {
+                errors.push('Le nom doit contenir au moins 2 caractères');
+            }
+            
+            const email = formData.get('email');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email || !emailRegex.test(email)) {
+                errors.push('Veuillez saisir une adresse email valide');
+            }
+            
+            return errors;
+        }
+
+        // Update main form submission with validation
+        document.getElementById('mainForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const errors = validateForm(formData);
+            
+            if (errors.length > 0) {
+                alert('Erreurs dans le formulaire:\n' + errors.join('\n'));
+                return;
+            }
+            
+            showLoading('mainForm');
+            
+            setTimeout(() => {
+                alert('✅ Votre demande a été envoyée avec succès !\n\nVous recevrez un email de confirmation dans les prochaines minutes.\nUn conseiller vous contactera sous 24h.');
+                this.reset();
+                // Clear price hint if exists
+                const priceHint = document.getElementById('priceHint');
+                if (priceHint) priceHint.remove();
+            }, 2000);
+        });
+
+        // Add chatbot simulation
+        function initChatBot() {
+            const chatButton = document.createElement('div');
+            chatButton.innerHTML = '💬';
+            chatButton.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                width: 60px;
+                height: 60px;
+                background: #667eea;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                cursor: pointer;
+                box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+                z-index: 1000;
+                transition: transform 0.3s ease;
+            `;
+            
+            chatButton.addEventListener('mouseover', () => {
+                chatButton.style.transform = 'scale(1.1)';
+            });
+            
+            chatButton.addEventListener('mouseout', () => {
+                chatButton.style.transform = 'scale(1)';
+            });
+            
+            chatButton.addEventListener('click', () => {
+                alert('💬 Chat en direct\n\nNotre équipe est disponible du lundi au vendredi de 9h à 18h.\n\nPour une assistance immédiate, appelez le 01 23 45 67 89 ou envoyez un email à contact@monentreprise.fr');
+            });
+            
+            document.body.appendChild(chatButton);
+        }
+
+        // Add progress tracking simulation
+        function createProgressTracker() {
+            const progressSection = document.createElement('section');
+            progressSection.style.cssText = `
+                padding: 40px 0;
+                background: #f8f9fa;
+                text-align: center;
+                margin-top: 2rem;
+            `;
+            
+            progressSection.innerHTML = `
+                <div class="container">
+                    <h3>Suivez vos démarches en temps réel</h3>
+                    <p style="margin: 1rem 0; color: #666;">Connectez-vous à votre espace client pour suivre l'avancement</p>
+                    <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 2rem;">
+                        <div style="background: white; padding: 1rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); min-width: 200px;">
+                            <div style="color: #4CAF50; font-size: 1.2rem; margin-bottom: 0.5rem;">✅ Reçu</div>
+                            <p style="font-size: 0.9rem; color: #666;">Votre dossier est reçu</p>
+                        </div>
+                        <div style="background: white; padding: 1rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); min-width: 200px;">
+                            <div style="color: #FF9800; font-size: 1.2rem; margin-bottom: 0.5rem;">⏳ En cours</div>
+                            <p style="font-size: 0.9rem; color: #666;">Traitement en cours</p>
+                        </div>
+                        <div style="background: white; padding: 1rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); min-width: 200px;">
+                            <div style="color: #2196F3; font-size: 1.2rem; margin-bottom: 0.5rem;">📋 Validation</div>
+                            <p style="font-size: 0.9rem; color: #666;">Vérification finale</p>
+                        </div>
+                        <div style="background: white; padding: 1rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); min-width: 200px;">
+                            <div style="color: #4CAF50; font-size: 1.2rem; margin-bottom: 0.5rem;">🎉 Terminé</div>
+                            <p style="font-size: 0.9rem; color: #666;">Documents prêts</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.querySelector('#contact').insertAdjacentElement('beforebegin', progressSection);
+        }
+
+        // Add testimonials section
+        function createTestimonials() {
+            const testimonialsSection = document.createElement('section');
+            testimonialsSection.style.cssText = `
+                padding: 80px 0;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            `;
+            
+            testimonialsSection.innerHTML = `
+                <div class="container">
+                    <h2 class="section-title" style="color: white;">Ils nous font confiance</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 3rem;">
+                        <div style="background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 15px; backdrop-filter: blur(10px);">
+                            <div style="font-size: 1.1rem; margin-bottom: 1rem;">"Service exceptionnel ! Ma micro-entreprise a été créée en 24h comme promis."</div>
+                            <div style="display: flex; align-items: center; opacity: 0.9;">
+                                <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; margin-right: 1rem; display: flex; align-items: center; justify-content: center;">👤</div>
+                                <div>
+                                    <div style="font-weight: bold;">Marie L.</div>
+                                    <div style="font-size: 0.9rem; opacity: 0.8;">Consultante</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 15px; backdrop-filter: blur(10px);">
+                            <div style="font-size: 1.1rem; margin-bottom: 1rem;">"Enfin un site qui simplifie vraiment les démarches administratives !"</div>
+                            <div style="display: flex; align-items: center; opacity: 0.9;">
+                                <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; margin-right: 1rem; display: flex; align-items: center; justify-content: center;">👤</div>
+                                <div>
+                                    <div style="font-weight: bold;">Ahmed K.</div>
+                                    <div style="font-size: 0.9rem; opacity: 0.8;">Artisan</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 15px; backdrop-filter: blur(10px);">
+                            <div style="font-size: 1.1rem; margin-bottom: 1rem;">"Support client au top, ils m'ont aidé pour mon titre de séjour."</div>
+                            <div style="display: flex; align-items: center; opacity: 0.9;">
+                                <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; margin-right: 1rem; display: flex; align-items: center; justify-content: center;">👤</div>
+                                <div>
+                                    <div style="font-weight: bold;">Sofia R.</div>
+                                    <div style="font-size: 0.9rem; opacity: 0.8;">Étudiante</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.querySelector('#tarifs').insertAdjacentElement('afterend', testimonialsSection);
+        }
+
+        // Add FAQ section
+        function createFAQ() {
+            const faqSection = document.createElement('section');
+            faqSection.style.cssText = `
+                padding: 80px 0;
+                background: white;
+            `;
+            
+            faqSection.innerHTML = `
+                <div class="container">
+                    <h2 class="section-title">Questions Fréquentes</h2>
+                    <div style="max-width: 800px; margin: 0 auto;">
+                        <div class="faq-item" style="margin-bottom: 1rem; background: #f8f9fa; border-radius: 10px; overflow: hidden;">
+                            <div class="faq-question" style="padding: 1.5rem; cursor: pointer; font-weight: 600; background: white; border-left: 4px solid #667eea;" onclick="toggleFAQ(0)">
+                                Combien de temps faut-il pour créer une micro-entreprise ?
+                            </div>
+                            <div class="faq-answer" style="padding: 0 1.5rem; max-height: 0; overflow: hidden; transition: all 0.3s ease;">
+                                <p style="padding: 1rem 0; color: #666;">En moyenne 24 à 48 heures ouvrées. Nous nous occupons de toutes les démarches : déclaration, immatriculation SIRENE, et vous recevez tous vos documents officiels.</p>
+                            </div>
+                        </div>
+                        <div class="faq-item" style="margin-bottom: 1rem; background: #f8f9fa; border-radius: 10px; overflow: hidden;">
+                            <div class="faq-question" style="padding: 1.5rem; cursor: pointer; font-weight: 600; background: white; border-left: 4px solid #667eea;" onclick="toggleFAQ(1)">
+                                Vos services sont-ils officiels ?
+                            </div>
+                            <div class="faq-answer" style="padding: 0 1.5rem; max-height: 0; overflow: hidden; transition: all 0.3s ease;">
+                                <p style="padding: 1rem 0; color: #666;">Oui, nous sommes un organisme agréé. Toutes nos démarches sont officielles et reconnues par l'administration française.</p>
+                            </div>
+                        </div>
+                        <div class="faq-item" style="margin-bottom: 1rem; background: #f8f9fa; border-radius: 10px; overflow: hidden;">
+                            <div class="faq-question" style="padding: 1.5rem; cursor: pointer; font-weight: 600; background: white; border-left: 4px solid #667eea;" onclick="toggleFAQ(2)">
+                                Que se passe-t-il si ma demande est refusée ?
+                            </div>
+                            <div class="faq-answer" style="padding: 0 1.5rem; max-height: 0; overflow: hidden; transition: all 0.3s ease;">
+                                <p style="padding: 1rem 0; color: #666;">Nous offrons une garantie remboursement si la demande est refusée pour une erreur de notre part. Nous vous accompagnons aussi pour corriger et relancer la demande.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.querySelector('#contact').insertAdjacentElement('beforebegin', faqSection);
+        }
+
+        // FAQ toggle function
+        function toggleFAQ(index) {
+            const faqItems = document.querySelectorAll('.faq-item');
+            const currentItem = faqItems[index];
+            const answer = currentItem.querySelector('.faq-answer');
+            
+            // Close all other FAQ items
+            faqItems.forEach((item, i) => {
+                if (i !== index) {
+                    item.querySelector('.faq-answer').style.maxHeight = '0';
+                }
+            });
+            
+            // Toggle current item
+            if (answer.style.maxHeight === '0px' || !answer.style.maxHeight) {
+                answer.style.maxHeight = answer.scrollHeight + 'px';
+            } else {
+                answer.style.maxHeight = '0';
+            }
+        }
+
+        // Add WhatsApp contact button
+        function addWhatsAppButton() {
+            const whatsappBtn = document.createElement('a');
+            whatsappBtn.href = 'https://wa.me/33123456789';
+            whatsappBtn.target = '_blank';
+            whatsappBtn.innerHTML = '📱';
+            whatsappBtn.style.cssText = `
+                position: fixed;
+                bottom: 90px;
+                right: 20px;
+                width: 60px;
+                height: 60px;
+                background: #25D366;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                text-decoration: none;
+                box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+                z-index: 1000;
+                transition: transform 0.3s ease;
+            `;
+            
+            whatsappBtn.addEventListener('mouseover', () => {
+                whatsappBtn.style.transform = 'scale(1.1)';
+            });
+            
+            whatsappBtn.addEventListener('mouseout', () => {
+                whatsappBtn.style.transform = 'scale(1)';
+            });
+            
+            document.body.appendChild(whatsappBtn);
+        }
+
+        // Initialize all features when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initChatBot();
+            createProgressTracker();
+            createTestimonials();
+            createFAQ();
+            addWhatsAppButton();
+            
+            // Add scroll to top button
+            const scrollTopBtn = document.createElement('button');
+            scrollTopBtn.innerHTML = '↑';
+            scrollTopBtn.style.cssText = `
+                position: fixed;
+                bottom: 160px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+                background: rgba(102, 126, 234, 0.8);
+                color: white;
+                border: none;
+                border-radius: 50%;
+                font-size: 20px;
+                cursor: pointer;
+                display: none;
+                z-index: 1000;
+                transition: all 0.3s ease;
+            `;
+            
+            scrollTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            
+            // Show/hide scroll button based on scroll position
+            window.addEventListener('scroll', () => {
+                if (window.pageYOffset > 300) {
+                    scrollTopBtn.style.display = 'flex';
+                    scrollTopBtn.style.alignItems = 'center';
+                    scrollTopBtn.style.justifyContent = 'center';
+                } else {
+                    scrollTopBtn.style.display = 'none';
+                }
+            });
+            
+            document.body.appendChild(scrollTopBtn);
+        });
+
+        // Add service calculator
+        function addServiceCalculator() {
+            const calculatorSection = document.createElement('section');
+            calculatorSection.style.cssText = `
+                padding: 60px 0;
+                background: #f8f9fa;
+                text-align: center;
+            `;
+            
+            calculatorSection.innerHTML = `
+                <div class="container">
+                    <h3>Calculateur de Prix</h3>
+                    <p style="margin: 1rem 0; color: #666;">Estimez le coût de vos démarches</p>
+                    <div style="max-width: 500px; margin: 2rem auto; background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Nombre de démarches :</label>
+                            <input type="range" id="demarcheRange" min="1" max="10" value="1" style="width: 100%;" oninput="updateCalculator()">
+                            <span id="demarcheCount">1</span> démarche(s)
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Urgence :</label>
+                            <select id="urgenceSelect" onchange="updateCalculator()" style="width: 100%; padding: 0.5rem; border: 2px solid #ddd; border-radius: 5px;">
+                                <option value="1">Normal (72h)</option>
+                                <option value="1.5">Rapide (48h) +50%</option>
+                                <option value="2">Express (24h) +100%</option>
+                            </select>
+                        </div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #667eea; padding: 1rem; background: #f8f9fa; border-radius: 10px;">
+                            Prix estimé: <span id="totalPrice">29€</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.querySelector('#tarifs').insertAdjacentElement('afterend', calculatorSection);
+        }
+
+        function updateCalculator() {
+            const demarcheCount = document.getElementById('demarcheRange').value;
+            const urgenceMultiplier = document.getElementById('urgenceSelect').value;
+            
+            document.getElementById('demarcheCount').textContent = demarcheCount;
+            
+            let basePrice = 29;
+            if (demarcheCount >= 3) basePrice = 79;
+            if (demarcheCount >= 5) basePrice = 149;
+            
+            const totalPrice = Math.round(basePrice * demarcheCount * urgenceMultiplier);
+            document.getElementById('totalPrice').textContent = totalPrice + '€';
+        }
+
+        // Add notification system
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                background: ${type === 'success' ? '#4CAF50' : '#f44336'};
+                color: white;
+                border-radius: 10px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+                z-index: 2000;
+                transform: translateX(400px);
+                transition: transform 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(400px)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Initialize calculator when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            addServiceCalculator();
+        });
+    </script>
+</body>
+</html>
