@@ -147,6 +147,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
 
         .stats-grid {
@@ -308,6 +317,17 @@
             margin: 0.5rem;
         }
 
+        .extend-btn {
+            background: #ffc107;
+            color: #333;
+            padding: 0.7rem 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 0.5rem;
+        }
+
         .search-filter {
             display: flex;
             gap: 1rem;
@@ -359,6 +379,16 @@
             border-bottom: none;
         }
 
+        #sessionTimer {
+            padding: 6px 12px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            font-family: monospace;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -385,6 +415,10 @@
             .search-filter {
                 flex-direction: column;
             }
+
+            .header-right {
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -403,7 +437,7 @@
             </div>
             <button type="submit" class="btn">Se connecter</button>
             <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
-                Utilisez vos identifiants administrateur
+                <strong>admin</strong> / <strong>admin123</strong>
             </p>
         </form>
     </div>
@@ -426,9 +460,11 @@
         <main class="main-content">
             <div class="header">
                 <h1 id="pageTitle">📊 Vue d'ensemble</h1>
-                <div>
+                <div class="header-right">
                     <button class="export-btn" onclick="exportData()">📥 Exporter</button>
+                    <button class="extend-btn" onclick="extendSession()">+10min</button>
                     <span>Bienvenue, Admin</span>
+                    <div id="sessionTimer">Session: --:--</div>
                 </div>
             </div>
 
@@ -487,8 +523,8 @@
                     <p>Les demandes de vos clients apparaîtront ici une fois qu'ils auront soumis le formulaire sur votre site.</p>
                     <p><strong>Pour recevoir des demandes :</strong></p>
                     <ol style="text-align: left; display: inline-block; margin-top: 1rem;">
-                        <li>Configurez EmailJS sur votre site principal</li>
-                        <li>Testez le formulaire de contact</li>
+                        <li>Testez le formulaire de contact de votre site</li>
+                        <li>Vérifiez que EmailJS est bien configuré</li>
                         <li>Les demandes s'afficheront automatiquement ici</li>
                     </ol>
                 </div>
@@ -525,15 +561,15 @@
                 <h3>💰 Gestion financière</h3>
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-number">0€</div>
+                        <div class="stat-number" id="ca-mois">0€</div>
                         <div>Ce mois</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">0€</div>
+                        <div class="stat-number" id="ca-total">0€</div>
                         <div>Total</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">0€</div>
+                        <div class="stat-number" id="ticket-moyen">0€</div>
                         <div>Ticket moyen</div>
                     </div>
                 </div>
@@ -591,17 +627,169 @@
     <div id="notification" class="notification"></div>
 
     <script>
-        // Variables globales - VIDES au départ
+        // Configuration de session 10 minutes
+        const SESSION_CONFIG = {
+            sessionKey: 'monentreprise_admin_session',
+            sessionDuration: 10 * 60 * 1000, // 10 minutes
+            warningTime: 2 * 60 * 1000 // Avertissement à 2 minutes
+        };
+
+        // Variables globales
         let demandes = [];
         let clients = [];
         let settings = {
             adminEmail: '',
-            adminPassword: 'admin123', // Mot de passe par défaut
+            adminPassword: 'admin123',
             companyName: 'MonEntreprise.fr',
             emailNotifications: true
         };
 
-        // Charger les données depuis localStorage si elles existent
+        // === GESTION DE SESSION ===
+        function createSession() {
+            const sessionData = {
+                isLoggedIn: true,
+                loginTime: Date.now(),
+                expiryTime: Date.now() + SESSION_CONFIG.sessionDuration
+            };
+            
+            localStorage.setItem(SESSION_CONFIG.sessionKey, JSON.stringify(sessionData));
+            console.log('Session créée pour 10 minutes');
+            startSessionTimer();
+        }
+
+        function isSessionValid() {
+            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
+            
+            if (!sessionData) {
+                return false;
+            }
+            
+            try {
+                const session = JSON.parse(sessionData);
+                const now = Date.now();
+                
+                if (now > session.expiryTime) {
+                    destroySession();
+                    return false;
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Erreur de session:', error);
+                destroySession();
+                return false;
+            }
+        }
+
+        function destroySession() {
+            localStorage.removeItem(SESSION_CONFIG.sessionKey);
+            if (window.sessionTimer) {
+                clearInterval(window.sessionTimer);
+            }
+            if (window.warningTimer) {
+                clearTimeout(window.warningTimer);
+            }
+            console.log('Session supprimée');
+        }
+
+        function extendSession() {
+            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
+            if (sessionData) {
+                try {
+                    const session = JSON.parse(sessionData);
+                    session.expiryTime = Date.now() + SESSION_CONFIG.sessionDuration;
+                    localStorage.setItem(SESSION_CONFIG.sessionKey, JSON.stringify(session));
+                    
+                    if (window.sessionTimer) {
+                        clearInterval(window.sessionTimer);
+                    }
+                    if (window.warningTimer) {
+                        clearTimeout(window.warningTimer);
+                    }
+                    startSessionTimer();
+                    
+                    showNotification('Session prolongée de 10 minutes');
+                    updateSessionDisplay();
+                } catch (error) {
+                    console.error('Erreur prolongation session:', error);
+                }
+            }
+        }
+
+        function updateSessionDisplay() {
+            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
+            if (!sessionData) return;
+            
+            try {
+                const session = JSON.parse(sessionData);
+                const now = Date.now();
+                const timeLeft = session.expiryTime - now;
+                
+                if (timeLeft > 0) {
+                    const minutes = Math.floor(timeLeft / (60 * 1000));
+                    const seconds = Math.floor((timeLeft % (60 * 1000)) / 1000);
+                    
+                    const sessionDisplay = document.getElementById('sessionTimer');
+                    if (sessionDisplay) {
+                        sessionDisplay.textContent = `Session: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                        
+                        if (timeLeft <= SESSION_CONFIG.warningTime) {
+                            sessionDisplay.style.color = '#ff6b6b';
+                            sessionDisplay.style.borderColor = 'rgba(255, 107, 107, 0.3)';
+                        } else {
+                            sessionDisplay.style.color = '#667eea';
+                            sessionDisplay.style.borderColor = 'rgba(102, 126, 234, 0.2)';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur affichage session:', error);
+            }
+        }
+
+        function startSessionTimer() {
+            window.sessionTimer = setInterval(() => {
+                if (!isSessionValid()) {
+                    autoLogout();
+                    return;
+                }
+                updateSessionDisplay();
+            }, 1000);
+            
+            window.warningTimer = setTimeout(() => {
+                if (isSessionValid()) {
+                    const confirmed = confirm('Votre session expire dans 2 minutes.\nVoulez-vous la prolonger de 10 minutes ?');
+                    if (confirmed) {
+                        extendSession();
+                    }
+                }
+            }, SESSION_CONFIG.sessionDuration - SESSION_CONFIG.warningTime);
+        }
+
+        function autoLogout() {
+            destroySession();
+            if (document.getElementById('dashboard').style.display === 'block') {
+                document.getElementById('dashboard').style.display = 'none';
+                document.getElementById('loginContainer').style.display = 'flex';
+                document.getElementById('loginForm').reset();
+                showNotification('Session expirée. Veuillez vous reconnecter.', 'error');
+            }
+        }
+
+        function checkSessionOnLoad() {
+            if (isSessionValid()) {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                loadData();
+                showNotification('Reconnexion automatique réussie');
+                startSessionTimer();
+                updateSessionDisplay();
+                return true;
+            }
+            return false;
+        }
+
+        // === GESTION DES DONNÉES ===
         function loadData() {
             const savedDemandes = localStorage.getItem('monentreprise_demandes');
             const savedClients = localStorage.getItem('monentreprise_clients');
@@ -621,81 +809,35 @@
             loadDemandes();
         }
 
-        // Sauvegarder les données dans localStorage
         function saveData() {
             localStorage.setItem('monentreprise_demandes', JSON.stringify(demandes));
             localStorage.setItem('monentreprise_clients', JSON.stringify(clients));
             localStorage.setItem('monentreprise_settings', JSON.stringify(settings));
         }
 
-        // Login
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            if (username === 'admin' && password === settings.adminPassword) {
-                document.getElementById('loginContainer').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                loadData();
-                showNotification('Connexion réussie !');
-            } else {
-                showNotification('Identifiants incorrects !', 'error');
-            }
-        });
-
-        // Navigation
-        document.addEventListener('DOMContentLoaded', function() {
-            const navLinks = document.querySelectorAll('.sidebar a[data-section]');
-            navLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const section = this.getAttribute('data-section');
-                    showSection(section);
-                    
-                    navLinks.forEach(l => l.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-        });
-
-        function showSection(sectionName) {
-            const sections = document.querySelectorAll('.content-section');
-            sections.forEach(section => section.classList.add('hidden'));
-            
-            const targetSection = document.getElementById(sectionName);
-            if (targetSection) {
-                targetSection.classList.remove('hidden');
-            }
-            
-            // Mettre à jour le titre
-            const titles = {
-                'overview': '📊 Vue d\'ensemble',
-                'demandes': '📋 Gestion des demandes',
-                'clients': '👥 Gestion des clients',
-                'finances': '💰 Gestion financière',
-                'rapports': '📈 Rapports et statistiques',
-                'parametres': '⚙️ Paramètres'
-            };
-            
-            document.getElementById('pageTitle').textContent = titles[sectionName] || 'Dashboard';
-        }
-
-        // Mettre à jour les statistiques
         function updateStats() {
             document.getElementById('totalDemandes').textContent = demandes.length;
             document.getElementById('demandesEnCours').textContent = demandes.filter(d => d.statut === 'en-cours').length;
             document.getElementById('demandesTerminees').textContent = demandes.filter(d => d.statut === 'termine').length;
             
-            // Calculer le chiffre d'affaires
             const ca = demandes.filter(d => d.statut === 'termine').reduce((total, d) => {
                 const prix = parseInt(d.prix.replace('€', ''));
                 return total + prix;
             }, 0);
             document.getElementById('chiffreAffaires').textContent = ca + '€';
+            
+            // Mise à jour finances
+            const caMois = document.getElementById('ca-mois');
+            const caTotal = document.getElementById('ca-total');
+            const ticketMoyen = document.getElementById('ticket-moyen');
+            
+            if (caMois) caMois.textContent = ca + '€';
+            if (caTotal) caTotal.textContent = ca + '€';
+            if (ticketMoyen && demandes.length > 0) {
+                ticketMoyen.textContent = Math.round(ca / demandes.filter(d => d.statut === 'termine').length || 0) + '€';
+            }
         }
 
-        // Charger les demandes
         function loadDemandes() {
             const tbody = document.getElementById('demandesTableBody');
             tbody.innerHTML = '';
@@ -728,54 +870,14 @@
             });
         }
 
-        // Ajouter une nouvelle demande (fonction pour recevoir les demandes du site)
-        function addNewDemande(demandeData) {
-            const newDemande = {
-                id: String(demandes.length + 1).padStart(3, '0'),
-                client: demandeData.prenom + ' ' + demandeData.nom,
-                email: demandeData.email,
-                telephone: demandeData.telephone || 'Non renseigné',
-                service: demandeData.service,
-                statut: 'nouveau',
-                date: new Date().toISOString().split('T')[0],
-                prix: getPrixService(demandeData.service),
-                details: demandeData.message || 'Aucun message',
-                urgence: demandeData.urgence || 'Normal'
-            };
-            
-            demandes.unshift(newDemande);
-            saveData();
-            updateStats();
-            loadDemandes();
-            showNotification('Nouvelle demande reçue !');
-        }
-
-        function getPrixService(service) {
-            const prix = {
-                'micro-entreprise': '79€',
-                'titre-sejour': '29€',
-                'prefecture': '29€',
-                'etat-civil': '29€',
-                'logement': '29€',
-                'emploi': '29€',
-                'transport': '29€',
-                'fiscalite': '29€',
-                'numerique': '29€'
-            };
-            return prix[service] || '29€';
-        }
-
+        // === FONCTIONS UTILITAIRES ===
         function getServiceName(service) {
             const services = {
                 'micro-entreprise': 'Micro-entreprise',
                 'titre-sejour': 'Titre de séjour',
                 'prefecture': 'Préfecture',
                 'etat-civil': 'État civil',
-                'logement': 'Logement',
-                'emploi': 'Emploi',
-                'transport': 'Transport',
-                'fiscalite': 'Fiscalité',
-                'numerique': 'Numérique'
+                'logement': 'Logement'
             };
             return services[service] || service;
         }
@@ -784,241 +886,3 @@
             const statuses = {
                 'nouveau': 'Nouveau',
                 'en-cours': 'En cours',
-                'termine': 'Terminé'
-            };
-            return statuses[status] || status;
-        }
-
-        function formatDate(dateStr) {
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('fr-FR');
-        }
-
-        // Actions sur les demandes
-        function viewDemande(id) {
-            const demande = demandes.find(d => d.id === id);
-            if (demande) {
-                document.getElementById('modalContent').innerHTML = `
-                    <p><strong>Client:</strong> ${demande.client}</p>
-                    <p><strong>Email:</strong> ${demande.email}</p>
-                    <p><strong>Téléphone:</strong> ${demande.telephone}</p>
-                    <p><strong>Service:</strong> ${getServiceName(demande.service)}</p>
-                    <p><strong>Date:</strong> ${formatDate(demande.date)}</p>
-                    <p><strong>Statut:</strong> ${getStatusName(demande.statut)}</p>
-                    <p><strong>Prix:</strong> ${demande.prix}</p>
-                    <p><strong>Urgence:</strong> ${demande.urgence}</p>
-                    <p><strong>Détails:</strong> ${demande.details}</p>
-                `;
-                document.getElementById('detailModal').style.display = 'block';
-            }
-        }
-
-        function editDemande(id) {
-            const demande = demandes.find(d => d.id === id);
-            if (demande) {
-                const newStatus = prompt('Nouveau statut (nouveau/en-cours/termine):', demande.statut);
-                if (newStatus && ['nouveau', 'en-cours', 'termine'].includes(newStatus)) {
-                    demande.statut = newStatus;
-                    saveData();
-                    loadDemandes();
-                    updateStats();
-                    showNotification('Statut mis à jour !');
-                }
-            }
-        }
-
-        function deleteDemande(id) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer cette demande ?')) {
-                demandes = demandes.filter(d => d.id !== id);
-                saveData();
-                updateStats();
-                loadDemandes();
-                showNotification('Demande supprimée avec succès');
-            }
-        }
-
-        // Filtres
-        function filterDemandes() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const statusFilter = document.getElementById('statusFilter').value;
-            const serviceFilter = document.getElementById('serviceFilter').value;
-            
-            const filteredDemandes = demandes.filter(demande => {
-                const matchesSearch = demande.client.toLowerCase().includes(searchTerm) ||
-                                    demande.email.toLowerCase().includes(searchTerm);
-                const matchesStatus = !statusFilter || demande.statut === statusFilter;
-                const matchesService = !serviceFilter || demande.service === serviceFilter;
-                
-                return matchesSearch && matchesStatus && matchesService;
-            });
-            
-            displayFilteredDemandes(filteredDemandes);
-        }
-
-        function displayFilteredDemandes(filteredDemandes) {
-            const tbody = document.getElementById('demandesTableBody');
-            tbody.innerHTML = '';
-            
-            if (filteredDemandes.length === 0) {
-                const row = tbody.insertRow();
-                const cell = row.insertCell();
-                cell.colSpan = 7;
-                cell.innerHTML = '<div class="empty-state"><p>Aucune demande trouvée avec ces critères</p></div>';
-                return;
-            }
-            
-            filteredDemandes.forEach(demande => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${demande.id}</td>
-                    <td>${demande.client}</td>
-                    <td>${getServiceName(demande.service)}</td>
-                    <td>${formatDate(demande.date)}</td>
-                    <td><span class="status ${demande.statut}">${getStatusName(demande.statut)}</span></td>
-                    <td>${demande.prix}</td>
-                    <td>
-                        <button class="action-btn btn-view" onclick="viewDemande('${demande.id}')">Voir</button>
-                        <button class="action-btn btn-edit" onclick="editDemande('${demande.id}')">Modifier</button>
-                        <button class="action-btn btn-delete" onclick="deleteDemande('${demande.id}')">Supprimer</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // Paramètres
-        function saveSettings() {
-            const adminEmail = document.getElementById('adminEmail').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const companyName = document.getElementById('companyName').value;
-            const emailNotifications = document.getElementById('emailNotifications').checked;
-            
-            if (adminEmail) settings.adminEmail = adminEmail;
-            if (newPassword) settings.adminPassword = newPassword;
-            if (companyName) settings.companyName = companyName;
-            settings.emailNotifications = emailNotifications;
-            
-            saveData();
-            showNotification('Paramètres sauvegardés !');
-            
-            if (newPassword) {
-                showNotification('Mot de passe mis à jour ! Pensez à le noter.', 'success');
-            }
-        }
-
-        // Utilitaires
-        function closeModal() {
-            document.getElementById('detailModal').style.display = 'none';
-        }
-
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = 'notification show';
-            notification.style.background = type === 'error' ? '#f44336' : '#4CAF50';
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
-        }
-
-        function exportData() {
-            if (demandes.length === 0) {
-                showNotification('Aucune donnée à exporter', 'error');
-                return;
-            }
-            
-            const csv = convertToCSV(demandes);
-            downloadCSV(csv, 'demandes.csv');
-            showNotification('Données exportées avec succès !');
-        }
-
-        function convertToCSV(data) {
-            const headers = ['ID', 'Client', 'Email', 'Téléphone', 'Service', 'Statut', 'Date', 'Prix', 'Urgence', 'Détails'];
-            const csvContent = [
-                headers.join(','),
-                ...data.map(row => [
-                    row.id,
-                    row.client,
-                    row.email,
-                    row.telephone,
-                    row.service,
-                    row.statut,
-                    row.date,
-                    row.prix,
-                    row.urgence,
-                    row.details
-                ].map(field => `"${field}"`).join(','))
-            ].join('\n');
-            
-            return csvContent;
-        }
-
-        function downloadCSV(csv, filename) {
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('hidden', '');
-            a.setAttribute('href', url);
-            a.setAttribute('download', filename);
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
-        function logout() {
-            if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
-                document.getElementById('dashboard').style.display = 'none';
-                document.getElementById('loginContainer').style.display = 'flex';
-                document.getElementById('loginForm').reset();
-            }
-        }
-
-        // Fermer modal en cliquant en dehors
-        window.onclick = function(event) {
-            const modal = document.getElementById('detailModal');
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        }
-
-        // Fonction pour simuler l'ajout d'une demande (pour tester)
-        function ajouterDemandeTest() {
-            const demandeTest = {
-                prenom: 'Test',
-                nom: 'Client',
-                email: 'test@example.com',
-                telephone: '06 12 34 56 78',
-                service: 'micro-entreprise',
-                message: 'Demande de test pour vérifier le système',
-                urgence: 'Normal'
-            };
-            
-            addNewDemande(demandeTest);
-        }
-
-        // API pour recevoir les demandes du site principal
-        window.addEventListener('message', function(event) {
-            // Sécurité : vérifier l'origine si nécessaire
-            if (event.data && event.data.type === 'nouvelle_demande') {
-                addNewDemande(event.data.demande);
-            }
-        });
-
-        // Interface pour connecter avec EmailJS ou autres services
-        window.MonEntreprise = {
-            addDemande: addNewDemande,
-            getDemandes: () => demandes,
-            updateStats: updateStats
-        };
-
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            // Charger les paramètres dans les champs
-            document.getElementById('adminEmail').value = settings.adminEmail;
-            document.getElementById('companyName').value = settings.companyName;
-            document.getElementById('emailNotifications').checked = settings.emailNotifications;
-        });
-    </script>
-</body>
-</html>
