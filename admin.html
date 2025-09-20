@@ -327,6 +327,21 @@
             display: none !important;
         }
 
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            margin-bottom: 1.5rem;
+        }
+
         .activity-list {
             list-style: none;
             padding: 0;
@@ -388,7 +403,7 @@
             </div>
             <button type="submit" class="btn">Se connecter</button>
             <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
-                Demo: <strong>admin</strong> / <strong>admin123</strong>
+                Utilisez vos identifiants administrateur
             </p>
         </form>
     </div>
@@ -421,32 +436,29 @@
             <div id="overview" class="content-section">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-number" id="totalDemandes">247</div>
+                        <div class="stat-number" id="totalDemandes">0</div>
                         <div>Demandes totales</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" id="demandesEnCours">18</div>
+                        <div class="stat-number" id="demandesEnCours">0</div>
                         <div>En cours</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" id="demandesTerminees">229</div>
+                        <div class="stat-number" id="demandesTerminees">0</div>
                         <div>Terminées</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" id="chiffreAffaires">15,670€</div>
+                        <div class="stat-number" id="chiffreAffaires">0€</div>
                         <div>Chiffre d'affaires</div>
                     </div>
                 </div>
 
                 <div class="content-section">
                     <h3>📈 Activité récente</h3>
-                    <ul class="activity-list">
-                        <li>🆕 Nouvelle demande de micro-entreprise - Marie Dubois</li>
-                        <li>✅ Titre de séjour complété - Ahmed Hassan</li>
-                        <li>🔄 Rendez-vous préfecture programmé - Sofia Rodriguez</li>
-                        <li>💰 Paiement reçu - Jean Martin (79€)</li>
-                        <li>📧 Email de confirmation envoyé - Lisa Chen</li>
-                    </ul>
+                    <div id="recentActivity" class="empty-state">
+                        <h3>🚀 Bienvenue dans votre panel admin !</h3>
+                        <p>Aucune activité pour le moment. Les nouvelles demandes apparaîtront ici.</p>
+                    </div>
                 </div>
             </div>
 
@@ -470,7 +482,18 @@
                     </select>
                 </div>
 
-                <table class="table" id="demandesTable">
+                <div id="demandesEmpty" class="empty-state">
+                    <h3>📋 Aucune demande</h3>
+                    <p>Les demandes de vos clients apparaîtront ici une fois qu'ils auront soumis le formulaire sur votre site.</p>
+                    <p><strong>Pour recevoir des demandes :</strong></p>
+                    <ol style="text-align: left; display: inline-block; margin-top: 1rem;">
+                        <li>Configurez EmailJS sur votre site principal</li>
+                        <li>Testez le formulaire de contact</li>
+                        <li>Les demandes s'afficheront automatiquement ici</li>
+                    </ol>
+                </div>
+
+                <table class="table" id="demandesTable" style="display: none;">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -483,7 +506,7 @@
                         </tr>
                     </thead>
                     <tbody id="demandesTableBody">
-                        <!-- Les données seront ajoutées dynamiquement -->
+                        <!-- Les vraies demandes apparaîtront ici -->
                     </tbody>
                 </table>
             </div>
@@ -491,14 +514,9 @@
             <!-- Clients -->
             <div id="clients" class="content-section hidden">
                 <h3>👥 Gestion des clients</h3>
-                <p>Liste complète des clients et leur historique de commandes.</p>
-                <div style="margin-top: 2rem;">
-                    <h4>Clients récents :</h4>
-                    <ul class="activity-list">
-                        <li>👤 Marie Dubois - marie.dubois@email.com - 3 commandes</li>
-                        <li>👤 Ahmed Hassan - ahmed.hassan@email.com - 1 commande</li>
-                        <li>👤 Sofia Rodriguez - sofia.rodriguez@email.com - 2 commandes</li>
-                    </ul>
+                <div class="empty-state">
+                    <h3>👥 Aucun client</h3>
+                    <p>La base de données clients se remplira automatiquement avec les nouvelles demandes.</p>
                 </div>
             </div>
 
@@ -507,32 +525,30 @@
                 <h3>💰 Gestion financière</h3>
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-number">2,340€</div>
+                        <div class="stat-number">0€</div>
                         <div>Ce mois</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">15,670€</div>
+                        <div class="stat-number">0€</div>
                         <div>Total</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">67€</div>
+                        <div class="stat-number">0€</div>
                         <div>Ticket moyen</div>
                     </div>
+                </div>
+                <div class="empty-state">
+                    <h3>💰 Aucune transaction</h3>
+                    <p>Les données financières apparaîtront après vos premières ventes.</p>
                 </div>
             </div>
 
             <!-- Rapports -->
             <div id="rapports" class="content-section hidden">
                 <h3>📈 Rapports et statistiques</h3>
-                <p>Analyses détaillées de votre activité.</p>
-                <div style="margin-top: 2rem;">
-                    <h4>Services les plus demandés :</h4>
-                    <ul class="activity-list">
-                        <li>🏢 Micro-entreprise - 45% des demandes</li>
-                        <li>📋 Titre de séjour - 25% des demandes</li>
-                        <li>🏛️ Préfecture - 20% des demandes</li>
-                        <li>📄 État civil - 10% des demandes</li>
-                    </ul>
+                <div class="empty-state">
+                    <h3>📈 Aucune donnée</h3>
+                    <p>Les rapports et statistiques seront générés après vos premières demandes.</p>
                 </div>
             </div>
 
@@ -541,13 +557,23 @@
                 <h3>⚙️ Paramètres</h3>
                 <div class="form-group">
                     <label>Email admin</label>
-                    <input type="email" value="admin@monentreprise.fr">
+                    <input type="email" id="adminEmail" placeholder="votre-email@monentreprise.fr">
                 </div>
                 <div class="form-group">
-                    <label>Notifications</label>
-                    <input type="checkbox" checked> Recevoir les notifications par email
+                    <label>Mot de passe admin</label>
+                    <input type="password" id="newPassword" placeholder="Nouveau mot de passe">
                 </div>
-                <button class="btn" style="width: auto;">Sauvegarder</button>
+                <div class="form-group">
+                    <label>Nom de l'entreprise</label>
+                    <input type="text" id="companyName" placeholder="MonEntreprise.fr">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="emailNotifications" checked> 
+                        Recevoir les notifications par email
+                    </label>
+                </div>
+                <button class="btn" style="width: auto;" onclick="saveSettings()">Sauvegarder les paramètres</button>
             </div>
         </main>
     </div>
@@ -565,53 +591,42 @@
     <div id="notification" class="notification"></div>
 
     <script>
-        // Données simulées
-        let demandes = [
-            {
-                id: '001',
-                client: 'Marie Dubois',
-                email: 'marie.dubois@email.com',
-                telephone: '06 12 34 56 78',
-                service: 'micro-entreprise',
-                statut: 'nouveau',
-                date: '2025-01-15',
-                prix: '79€',
-                details: 'Création micro-entreprise - Activité de conseil'
-            },
-            {
-                id: '002',
-                client: 'Ahmed Hassan',
-                email: 'ahmed.hassan@email.com',
-                telephone: '07 23 45 67 89',
-                service: 'titre-sejour',
-                statut: 'en-cours',
-                date: '2025-01-14',
-                prix: '29€',
-                details: 'Renouvellement titre de séjour'
-            },
-            {
-                id: '003',
-                client: 'Sofia Rodriguez',
-                email: 'sofia.rodriguez@email.com',
-                telephone: '06 34 56 78 90',
-                service: 'prefecture',
-                statut: 'termine',
-                date: '2025-01-13',
-                prix: '29€',
-                details: 'Rendez-vous préfecture pour naturalisation'
-            },
-            {
-                id: '004',
-                client: 'Jean Martin',
-                email: 'jean.martin@email.com',
-                telephone: '06 45 67 89 01',
-                service: 'micro-entreprise',
-                statut: 'termine',
-                date: '2025-01-12',
-                prix: '79€',
-                details: 'Création micro-entreprise - Activité artisanale'
+        // Variables globales - VIDES au départ
+        let demandes = [];
+        let clients = [];
+        let settings = {
+            adminEmail: '',
+            adminPassword: 'admin123', // Mot de passe par défaut
+            companyName: 'MonEntreprise.fr',
+            emailNotifications: true
+        };
+
+        // Charger les données depuis localStorage si elles existent
+        function loadData() {
+            const savedDemandes = localStorage.getItem('monentreprise_demandes');
+            const savedClients = localStorage.getItem('monentreprise_clients');
+            const savedSettings = localStorage.getItem('monentreprise_settings');
+            
+            if (savedDemandes) {
+                demandes = JSON.parse(savedDemandes);
             }
-        ];
+            if (savedClients) {
+                clients = JSON.parse(savedClients);
+            }
+            if (savedSettings) {
+                settings = { ...settings, ...JSON.parse(savedSettings) };
+            }
+            
+            updateStats();
+            loadDemandes();
+        }
+
+        // Sauvegarder les données dans localStorage
+        function saveData() {
+            localStorage.setItem('monentreprise_demandes', JSON.stringify(demandes));
+            localStorage.setItem('monentreprise_clients', JSON.stringify(clients));
+            localStorage.setItem('monentreprise_settings', JSON.stringify(settings));
+        }
 
         // Login
         document.getElementById('loginForm').addEventListener('submit', function(e) {
@@ -619,10 +634,10 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
-            if (username === 'admin' && password === 'admin123') {
+            if (username === 'admin' && password === settings.adminPassword) {
                 document.getElementById('loginContainer').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'block';
-                loadDemandes();
+                loadData();
                 showNotification('Connexion réussie !');
             } else {
                 showNotification('Identifiants incorrects !', 'error');
@@ -666,10 +681,33 @@
             document.getElementById('pageTitle').textContent = titles[sectionName] || 'Dashboard';
         }
 
+        // Mettre à jour les statistiques
+        function updateStats() {
+            document.getElementById('totalDemandes').textContent = demandes.length;
+            document.getElementById('demandesEnCours').textContent = demandes.filter(d => d.statut === 'en-cours').length;
+            document.getElementById('demandesTerminees').textContent = demandes.filter(d => d.statut === 'termine').length;
+            
+            // Calculer le chiffre d'affaires
+            const ca = demandes.filter(d => d.statut === 'termine').reduce((total, d) => {
+                const prix = parseInt(d.prix.replace('€', ''));
+                return total + prix;
+            }, 0);
+            document.getElementById('chiffreAffaires').textContent = ca + '€';
+        }
+
         // Charger les demandes
         function loadDemandes() {
             const tbody = document.getElementById('demandesTableBody');
             tbody.innerHTML = '';
+            
+            if (demandes.length === 0) {
+                document.getElementById('demandesEmpty').style.display = 'block';
+                document.getElementById('demandesTable').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('demandesEmpty').style.display = 'none';
+            document.getElementById('demandesTable').style.display = 'table';
             
             demandes.forEach(demande => {
                 const row = document.createElement('tr');
@@ -690,13 +728,54 @@
             });
         }
 
+        // Ajouter une nouvelle demande (fonction pour recevoir les demandes du site)
+        function addNewDemande(demandeData) {
+            const newDemande = {
+                id: String(demandes.length + 1).padStart(3, '0'),
+                client: demandeData.prenom + ' ' + demandeData.nom,
+                email: demandeData.email,
+                telephone: demandeData.telephone || 'Non renseigné',
+                service: demandeData.service,
+                statut: 'nouveau',
+                date: new Date().toISOString().split('T')[0],
+                prix: getPrixService(demandeData.service),
+                details: demandeData.message || 'Aucun message',
+                urgence: demandeData.urgence || 'Normal'
+            };
+            
+            demandes.unshift(newDemande);
+            saveData();
+            updateStats();
+            loadDemandes();
+            showNotification('Nouvelle demande reçue !');
+        }
+
+        function getPrixService(service) {
+            const prix = {
+                'micro-entreprise': '79€',
+                'titre-sejour': '29€',
+                'prefecture': '29€',
+                'etat-civil': '29€',
+                'logement': '29€',
+                'emploi': '29€',
+                'transport': '29€',
+                'fiscalite': '29€',
+                'numerique': '29€'
+            };
+            return prix[service] || '29€';
+        }
+
         function getServiceName(service) {
             const services = {
                 'micro-entreprise': 'Micro-entreprise',
                 'titre-sejour': 'Titre de séjour',
                 'prefecture': 'Préfecture',
                 'etat-civil': 'État civil',
-                'logement': 'Logement'
+                'logement': 'Logement',
+                'emploi': 'Emploi',
+                'transport': 'Transport',
+                'fiscalite': 'Fiscalité',
+                'numerique': 'Numérique'
             };
             return services[service] || service;
         }
@@ -727,6 +806,7 @@
                     <p><strong>Date:</strong> ${formatDate(demande.date)}</p>
                     <p><strong>Statut:</strong> ${getStatusName(demande.statut)}</p>
                     <p><strong>Prix:</strong> ${demande.prix}</p>
+                    <p><strong>Urgence:</strong> ${demande.urgence}</p>
                     <p><strong>Détails:</strong> ${demande.details}</p>
                 `;
                 document.getElementById('detailModal').style.display = 'block';
@@ -734,12 +814,24 @@
         }
 
         function editDemande(id) {
-            showNotification('Fonction de modification en développement');
+            const demande = demandes.find(d => d.id === id);
+            if (demande) {
+                const newStatus = prompt('Nouveau statut (nouveau/en-cours/termine):', demande.statut);
+                if (newStatus && ['nouveau', 'en-cours', 'termine'].includes(newStatus)) {
+                    demande.statut = newStatus;
+                    saveData();
+                    loadDemandes();
+                    updateStats();
+                    showNotification('Statut mis à jour !');
+                }
+            }
         }
 
         function deleteDemande(id) {
             if (confirm('Êtes-vous sûr de vouloir supprimer cette demande ?')) {
                 demandes = demandes.filter(d => d.id !== id);
+                saveData();
+                updateStats();
                 loadDemandes();
                 showNotification('Demande supprimée avec succès');
             }
@@ -760,101 +852,4 @@
                 return matchesSearch && matchesStatus && matchesService;
             });
             
-            displayFilteredDemandes(filteredDemandes);
-        }
-
-        function displayFilteredDemandes(filteredDemandes) {
-            const tbody = document.getElementById('demandesTableBody');
-            tbody.innerHTML = '';
-            
-            filteredDemandes.forEach(demande => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${demande.id}</td>
-                    <td>${demande.client}</td>
-                    <td>${getServiceName(demande.service)}</td>
-                    <td>${formatDate(demande.date)}</td>
-                    <td><span class="status ${demande.statut}">${getStatusName(demande.statut)}</span></td>
-                    <td>${demande.prix}</td>
-                    <td>
-                        <button class="action-btn btn-view" onclick="viewDemande('${demande.id}')">Voir</button>
-                        <button class="action-btn btn-edit" onclick="editDemande('${demande.id}')">Modifier</button>
-                        <button class="action-btn btn-delete" onclick="deleteDemande('${demande.id}')">Supprimer</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // Utilitaires
-        function closeModal() {
-            document.getElementById('detailModal').style.display = 'none';
-        }
-
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = 'notification show';
-            notification.style.background = type === 'error' ? '#f44336' : '#4CAF50';
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
-        }
-
-        function exportData() {
-            const csv = convertToCSV(demandes);
-            downloadCSV(csv, 'demandes.csv');
-            showNotification('Données exportées avec succès !');
-        }
-
-        function convertToCSV(data) {
-            const headers = ['ID', 'Client', 'Email', 'Téléphone', 'Service', 'Statut', 'Date', 'Prix', 'Détails'];
-            const csvContent = [
-                headers.join(','),
-                ...data.map(row => [
-                    row.id,
-                    row.client,
-                    row.email,
-                    row.telephone,
-                    row.service,
-                    row.statut,
-                    row.date,
-                    row.prix,
-                    row.details
-                ].join(','))
-            ].join('\n');
-            
-            return csvContent;
-        }
-
-        function downloadCSV(csv, filename) {
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('hidden', '');
-            a.setAttribute('href', url);
-            a.setAttribute('download', filename);
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
-        function logout() {
-            if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
-                document.getElementById('dashboard').style.display = 'none';
-                document.getElementById('loginContainer').style.display = 'flex';
-                document.getElementById('loginForm').reset();
-            }
-        }
-
-        // Fermer modal en cliquant en dehors
-        window.onclick = function(event) {
-            const modal = document.getElementById('detailModal');
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        }
-    </script>
-</body>
-</html>
+            displayFilteredDemandes(filteredDemandes
