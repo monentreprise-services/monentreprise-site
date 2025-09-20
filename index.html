@@ -14,10 +14,23 @@
     <!-- EmailJS Configuration -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
-        // Initialisation EmailJS avec votre clé publique
+        // Initialisation EmailJS avec gestion d'erreur
         (function(){
-            emailjs.init("ntZTBB2BSKb64uZk8");
+            try {
+                emailjs.init("ntZTBB2BSKb64uZk8");
+                console.log('EmailJS initialisé avec succès');
+                window.emailjsLoaded = true;
+            } catch (error) {
+                console.error('Erreur initialisation EmailJS:', error);
+                window.emailjsLoaded = false;
+            }
         })();
+        
+        // Vérification du chargement
+        window.addEventListener('load', function() {
+            console.log('Page chargée. EmailJS disponible:', typeof emailjs !== 'undefined');
+            console.log('User Agent:', navigator.userAgent);
+        });
     </script>
     
     <style>
@@ -151,6 +164,8 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            touch-action: manipulation;
+            -webkit-appearance: none;
         }
 
         .btn-primary {
@@ -388,6 +403,8 @@
             font-size: 1rem;
             transition: var(--transition);
             font-family: inherit;
+            -webkit-appearance: none;
+            touch-action: manipulation;
         }
 
         .form-group input:focus,
@@ -471,6 +488,26 @@
             color: var(--white);
         }
 
+        /* Debug Panel */
+        .debug-panel {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-family: monospace;
+            z-index: 9999;
+            max-width: 300px;
+            display: none;
+        }
+
+        .debug-panel.show {
+            display: block;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .nav-menu {
@@ -519,6 +556,11 @@
             .hero {
                 padding: 100px 5% 60px;
             }
+
+            .form-container {
+                padding: 2rem;
+                margin: 0 1rem;
+            }
         }
 
         /* Animations */
@@ -561,6 +603,12 @@
     </style>
 </head>
 <body>
+    <!-- Debug Panel -->
+    <div id="debugPanel" class="debug-panel">
+        <div>Debug Info:</div>
+        <div id="debugContent"></div>
+    </div>
+
     <!-- Header -->
     <header class="header">
         <nav class="nav">
@@ -801,7 +849,7 @@
         <div class="container">
             <h2 class="section-title">Commencez maintenant</h2>
             <div class="form-container">
-                <form id="mainForm">
+                <form id="mainForm" novalidate>
                     <div class="form-group">
                         <label for="service">Type de service souhaité *</label>
                         <select id="service" name="service" required>
@@ -823,11 +871,6 @@
                     <div class="form-group">
                         <label for="prenom">Prénom *</label>
                         <input type="text" id="prenom" name="prenom" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="nom">Nom *</label>
-                        <input type="text" id="nom" name="nom" required>
                     </div>
 
                     <div class="form-group">
@@ -854,7 +897,7 @@
                         </select>
                     </div>
 
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">Envoyer ma demande</button>
+                    <button type="button" class="btn btn-primary" id="submitBtn" style="width: 100%;" onclick="handleFormSubmit()">Envoyer ma demande</button>
                 </form>
             </div>
         </div>
@@ -902,7 +945,7 @@
     <a href="#" class="floating-btn chat-btn" onclick="openChat()">💬</a>
     <a href="https://wa.me/33123456789" class="floating-btn whatsapp-btn" target="_blank">📱</a>
 
-    <!-- JavaScript avec EmailJS intégré -->
+    <!-- JavaScript avec corrections mobile -->
     <script>
         // Configuration EmailJS avec vos vraies clés
         const EMAIL_CONFIG = {
@@ -911,8 +954,141 @@
             adminEmail: 'mohamed.oudiai@icloud.com'
         };
 
-        // Fonction pour envoyer la demande par EmailJS
-        function sendDemandeEmail(formData) {
+        // Variables de debug
+        let debugMode = true; // Activez pour voir les logs
+        let submitAttempts = 0;
+
+        // Fonction de debug
+        function debugLog(message, data = null) {
+            if (debugMode) {
+                console.log(`[DEBUG] ${message}`, data);
+                updateDebugPanel(message, data);
+            }
+        }
+
+        function updateDebugPanel(message, data) {
+            const panel = document.getElementById('debugPanel');
+            const content = document.getElementById('debugContent');
+            if (panel && content) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = `${timestamp}: ${message}`;
+                content.innerHTML = logEntry + (data ? `<br>Data: ${JSON.stringify(data, null, 2)}` : '');
+                panel.classList.add('show');
+                
+                // Masquer après 10 secondes
+                setTimeout(() => {
+                    panel.classList.remove('show');
+                }, 10000);
+            }
+        }
+
+        // Fonction principale de soumission
+        function handleFormSubmit() {
+            debugLog('=== DÉBUT SOUMISSION FORMULAIRE ===');
+            submitAttempts++;
+            debugLog(`Tentative #${submitAttempts}`);
+            
+            const form = document.getElementById('mainForm');
+            if (!form) {
+                debugLog('ERREUR: Formulaire non trouvé');
+                showNotification('Erreur: formulaire non accessible', 'error');
+                return;
+            }
+
+            const formData = new FormData(form);
+            
+            // Log des données collectées
+            const dataObject = {};
+            for (let [key, value] of formData.entries()) {
+                dataObject[key] = value;
+            }
+            debugLog('Données formulaire collectées', dataObject);
+
+            // Validation
+            const errors = validateForm(formData);
+            if (errors.length > 0) {
+                debugLog('Erreurs de validation', errors);
+                showNotification('Erreurs dans le formulaire:\n' + errors.join('\n'), 'error');
+                return;
+            }
+
+            // Vérifier EmailJS
+            if (typeof emailjs === 'undefined') {
+                debugLog('ERREUR CRITIQUE: EmailJS non chargé');
+                showNotification('Service email non disponible. Veuillez rafraîchir la page.', 'error');
+                return;
+            }
+
+            debugLog('EmailJS disponible, démarrage envoi');
+            
+            // Désactiver le bouton et afficher le loading
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span style="display: inline-block; width: 16px; height: 16px; border: 2px solid #ffffff; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; margin-right: 8px;"></span>Envoi en cours...';
+            
+            // Ajouter animation de rotation si nécessaire
+            if (!document.getElementById('spin-animation')) {
+                const style = document.createElement('style');
+                style.id = 'spin-animation';
+                style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+                document.head.appendChild(style);
+            }
+
+            const requestId = generateRequestId();
+            debugLog('ID de demande généré', requestId);
+
+            // Tentative d'envoi EmailJS
+            sendDemandeEmail(formData, requestId)
+                .then((response) => {
+                    debugLog('EmailJS SUCCESS', response);
+                    
+                    // Sauvegarder dans le panel admin
+                    try {
+                        saveToAdminPanel(formData, requestId);
+                        debugLog('Sauvegarde admin panel réussie');
+                    } catch (error) {
+                        debugLog('Erreur sauvegarde admin panel', error);
+                    }
+                    
+                    // Message de succès
+                    showNotification(`✅ Votre demande a été envoyée avec succès !
+
+📧 Vous recevrez une confirmation par email dans les prochaines minutes.
+🆔 Numéro de demande: ${requestId}
+⏰ Nous vous contacterons sous 24h maximum.
+
+Merci de votre confiance !`);
+                    
+                    // Reset du formulaire
+                    form.reset();
+                    const priceHint = document.getElementById('priceHint');
+                    if (priceHint) priceHint.remove();
+                    
+                    debugLog('Formulaire réinitialisé avec succès');
+                })
+                .catch((error) => {
+                    debugLog('EmailJS ERROR', error);
+                    showNotification(`❌ Erreur lors de l'envoi de votre demande.
+
+Veuillez réessayer dans quelques instants ou nous contacter directement:
+📞 01 23 45 67 89
+📧 contact@monentreprise.fr
+
+Code d'erreur: ${error.text || error.message || 'EMAIL_ERROR'}`, 'error');
+                })
+                .finally(() => {
+                    // Restaurer le bouton
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                    debugLog('Bouton restauré');
+                });
+        }
+
+        // Fonction d'envoi EmailJS améliorée
+        function sendDemandeEmail(formData, requestId) {
+            debugLog('Préparation des paramètres EmailJS');
+            
             const templateParams = {
                 client_name: formData.get('prenom') + ' ' + formData.get('nom'),
                 client_email: formData.get('email'),
@@ -921,12 +1097,29 @@
                 urgence_level: formData.get('urgence') || 'Normal',
                 client_message: formData.get('message') || 'Aucun message spécifique',
                 request_date: new Date().toLocaleDateString('fr-FR') + ' à ' + new Date().toLocaleTimeString('fr-FR'),
-                request_id: generateRequestId(),
+                request_id: requestId,
                 estimated_price: getServicePrice(formData.get('service')),
                 admin_email: EMAIL_CONFIG.adminEmail
             };
 
-            return emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.templateId, templateParams);
+            debugLog('Paramètres EmailJS préparés', templateParams);
+
+            return new Promise((resolve, reject) => {
+                try {
+                    emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.templateId, templateParams)
+                        .then((response) => {
+                            debugLog('EmailJS.send réussi', response);
+                            resolve(response);
+                        })
+                        .catch((error) => {
+                            debugLog('EmailJS.send échoué', error);
+                            reject(error);
+                        });
+                } catch (error) {
+                    debugLog('Erreur dans emailjs.send', error);
+                    reject(error);
+                }
+            });
         }
 
         // Fonctions utilitaires
@@ -992,13 +1185,14 @@
                 demandes.unshift(newDemande);
                 localStorage.setItem('monentreprise_demandes', JSON.stringify(demandes));
                 
-                console.log('Demande sauvegardée dans le panel admin:', newDemande);
+                debugLog('Demande sauvegardée dans le panel admin', newDemande);
             } catch (error) {
-                console.error('Erreur sauvegarde panel admin:', error);
+                debugLog('Erreur sauvegarde panel admin', error);
+                throw error;
             }
         }
 
-        // Fonction de validation du formulaire
+        // Validation du formulaire
         function validateForm(formData) {
             const errors = [];
             
@@ -1027,7 +1221,7 @@
             return errors;
         }
 
-        // Fonction d'affichage des notifications
+        // Fonction d'affichage des notifications améliorée
         function showNotification(message, type = 'success') {
             const existingNotifications = document.querySelectorAll('.custom-notification');
             existingNotifications.forEach(notif => notif.remove());
@@ -1044,11 +1238,12 @@
                 border-radius: 10px;
                 box-shadow: 0 4px 20px rgba(0,0,0,0.3);
                 z-index: 10000;
-                max-width: 400px;
+                max-width: 90%;
                 font-weight: 500;
                 transform: translateX(450px);
                 transition: transform 0.3s ease;
                 white-space: pre-line;
+                word-wrap: break-word;
             `;
             notification.textContent = message;
             
@@ -1065,166 +1260,148 @@
                         notification.parentNode.removeChild(notification);
                     }
                 }, 300);
-            }, 5000);
+            }, 6000);
         }
 
-        // Gestion du formulaire principal avec EmailJS
+        // Initialisation et événements
         document.addEventListener('DOMContentLoaded', function() {
-            const mainForm = document.getElementById('mainForm');
-            if (mainForm) {
-                mainForm.addEventListener('submit', function(e) {
+            debugLog('DOM chargé - Initialisation');
+            
+            // Vérifier EmailJS
+            setTimeout(() => {
+                if (typeof emailjs !== 'undefined') {
+                    debugLog('EmailJS chargé et disponible');
+                } else {
+                    debugLog('ATTENTION: EmailJS non disponible');
+                }
+            }, 1000);
+
+            // Navigation fluide
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
                     e.preventDefault();
-                    
-                    const formData = new FormData(this);
-                    const errors = validateForm(formData);
-                    
-                    if (errors.length > 0) {
-                        showNotification('Erreurs dans le formulaire:\n' + errors.join('\n'), 'error');
-                        return;
-                    }
-                    
-                    const submitBtn = this.querySelector('button[type="submit"]');
-                    const originalText = submitBtn.textContent;
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<span style="display: inline-block; width: 16px; height: 16px; border: 2px solid #ffffff; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; margin-right: 8px;"></span>Envoi en cours...';
-                    
-                    if (!document.getElementById('spin-animation')) {
-                        const style = document.createElement('style');
-                        style.id = 'spin-animation';
-                        style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
-                        document.head.appendChild(style);
-                    }
-                    
-                    const requestId = generateRequestId();
-                    
-                    sendDemandeEmail(formData)
-                        .then((response) => {
-                            console.log('Email envoyé avec succès:', response);
-                            
-                            saveToAdminPanel(formData, requestId);
-                            
-                            showNotification(`✅ Votre demande a été envoyée avec succès !
-
-📧 Vous recevrez une confirmation par email dans les prochaines minutes.
-🆔 Numéro de demande: ${requestId}
-⏰ Nous vous contacterons sous 24h maximum.
-
-Merci de votre confiance !`);
-                            
-                            this.reset();
-                            
-                            const priceHint = document.getElementById('priceHint');
-                            if (priceHint) priceHint.remove();
-                        })
-                        .catch((error) => {
-                            console.error('Erreur EmailJS:', error);
-                            showNotification(`❌ Erreur lors de l'envoi de votre demande.
-
-Veuillez réessayer dans quelques instants ou nous contacter directement:
-📞 01 23 45 67 89
-📧 contact@monentreprise.fr
-
-Code d'erreur: ${error.text || 'EMAIL_ERROR'}`, 'error');
-                        })
-                        .finally(() => {
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = originalText;
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
                         });
+                    }
+                });
+            });
+
+            // Animation au scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.animate-on-scroll').forEach(el => {
+                observer.observe(el);
+            });
+
+            // Menu mobile
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+
+            if (hamburger && navMenu) {
+                hamburger.addEventListener('click', () => {
+                    hamburger.classList.toggle('active');
+                    navMenu.classList.toggle('active');
+                });
+
+                document.querySelectorAll('.nav-menu a').forEach(n => n.addEventListener('click', () => {
+                    hamburger.classList.remove('active');
+                    navMenu.classList.remove('active');
+                }));
+            }
+
+            // Prix dynamique selon le service
+            const serviceSelect = document.getElementById('service');
+            if (serviceSelect) {
+                serviceSelect.addEventListener('change', function() {
+                    const selectedService = this.value;
+                    let recommendedPrice = '';
+                    
+                    switch(selectedService) {
+                        case 'micro-entreprise':
+                            recommendedPrice = 'Pack Premium (79€) recommandé';
+                            break;
+                        case 'titre-sejour':
+                        case 'prefecture':
+                        case 'etat-civil':
+                        case 'securite-sociale':
+                        case 'logement':
+                        case 'emploi':
+                        case 'transport':
+                        case 'fiscalite':
+                        case 'numerique':
+                            recommendedPrice = 'Pack Essentiel (29€) recommandé';
+                            break;
+                        default:
+                            recommendedPrice = '';
+                    }
+                    
+                    let priceHint = document.getElementById('priceHint');
+                    if (recommendedPrice) {
+                        if (!priceHint) {
+                            priceHint = document.createElement('p');
+                            priceHint.id = 'priceHint';
+                            priceHint.style.color = '#667eea';
+                            priceHint.style.fontSize = '0.9rem';
+                            priceHint.style.marginTop = '5px';
+                            priceHint.style.fontWeight = '600';
+                            this.parentNode.appendChild(priceHint);
+                        }
+                        priceHint.textContent = recommendedPrice;
+                    } else if (priceHint) {
+                        priceHint.remove();
+                    }
                 });
             }
-        });
 
-        // Navigation fluide
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // Animation au scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.animate-on-scroll').forEach(el => {
-            observer.observe(el);
-        });
-
-        // Menu mobile
-        const hamburger = document.querySelector('.hamburger');
-        const navMenu = document.querySelector('.nav-menu');
-
-        hamburger.addEventListener('click', () => {
-            hamburger.classList.toggle('active');
-            navMenu.classList.toggle('active');
-        });
-
-        document.querySelectorAll('.nav-menu a').forEach(n => n.addEventListener('click', () => {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
-        }));
-
-        // Prix dynamique selon le service
-        document.getElementById('service').addEventListener('change', function() {
-            const selectedService = this.value;
-            let recommendedPrice = '';
-            
-            switch(selectedService) {
-                case 'micro-entreprise':
-                    recommendedPrice = 'Pack Premium (79€) recommandé';
-                    break;
-                case 'titre-sejour':
-                case 'prefecture':
-                case 'etat-civil':
-                case 'securite-sociale':
-                case 'logement':
-                case 'emploi':
-                case 'transport':
-                case 'fiscalite':
-                case 'numerique':
-                    recommendedPrice = 'Pack Essentiel (29€) recommandé';
-                    break;
-                default:
-                    recommendedPrice = '';
+            // Gestion des touches pour le formulaire
+            const form = document.getElementById('mainForm');
+            if (form) {
+                form.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                        e.preventDefault();
+                        handleFormSubmit();
+                    }
+                });
             }
-            
-            let priceHint = document.getElementById('priceHint');
-            if (recommendedPrice) {
-                if (!priceHint) {
-                    priceHint = document.createElement('p');
-                    priceHint.id = 'priceHint';
-                    priceHint.style.color = '#667eea';
-                    priceHint.style.fontSize = '0.9rem';
-                    priceHint.style.marginTop = '5px';
-                    priceHint.style.fontWeight = '600';
-                    this.parentNode.appendChild(priceHint);
-                }
-                priceHint.textContent = recommendedPrice;
-            } else if (priceHint) {
-                priceHint.remove();
-            }
+
+            debugLog('Initialisation terminée');
         });
 
         // Chat simulation
         function openChat() {
             alert('💬 Chat en direct\n\nNotre équipe est disponible du lundi au vendredi de 9h à 18h.\n\nPour une assistance immédiate :\n📞 01 23 45 67 89\n📧 contact@monentreprise.fr');
         }
+
+        // Test mobile spécifique
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // Log des informations device
+        window.addEventListener('load', function() {
+            debugLog('Device Info', {
+                isMobile: isMobile(),
+                userAgent: navigator.userAgent,
+                screen: `${screen.width}x${screen.height}`,
+                viewport: `${window.innerWidth}x${window.innerHeight}`,
+                emailjsAvailable: typeof emailjs !== 'undefined'
+            });
+        });
     </script>
 </body>
 </html>
