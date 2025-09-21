@@ -1,794 +1,10 @@
-function isSessionValid() {
-            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
-            
-            if (!sessionData) {
-                return false;
-            }
-            
-            try {
-                const session = JSON.parse(sessionData);
-                const now = Date.now();
-                
-                if (now > session.expiryTime) {
-                    destroySession();
-                    return false;
-                }
-                
-                return true;
-            } catch (error) {
-                console.error('Erreur de session:', error);
-                destroySession();
-                return false;
-            }
-        }
-
-        function destroySession() {
-            localStorage.removeItem(SESSION_CONFIG.sessionKey);
-            if (window.sessionTimer) {
-                clearInterval(window.sessionTimer);
-            }
-            if (window.warningTimer) {
-                clearTimeout(window.warningTimer);
-            }
-            console.log('Session supprimée');
-        }
-
-        function extendSession() {
-            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
-            if (sessionData) {
-                try {
-                    const session = JSON.parse(sessionData);
-                    session.expiryTime = Date.now() + SESSION_CONFIG.sessionDuration;
-                    localStorage.setItem(SESSION_CONFIG.sessionKey, JSON.stringify(session));
-                    
-                    if (window.sessionTimer) {
-                        clearInterval(window.sessionTimer);
-                    }
-                    if (window.warningTimer) {
-                        clearTimeout(window.warningTimer);
-                    }
-                    startSessionTimer();
-                    
-                    showNotification('Session prolongée de 10 minutes');
-                    updateSessionDisplay();
-                } catch (error) {
-                    console.error('Erreur prolongation session:', error);
-                }
-            }
-        }
-
-        function updateSessionDisplay() {
-            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
-            if (!sessionData) return;
-            
-            try {
-                const session = JSON.parse(sessionData);
-                const now = Date.now();
-                const timeLeft = session.expiryTime - now;
-                
-                if (timeLeft > 0) {
-                    const minutes = Math.floor(timeLeft / (60 * 1000));
-                    const seconds = Math.floor((timeLeft % (60 * 1000)) / 1000);
-                    
-                    const sessionDisplay = document.getElementById('sessionTimer');
-                    if (sessionDisplay) {
-                        sessionDisplay.textContent = `Session: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-                        
-                        if (timeLeft <= SESSION_CONFIG.warningTime) {
-                            sessionDisplay.style.color = '#ff6b6b';
-                            sessionDisplay.style.borderColor = 'rgba(255, 107, 107, 0.3)';
-                        } else {
-                            sessionDisplay.style.color = '#667eea';
-                            sessionDisplay.style.borderColor = 'rgba(102, 126, 234, 0.2)';
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Erreur affichage session:', error);
-            }
-        }
-
-        function startSessionTimer() {
-            window.sessionTimer = setInterval(() => {
-                if (!isSessionValid()) {
-                    autoLogout();
-                    return;
-                }
-                updateSessionDisplay();
-            }, 1000);
-            
-            window.warningTimer = setTimeout(() => {
-                if (isSessionValid()) {
-                    const confirmed = confirm('Votre session expire dans 2 minutes.\nVoulez-vous la prolonger de 10 minutes ?');
-                    if (confirmed) {
-                        extendSession();
-                    }
-                }
-            }, SESSION_CONFIG.sessionDuration - SESSION_CONFIG.warningTime);
-        }
-
-        function autoLogout() {
-            destroySession();
-            if (document.getElementById('dashboard').style.display === 'block') {
-                document.getElementById('dashboard').style.display = 'none';
-                document.getElementById('loginContainer').style.display = 'flex';
-                showNotification('Session expirée. Veuillez vous reconnecter.', 'error');
-            }
-        }
-
-        function checkSessionOnLoad() {
-            if (isSessionValid()) {
-                document.getElementById('loginContainer').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                loadData();
-                showNotification('Reconnexion automatique réussie');
-                startSessionTimer();
-                updateSessionDisplay();
-                return true;
-            }
-            return false;
-        }
-
-        // === FONCTION DE CONNEXION ===
-        function handleLogin() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            console.log('Tentative de connexion:', username);
-            
-            if (username === 'admin' && password === 'admin123') {
-                console.log('Connexion réussie');
-                createSession();
-                document.getElementById('loginContainer').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                loadData();
-                showNotification('Connexion réussie ! Système de notifications activé');
-                updateSessionDisplay();
-            } else {
-                console.log('Identifiants incorrects');
-                showNotification('Identifiants incorrects !', 'error');
-            }
-        }
-
-        // === GESTION DES DONNÉES ===
-        function loadData() {
-            const savedDemandes = loadFromStorage(MONENTREPRISE_CONFIG.DEMANDES_KEY);
-            const savedClients = loadFromStorage(MONENTREPRISE_CONFIG.CLIENTS_KEY);
-            const savedDocuments = loadFromStorage(MONENTREPRISE_CONFIG.DOCUMENTS_KEY);
-            const savedSettings = localStorage.getItem('monentreprise_settings');
-            const savedEmailConfig = localStorage.getItem(MONENTREPRISE_CONFIG.EMAIL_CONFIG_KEY);
-            const savedEmailCount = localStorage.getItem('monentreprise_emails_sent');
-            const savedMessages = localStorage.getItem('monentreprise_default_messages');
-            
-            if (savedDemandes) {
-                demandes = savedDemandes;
-            }
-            if (savedClients) {
-                clients = savedClients;
-            }
-            if (savedDocuments) {
-                documents = savedDocuments;
-            }
-            if (savedSettings) {
-                settings = { ...settings, ...JSON.parse(savedSettings) };
-            }
-            if (savedEmailConfig) {
-                emailjsConfig = JSON.parse(savedEmailConfig);
-                loadEmailConfiguration();
-            }
-            if (savedEmailCount) {
-                emailsSentCount = parseInt(savedEmailCount);
-            }
-            if (savedMessages) {
-                defaultMessages = { ...defaultMessages, ...JSON.parse(savedMessages) };
-                loadDefaultMessages();
-            }
-            
-            updateStats();
-            loadDemandes();
-            loadDocuments();
-            loadClients();
-        }
-
-        function saveData() {
-            saveToStorage(MONENTREPRISE_CONFIG.DEMANDES_KEY, demandes);
-            saveToStorage(MONENTREPRISE_CONFIG.CLIENTS_KEY, clients);
-            saveToStorage(MONENTREPRISE_CONFIG.DOCUMENTS_KEY, documents);
-            localStorage.setItem('monentreprise_settings', JSON.stringify(settings));
-            localStorage.setItem('monentreprise_emails_sent', emailsSentCount.toString());
-        }
-
-        function updateStats() {
-            document.getElementById('totalDemandes').textContent = demandes.length;
-            document.getElementById('demandesEnCours').textContent = demandes.filter(d => d.statut === 'en-cours' || d.statut === 'documents-requis').length;
-            document.getElementById('emailsSent').textContent = emailsSentCount;
-            
-            const ca = demandes.filter(d => d.statut === 'termine').reduce((total, d) => {
-                const prix = parseInt(d.prix.replace('€', ''));
-                return total + prix;
-            }, 0);
-            document.getElementById('chiffreAffaires').textContent = ca + '€';
-            
-            // Mise à jour finances
-            const caMois = document.getElementById('ca-mois');
-            const caTotal = document.getElementById('ca-total');
-            const ticketMoyen = document.getElementById('ticket-moyen');
-            
-            if (caMois) caMois.textContent = ca + '€';
-            if (caTotal) caTotal.textContent = ca + '€';
-            if (ticketMoyen && demandes.length > 0) {
-                ticketMoyen.textContent = Math.round(ca / demandes.filter(d => d.statut === 'termine').length || 0) + '€';
-            }
-        }
-
-        // === GESTION DES EMAILS ===
-        function saveEmailConfiguration() {
-            emailjsConfig.serviceId = document.getElementById('emailjsServiceId').value;
-            emailjsConfig.templateId = document.getElementById('emailjsTemplateId').value;
-            emailjsConfig.publicKey = document.getElementById('emailjsPublicKey').value;
-            
-            localStorage.setItem(MONENTREPRISE_CONFIG.EMAIL_CONFIG_KEY, JSON.stringify(emailjsConfig));
-            
-            if (emailjsConfig.publicKey) {
-                emailjs.init(emailjsConfig.publicKey);
-            }
-            
-            showNotification('Configuration email sauvegardée');
-        }
-
-        function loadEmailConfiguration() {
-            document.getElementById('emailjsServiceId').value = emailjsConfig.serviceId || '';
-            document.getElementById('emailjsTemplateId').value = emailjsConfig.templateId || '';
-            document.getElementById('emailjsPublicKey').value = emailjsConfig.publicKey || '';
-            
-            if (emailjsConfig.publicKey) {
-                emailjs.init(emailjsConfig.publicKey);
-            }
-        }
-
-        function loadDefaultMessages() {
-            document.getElementById('messageEnCours').value = defaultMessages['en-cours'];
-            document.getElementById('messageDocumentsRequis').value = defaultMessages['documents-requis'];
-            document.getElementById('messageTermine').value = defaultMessages['termine'];
-        }
-
-        function saveDefaultMessages() {
-            defaultMessages['en-cours'] = document.getElementById('messageEnCours').value;
-            defaultMessages['documents-requis'] = document.getElementById('messageDocumentsRequis').value;
-            defaultMessages['termine'] = document.getElementById('messageTermine').value;
-            
-            localStorage.setItem('monentreprise_default_messages', JSON.stringify(defaultMessages));
-            showNotification('Messages par défaut sauvegardés');
-        }
-
-        function testEmailConfiguration() {
-            if (!emailjsConfig.serviceId || !emailjsConfig.templateId || !emailjsConfig.publicKey) {
-                showNotification('Veuillez remplir tous les champs de configuration', 'error');
-                return;
-            }
-            
-            const testParams = {
-                to_email: settings.adminEmail,
-                client_name: 'Test Client',
-                request_id: 'TEST-001',
-                old_status_display: 'Nouveau',
-                new_status_display: 'En cours',
-                status_message: 'Ceci est un email de test pour vérifier la configuration.',
-                client_portal_link: window.location.origin + '/' + MONENTREPRISE_CONFIG.CLIENT_URL + '?id=TEST-001',
-                admin_email: settings.adminEmail
-            };
-            
-            showNotification('Envoi de l\'email de test...', 'warning');
-            
-            emailjs.send(emailjsConfig.serviceId, emailjsConfig.templateId, testParams)
-                .then(() => {
-                    showNotification('Email de test envoyé avec succès !');
-                    emailsSentCount++;
-                    saveData();
-                    updateStats();
-                })
-                .catch((error) => {
-                    console.error('Erreur envoi email:', error);
-                    showNotification('Erreur lors de l\'envoi de l\'email de test', 'error');
-                });
-        }
-
-        function sendEmailNotification(demande, oldStatus, newStatus, customMessage = '') {
-            if (!settings.emailNotifications || !emailjsConfig.serviceId) {
-                console.log('Notifications email désactivées ou non configurées');
-                return;
-            }
-            
-            const message = customMessage || defaultMessages[newStatus] || '';
-            const portalLink = window.location.origin + '/' + MONENTREPRISE_CONFIG.CLIENT_URL + '?id=' + demande.id;
-            
-            const params = {
-                to_email: demande.email,
-                client_name: `${demande.prenom} ${demande.nom}`,
-                request_id: demande.id,
-                old_status_display: getStatusName(oldStatus),
-                new_status_display: getStatusName(newStatus),
-                status_message: message,
-                client_portal_link: portalLink,
-                admin_email: settings.adminEmail
-            };
-            
-            emailjs.send(emailjsConfig.serviceId, emailjsConfig.templateId, params)
-                .then(() => {
-                    showNotification(`Email envoyé à ${demande.prenom} ${demande.nom}`);
-                    emailsSentCount++;
-                    
-                    addActivity(`Email envoyé à ${demande.prenom} ${demande.nom} - Statut: ${getStatusName(newStatus)}`);
-                    
-                    saveData();
-                    updateStats();
-                })
-                .catch((error) => {
-                    console.error('Erreur envoi email:', error);
-                    showNotification('Erreur lors de l\'envoi de l\'email', 'error');
-                });
-        }
-
-        // === GESTION DES DEMANDES ===
-        function loadDemandes() {
-            const tbody = document.getElementById('demandesTableBody');
-            tbody.innerHTML = '';
-            
-            if (demandes.length === 0) {
-                document.getElementById('demandesEmpty').style.display = 'block';
-                document.getElementById('demandesTable').style.display = 'none';
-                return;
-            }
-            
-            document.getElementById('demandesEmpty').style.display = 'none';
-            document.getElementById('demandesTable').style.display = 'table';
-            
-            demandes.forEach(demande => {
-                const row = document.createElement('tr');
-                const relatedDocs = documents.filter(doc => doc.demandeId === demande.id);
-                const documentsDisplay = relatedDocs.length > 0 ? 
-                    `<span style="color: #28a745; font-weight: 600;">${relatedDocs.length} doc(s)</span>` : 
-                    `<span style="color: #666;">Aucun</span>`;
-                
-                row.innerHTML = `
-                    <td>${demande.id}</td>
-                    <td>${demande.prenom} ${demande.nom}</td>
-                    <td>${getServiceName(demande.service)}</td>
-                    <td>${formatDate(demande.dateComplete)}</td>
-                    <td><span class="status ${demande.statut}">${getStatusName(demande.statut)}</span></td>
-                    <td>${documentsDisplay}</td>
-                    <td>${demande.prix}</td>
-                    <td>
-                        <button class="action-btn btn-view" onclick="viewDemande('${demande.id}')">Voir</button>
-                        <button class="action-btn btn-progress" onclick="openStatusModal('${demande.id}', 'en-cours')">En cours</button>
-                        <button class="action-btn btn-docs" onclick="openStatusModal('${demande.id}', 'documents-requis')">Docs requis</button>
-                        <button class="action-btn btn-confirm" onclick="openStatusModal('${demande.id}', 'termine')">Terminer</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        function simulateNewDemande() {
-            const now = new Date().toISOString();
-            const testId = generateDemandeId();
-            
-            const testDemande = {
-                id: testId,
-                prenom: 'Marie',
-                nom: 'Martin',
-                email: 'marie.martin@example.com',
-                telephone: '06 11 22 33 44',
-                service: 'micro-entreprise',
-                prix: '79€',
-                statut: 'nouveau',
-                details: 'Demande de création de micro-entreprise pour activité de consultation',
-                dateComplete: now,
-                urgence: 'Normal'
-            };
-            
-            demandes.unshift(testDemande);
-            saveData();
-            updateStats();
-            loadDemandes();
-            
-            addActivity(`Nouvelle demande reçue de ${testDemande.prenom} ${testDemande.nom}`);
-            showNotification('Nouvelle demande simulée avec succès !');
-        }
-
-        // === GESTION DES STATUTS ===
-        function openStatusModal(demandeId, suggestedStatus = null) {
-            currentDemandeId = demandeId;
-            const modal = document.getElementById('statusModal');
-            const statusSelect = document.getElementById('newStatus');
-            const commentField = document.getElementById('statusComment');
-            const emailCheckbox = document.getElementById('sendEmailNotification');
-            
-            if (suggestedStatus) {
-                statusSelect.value = suggestedStatus;
-                commentField.value = defaultMessages[suggestedStatus] || '';
-            }
-            
-            emailCheckbox.checked = settings.emailNotifications;
-            modal.style.display = 'block';
-        }
-
-        function closeStatusModal() {
-            document.getElementById('statusModal').style.display = 'none';
-            currentDemandeId = null;
-        }
-
-        function updateDemandeStatus() {
-            if (!currentDemandeId) return;
-            
-            const newStatus = document.getElementById('newStatus').value;
-            const comment = document.getElementById('statusComment').value;
-            const sendEmail = document.getElementById('sendEmailNotification').checked;
-            
-            const demandeIndex = demandes.findIndex(d => d.id === currentDemandeId);
-            if (demandeIndex === -1) {
-                showNotification('Demande non trouvée', 'error');
-                return;
-            }
-            
-            const demande = demandes[demandeIndex];
-            const oldStatus = demande.statut;
-            
-            demandes[demandeIndex].statut = newStatus;
-            demandes[demandeIndex].lastUpdate = new Date().toISOString();
-            
-            if (!demandes[demandeIndex].statusHistory) {
-                demandes[demandeIndex].statusHistory = [];
-            }
-            
-            demandes[demandeIndex].statusHistory.push({
-                date: new Date().toISOString(),
-                oldStatus: oldStatus,
-                newStatus: newStatus,
-                comment: comment,
-                updatedBy: 'admin'
-            });
-            
-            saveDefaultMessages();
-            
-            if (sendEmail) {
-                sendEmailNotification(demande, oldStatus, newStatus, comment);
-            }
-            
-            saveData();
-            updateStats();
-            loadDemandes();
-            closeStatusModal();
-            
-            showNotification(`Statut mis à jour: ${getStatusName(newStatus)}`);
-            addActivity(`Demande ${currentDemandeId} passée de "${getStatusName(oldStatus)}" à "${getStatusName(newStatus)}"`);
-        }
-
-        // === GESTION DES DOCUMENTS ===
-        function loadDocuments() {
-            const documentsList = document.getElementById('documentsList');
-            const documentsEmpty = document.getElementById('documentsEmpty');
-            
-            if (documents.length === 0) {
-                documentsEmpty.style.display = 'block';
-                documentsList.innerHTML = '';
-                return;
-            }
-            
-            documentsEmpty.style.display = 'none';
-            
-            documentsList.innerHTML = documents.map(doc => `
-                <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0; margin: 0.5rem 0;">
-                    <div style="font-size: 1.5rem;">📄</div>
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600;">${doc.name}</div>
-                        <div style="font-size: 0.8rem; color: #666;">
-                            Client: ${doc.clientName} • ${formatFileSize(doc.size)} • ${formatDate(doc.uploadDate)}
-                        </div>
-                    </div>
-                    <div>
-                        <button class="action-btn btn-view" onclick="viewDocument('${doc.id}')">Voir</button>
-                        <button class="action-btn btn-confirm" onclick="downloadDocument('${doc.id}')">Télécharger</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function loadClients() {
-            const clientsList = document.getElementById('clientsList');
-            const clientsEmpty = document.getElementById('clientsEmpty');
-            
-            if (clients.length === 0) {
-                if (clientsEmpty) clientsEmpty.style.display = 'block';
-                if (clientsList) clientsList.innerHTML = '';
-                return;
-            }
-            
-            if (clientsEmpty) clientsEmpty.style.display = 'none';
-            
-            if (clientsList) {
-                clientsList.innerHTML = clients.map(client => `
-                    <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0; margin: 0.5rem 0;">
-                        <div style="font-size: 1.5rem;">👤</div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600;">${client.nom}</div>
-                            <div style="font-size: 0.8rem; color: #666;">
-                                ${client.email} • ${client.telephone} • ${client.demandes.length} demande(s)
-                            </div>
-                        </div>
-                        <div>
-                            <span style="padding: 0.25rem 0.75rem; background: #d4edda; color: #155724; border-radius: 15px; font-size: 0.8rem;">
-                                ${client.statutCompte}
-                            </span>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        function viewDocument(docId) {
-            showNotification(`Ouverture du document: ${docId}`);
-        }
-
-        function downloadDocument(docId) {
-            showNotification(`Téléchargement du document: ${docId}`);
-        }
-
-        // === FONCTIONS D'AFFICHAGE ===
-        function viewDemande(demandeId) {
-            const demande = demandes.find(d => d.id === demandeId);
-            if (!demande) return;
-            
-            const relatedDocs = documents.filter(doc => doc.demandeId === demandeId);
-            const modal = document.getElementById('detailModal');
-            const content = document.getElementById('modalContent');
-            
-            const details = `
-                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px; margin: 1rem 0;">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                        <div><strong>ID:</strong> ${demande.id}</div>
-                        <div><strong>Client:</strong> ${demande.prenom} ${demande.nom}</div>
-                        <div><strong>Email:</strong> ${demande.email}</div>
-                        <div><strong>Service:</strong> ${getServiceName(demande.service)}</div>
-                        <div><strong>Prix:</strong> ${demande.prix}</div>
-                        <div><strong>Date:</strong> ${formatDate(demande.dateComplete)}</div>
-                    </div>
-                    
-                    ${demande.details ? `
-                        <div style="margin-top: 1rem;">
-                            <strong>Message:</strong><br>
-                            ${demande.details}
-                        </div>
-                    ` : ''}
-                    
-                    ${relatedDocs.length > 0 ? `
-                        <div style="margin-top: 1rem;">
-                            <strong>Documents reçus (${relatedDocs.length}):</strong><br>
-                            ${relatedDocs.map(doc => `• ${doc.name}`).join('<br>')}
-                        </div>
-                    ` : ''}
-                </div>
-                
-                <div style="margin-top: 1rem;">
-                    <button class="btn" onclick="openStatusModal('${demande.id}')" style="width: auto; margin-right: 1rem;">Changer le statut</button>
-                    <button class="btn" onclick="closeModal()" style="width: auto; background: #6c757d;">Fermer</button>
-                </div>
-            `;
-            
-            content.innerHTML = details;
-            modal.style.display = 'block';
-        }
-
-        function closeModal() {
-            document.getElementById('detailModal').style.display = 'none';
-        }
-
-        // === ACTIVITÉ ===
-        function addActivity(message) {
-            const activityList = document.querySelector('#recentActivity .activity-list');
-            if (activityList) {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <div>
-                        <strong>${new Date().toLocaleTimeString('fr-FR')}</strong><br>
-                        <small>${message}</small>
-                    </div>
-                `;
-                activityList.insertBefore(li, activityList.firstChild);
-                
-                while (activityList.children.length > 10) {
-                    activityList.removeChild(activityList.lastChild);
-                }
-            }
-        }
-
-        // === FONCTIONS UTILITAIRES ===
-        function getServiceName(service) {
-            const services = {
-                'micro-entreprise': 'Création Micro-Entreprise',
-                'titre-sejour': 'Titre de séjour',
-                'prefecture': 'Rendez-vous préfecture',
-                'etat-civil': 'État civil',
-                'securite-sociale': 'Sécurité sociale',
-                'logement': 'Logement',
-                'emploi': 'Emploi',
-                'transport': 'Transport',
-                'fiscalite': 'Fiscalité',
-                'numerique': 'Services numériques',
-                'autre': 'Autre'
-            };
-            return services[service] || service;
-        }
-
-        function getStatusName(status) {
-            const statuses = {
-                'nouveau': 'Nouveau',
-                'en-cours': 'En cours',
-                'documents-requis': 'Documents requis',
-                'termine': 'Terminé',
-                'refuse': 'Refusé'
-            };
-            return statuses[status] || status;
-        }
-
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        function filterDemandes() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const statusFilter = document.getElementById('statusFilter').value;
-            const serviceFilter = document.getElementById('serviceFilter').value;
-            
-            const rows = document.querySelectorAll('#demandesTableBody tr');
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                const statusCell = row.querySelector('.status');
-                const serviceCell = row.cells[2];
-                
-                const matchesSearch = text.includes(searchTerm);
-                const matchesStatus = !statusFilter || statusCell.classList.contains(statusFilter);
-                const matchesService = !serviceFilter || serviceCell.textContent.toLowerCase().includes(serviceFilter);
-                
-                if (matchesSearch && matchesStatus && matchesService) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
-
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = `notification ${type}`;
-            notification.classList.add('show');
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 4000);
-        }
-
-        function exportData() {
-            const data = {
-                demandes: demandes,
-                clients: clients,
-                documents: documents,
-                emailConfig: emailjsConfig,
-                emailsSent: emailsSentCount,
-                exportDate: new Date().toISOString()
-            };
-            
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `monentreprise-export-${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            
-            showNotification('Données exportées avec succès');
-        }
-
-        function saveSettings() {
-            settings.adminEmail = document.getElementById('adminEmail').value;
-            settings.companyName = document.getElementById('companyName').value;
-            settings.emailNotifications = document.getElementById('emailNotifications').checked;
-            
-            const newPassword = document.getElementById('newPassword').value;
-            if (newPassword) {
-                settings.adminPassword = newPassword;
-            }
-            
-            localStorage.setItem('monentreprise_settings', JSON.stringify(settings));
-            showNotification('Paramètres sauvegardés');
-        }
-
-        function logout() {
-            destroySession();
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('loginContainer').style.display = 'flex';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            showNotification('Déconnexion réussie');
-        }
-
-        // === NAVIGATION ===
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Panel Admin MonEntreprise.fr avec notifications chargé');
-            
-            if (!checkSessionOnLoad()) {
-                console.log('Aucune session valide, affichage du formulaire de connexion');
-            }
-            
-            document.querySelectorAll('.sidebar a[data-section]').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    const section = this.getAttribute('data-section');
-                    
-                    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
-                    
-                    const targetSection = document.getElementById(section);
-                    if (targetSection) {
-                        targetSection.classList.remove('hidden');
-                    }
-                    
-                    const titles = {
-                        'overview': '📊 Vue d\'ensemble',
-                        'demandes': '📋 Gestion des demandes',
-                        'notifications': '📧 Configuration des notifications',
-                        'documents': '📄 Documents reçus',
-                        'clients': '👥 Gestion des clients',
-                        'finances': '💰 Gestion financière',
-                        'parametres': '⚙️ Paramètres'
-                    };
-                    
-                    document.getElementById('pageTitle').textContent = titles[section] || section;
-                });
-            });
-            
-            window.addEventListener('click', function(event) {
-                const detailModal = document.getElementById('detailModal');
-                const statusModal = document.getElementById('statusModal');
-                
-                if (event.target === detailModal) {
-                    closeModal();
-                }
-                if (event.target === statusModal) {
-                    closeStatusModal();
-                }
-            });
-            
-            document.getElementById('password').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    handleLogin();
-                }
-            });
-        });
-
-        // Initialiser EmailJS
-        if (emailjsConfig.publicKey) {
-            emailjs.init(emailjsConfig.publicKey);
-        }
-
-        console.log('Panel Admin MonEntreprise.fr avec système de notifications complet initialisé');
-    </script>
-</body>
-</html><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Admin - MonEntreprise.fr</title>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -1266,7 +482,7 @@ function isSessionValid() {
     <!-- Login Form -->
     <div id="loginContainer" class="login-container">
         <div class="login-form">
-            <h1>🔐 Panel Admin</h1>
+            <h1>Panel Admin</h1>
             <div class="form-group">
                 <label for="username">Nom d'utilisateur</label>
                 <input type="text" id="username" required placeholder="Votre nom d'utilisateur">
@@ -1287,22 +503,22 @@ function isSessionValid() {
         <nav class="sidebar">
             <h2>MonEntreprise</h2>
             <ul>
-                <li><a href="#" data-section="overview" class="active">📊 Vue d'ensemble</a></li>
-                <li><a href="#" data-section="demandes">📋 Demandes</a></li>
-                <li><a href="#" data-section="notifications">📧 Notifications</a></li>
-                <li><a href="#" data-section="documents">📄 Documents</a></li>
-                <li><a href="#" data-section="clients">👥 Clients</a></li>
-                <li><a href="#" data-section="finances">💰 Finances</a></li>
-                <li><a href="#" data-section="parametres">⚙️ Paramètres</a></li>
-                <li><a href="#" onclick="logout()">🚪 Déconnexion</a></li>
+                <li><a href="#" data-section="overview" class="active">Vue d'ensemble</a></li>
+                <li><a href="#" data-section="demandes">Demandes</a></li>
+                <li><a href="#" data-section="notifications">Notifications</a></li>
+                <li><a href="#" data-section="documents">Documents</a></li>
+                <li><a href="#" data-section="clients">Clients</a></li>
+                <li><a href="#" data-section="finances">Finances</a></li>
+                <li><a href="#" data-section="parametres">Paramètres</a></li>
+                <li><a href="#" onclick="logout()">Déconnexion</a></li>
             </ul>
         </nav>
 
         <main class="main-content">
             <div class="header">
-                <h1 id="pageTitle">📊 Vue d'ensemble</h1>
+                <h1 id="pageTitle">Vue d'ensemble</h1>
                 <div class="header-right">
-                    <button class="export-btn" onclick="exportData()">📥 Exporter</button>
+                    <button class="export-btn" onclick="exportData()">Exporter</button>
                     <button class="extend-btn" onclick="extendSession()">+10min</button>
                     <span>Bienvenue, Admin</span>
                     <div id="sessionTimer">Session: --:--</div>
@@ -1331,7 +547,7 @@ function isSessionValid() {
                 </div>
 
                 <div class="content-section">
-                    <h3>📈 Activité récente</h3>
+                    <h3>Activité récente</h3>
                     <div id="recentActivity">
                         <div class="activity-list">
                             <li>
@@ -1347,7 +563,7 @@ function isSessionValid() {
 
             <!-- Gestion des demandes -->
             <div id="demandes" class="content-section hidden">
-                <h3>📋 Gestion des demandes</h3>
+                <h3>Gestion des demandes</h3>
                 
                 <div class="search-filter">
                     <input type="text" placeholder="Rechercher..." id="searchInput" onkeyup="filterDemandes()">
@@ -1368,9 +584,9 @@ function isSessionValid() {
                 </div>
 
                 <div id="demandesEmpty" class="empty-state">
-                    <h3>📋 Aucune demande</h3>
+                    <h3>Aucune demande</h3>
                     <p>Les demandes apparaîtront ici quand les clients utilisent le formulaire.</p>
-                    <button class="btn" onclick="simulateNewDemande()" style="width: auto;">🧪 Simuler une demande</button>
+                    <button class="btn" onclick="simulateNewDemande()" style="width: auto;">Simuler une demande</button>
                 </div>
 
                 <table class="table" id="demandesTable" style="display: none;">
@@ -1393,21 +609,21 @@ function isSessionValid() {
 
             <!-- Configuration des notifications -->
             <div id="notifications" class="content-section hidden">
-                <h3>📧 Configuration des notifications email</h3>
+                <h3>Configuration des notifications email</h3>
                 
                 <div class="email-config">
                     <h4>Configuration EmailJS</h4>
                     <div class="form-group">
                         <label for="emailjsServiceId">Service ID EmailJS</label>
-                        <input type="text" id="emailjsServiceId" placeholder="service_xxxxxxx">
+                        <input type="text" id="emailjsServiceId" placeholder="service_xxxxxxx" value="service_2te46oj">
                     </div>
                     <div class="form-group">
                         <label for="emailjsTemplateId">Template ID pour notifications</label>
-                        <input type="text" id="emailjsTemplateId" placeholder="template_xxxxxxx">
+                        <input type="text" id="emailjsTemplateId" placeholder="template_xxxxxxx" value="template_9jpudgc">
                     </div>
                     <div class="form-group">
                         <label for="emailjsPublicKey">Clé publique EmailJS</label>
-                        <input type="text" id="emailjsPublicKey" placeholder="user_xxxxxxxxxxxx">
+                        <input type="text" id="emailjsPublicKey" placeholder="user_xxxxxxxxxxxx" value="ntZTBB2BSKb64uZk8">
                     </div>
                     <button class="test-email-btn" onclick="testEmailConfiguration()">Tester la configuration</button>
                     <button class="btn" onclick="saveEmailConfiguration()" style="width: auto;">Sauvegarder</button>
@@ -1431,9 +647,9 @@ function isSessionValid() {
 
             <!-- Documents -->
             <div id="documents" class="content-section hidden">
-                <h3>📄 Documents reçus</h3>
+                <h3>Documents reçus</h3>
                 <div id="documentsEmpty" class="empty-state">
-                    <h3>📄 Aucun document</h3>
+                    <h3>Aucun document</h3>
                     <p>Les documents uploadés par vos clients apparaîtront ici.</p>
                 </div>
                 <div id="documentsList"></div>
@@ -1441,9 +657,9 @@ function isSessionValid() {
 
             <!-- Clients -->
             <div id="clients" class="content-section hidden">
-                <h3>👥 Gestion des clients</h3>
+                <h3>Gestion des clients</h3>
                 <div id="clientsEmpty" class="empty-state">
-                    <h3>👥 Aucun client</h3>
+                    <h3>Aucun client</h3>
                     <p>La base de données clients se remplira automatiquement.</p>
                 </div>
                 <div id="clientsList"></div>
@@ -1451,7 +667,7 @@ function isSessionValid() {
 
             <!-- Finances -->
             <div id="finances" class="content-section hidden">
-                <h3>💰 Gestion financière</h3>
+                <h3>Gestion financière</h3>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-number" id="ca-mois">0€</div>
@@ -1467,17 +683,17 @@ function isSessionValid() {
                     </div>
                 </div>
                 <div class="empty-state">
-                    <h3>💰 Aucune transaction</h3>
+                    <h3>Aucune transaction</h3>
                     <p>Les données financières apparaîtront après vos premières ventes.</p>
                 </div>
             </div>
 
             <!-- Paramètres -->
             <div id="parametres" class="content-section hidden">
-                <h3>⚙️ Paramètres</h3>
+                <h3>Paramètres</h3>
                 <div class="form-group">
                     <label>Email admin</label>
-                    <input type="email" id="adminEmail" placeholder="votre-email@monentreprise.fr">
+                    <input type="email" id="adminEmail" placeholder="votre-email@monentreprise.fr" value="mohamed.oudiai@icloud.com">
                 </div>
                 <div class="form-group">
                     <label>Mot de passe admin</label>
@@ -1485,7 +701,7 @@ function isSessionValid() {
                 </div>
                 <div class="form-group">
                     <label>Nom de l'entreprise</label>
-                    <input type="text" id="companyName" placeholder="MonEntreprise.fr">
+                    <input type="text" id="companyName" placeholder="MonEntreprise.fr" value="MonEntreprise.fr">
                 </div>
                 <div class="form-group">
                     <label>
@@ -1544,32 +760,12 @@ function isSessionValid() {
     <!-- Notification -->
     <div id="notification" class="notification"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
-        // === CONFIGURATION COMMUNE MONENTREPRISE ===
-        const MONENTREPRISE_CONFIG = {
-            DEMANDES_KEY: 'monentreprise_demandes',
-            CLIENTS_KEY: 'monentreprise_clients', 
-            DOCUMENTS_KEY: 'monentreprise_documents',
-            EMAIL_CONFIG_KEY: 'monentreprise_email_config',
-            
-            SITE_URL: 'index.html',
-            CLIENT_URL: 'client.html',
-            ADMIN_URL: 'admin.html'
-        };
-
-        // Configuration EmailJS
-        let emailjsConfig = {
+        // Configuration
+        const emailjsConfig = {
             serviceId: 'service_2te46oj',
-            templateId: 'template_9jpudgc', // Template pour notifications client
+            templateId: 'template_9jpudgc',
             publicKey: 'ntZTBB2BSKb64uZk8'
-        };
-
-        // Configuration de session 10 minutes
-        const SESSION_CONFIG = {
-            sessionKey: 'monentreprise_admin_session',
-            sessionDuration: 10 * 60 * 1000,
-            warningTime: 2 * 60 * 1000
         };
 
         // Variables globales
@@ -1578,6 +774,7 @@ function isSessionValid() {
         let documents = [];
         let currentDemandeId = null;
         let emailsSentCount = 0;
+        let sessionTimer = null;
         let settings = {
             adminEmail: 'mohamed.oudiai@icloud.com',
             adminPassword: 'admin123',
@@ -1585,7 +782,6 @@ function isSessionValid() {
             emailNotifications: true
         };
 
-        // Messages par défaut
         let defaultMessages = {
             'en-cours': 'Votre demande est maintenant en cours de traitement. Nous vous tiendrons informé de l\'avancement.',
             'documents-requis': 'Merci d\'envoyer les documents complémentaires via votre espace client. Cliquez sur le lien pour accéder à votre espace et uploader vos documents.',
@@ -1593,54 +789,675 @@ function isSessionValid() {
             'refuse': 'Nous sommes désolés de vous informer que votre demande ne peut pas être traitée pour le moment.'
         };
 
-        // === FONCTIONS COMMUNES ===
-        function generateDemandeId() {
-            return 'DEM-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5).toUpperCase();
+        // Initialiser EmailJS
+        if (typeof emailjs !== 'undefined') {
+            emailjs.init(emailjsConfig.publicKey);
         }
 
-        function saveToStorage(key, data) {
-            try {
-                localStorage.setItem(key, JSON.stringify(data));
-                return true;
-            } catch (error) {
-                console.error('Erreur sauvegarde:', error);
-                return false;
+        // Session management
+        function startSession() {
+            const sessionDuration = 10 * 60 * 1000; // 10 minutes
+            sessionTimer = setInterval(updateSessionDisplay, 1000);
+            
+            setTimeout(() => {
+                if (confirm('Votre session expire dans 2 minutes. Voulez-vous la prolonger ?')) {
+                    extendSession();
+                }
+            }, sessionDuration - 2 * 60 * 1000);
+        }
+
+        function updateSessionDisplay() {
+            const now = new Date();
+            const minutes = Math.floor(Math.random() * 10) + 5; // Simulation
+            const seconds = Math.floor(Math.random() * 60);
+            document.getElementById('sessionTimer').textContent = 
+                `Session: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function extendSession() {
+            showNotification('Session prolongée de 10 minutes');
+        }
+
+        // Login
+        function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (username === 'admin' && password === 'admin123') {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                loadData();
+                startSession();
+                showNotification('Connexion réussie ! Système de notifications activé');
+            } else {
+                showNotification('Identifiants incorrects !', 'error');
             }
         }
 
-        function loadFromStorage(key) {
-            try {
-                const data = localStorage.getItem(key);
-                return data ? JSON.parse(data) : [];
-            } catch (error) {
-                console.error('Erreur chargement:', error);
-                return [];
+        // Chargement des données
+        function loadData() {
+            demandes = JSON.parse(localStorage.getItem('monentreprise_demandes') || '[]');
+            clients = JSON.parse(localStorage.getItem('monentreprise_clients') || '[]');
+            documents = JSON.parse(localStorage.getItem('monentreprise_documents') || '[]');
+            emailsSentCount = parseInt(localStorage.getItem('monentreprise_emails_sent') || '0');
+            
+            updateStats();
+            loadDemandes();
+            loadDocuments();
+            loadClients();
+        }
+
+        function saveData() {
+            localStorage.setItem('monentreprise_demandes', JSON.stringify(demandes));
+            localStorage.setItem('monentreprise_clients', JSON.stringify(clients));
+            localStorage.setItem('monentreprise_documents', JSON.stringify(documents));
+            localStorage.setItem('monentreprise_emails_sent', emailsSentCount.toString());
+        }
+
+        function updateStats() {
+            document.getElementById('totalDemandes').textContent = demandes.length;
+            document.getElementById('demandesEnCours').textContent = demandes.filter(d => 
+                d.statut === 'en-cours' || d.statut === 'documents-requis').length;
+            document.getElementById('emailsSent').textContent = emailsSentCount;
+            
+            const ca = demandes.filter(d => d.statut === 'termine').reduce((total, d) => {
+                const prix = parseInt(d.prix.replace('€', '')) || 0;
+                return total + prix;
+            }, 0);
+            document.getElementById('chiffreAffaires').textContent = ca + '€';
+            
+            // Mise à jour finances
+            const caMois = document.getElementById('ca-mois');
+            const caTotal = document.getElementById('ca-total');
+            const ticketMoyen = document.getElementById('ticket-moyen');
+            
+            if (caMois) caMois.textContent = ca + '€';
+            if (caTotal) caTotal.textContent = ca + '€';
+            if (ticketMoyen && demandes.length > 0) {
+                const terminees = demandes.filter(d => d.statut === 'termine').length;
+                ticketMoyen.textContent = terminees > 0 ? Math.round(ca / terminees) + '€' : '0€';
             }
+        }
+
+        // Gestion des demandes
+        function loadDemandes() {
+            const tbody = document.getElementById('demandesTableBody');
+            tbody.innerHTML = '';
+            
+            if (demandes.length === 0) {
+                document.getElementById('demandesEmpty').style.display = 'block';
+                document.getElementById('demandesTable').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('demandesEmpty').style.display = 'none';
+            document.getElementById('demandesTable').style.display = 'table';
+            
+            demandes.forEach(demande => {
+                const row = document.createElement('tr');
+                const relatedDocs = documents.filter(doc => doc.demandeId === demande.id);
+                const documentsDisplay = relatedDocs.length > 0 ? 
+                    `<span style="color: #28a745; font-weight: 600;">${relatedDocs.length} doc(s)</span>` : 
+                    `<span style="color: #666;">Aucun</span>`;
+                
+                row.innerHTML = `
+                    <td>${demande.id}</td>
+                    <td>${demande.prenom} ${demande.nom}</td>
+                    <td>${getServiceName(demande.service)}</td>
+                    <td>${formatDate(demande.dateComplete)}</td>
+                    <td><span class="status ${demande.statut}">${getStatusName(demande.statut)}</span></td>
+                    <td>${documentsDisplay}</td>
+                    <td>${demande.prix}</td>
+                    <td>
+                        <button class="action-btn btn-view" onclick="viewDemande('${demande.id}')">Voir</button>
+                        <button class="action-btn btn-progress" onclick="openStatusModal('${demande.id}', 'en-cours')">En cours</button>
+                        <button class="action-btn btn-docs" onclick="openStatusModal('${demande.id}', 'documents-requis')">Docs requis</button>
+                        <button class="action-btn btn-confirm" onclick="openStatusModal('${demande.id}', 'termine')">Terminer</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function simulateNewDemande() {
+            const now = new Date().toISOString();
+            const testId = 'DEM-' + Date.now();
+            
+            const testDemande = {
+                id: testId,
+                prenom: 'Marie',
+                nom: 'Martin',
+                email: 'marie.martin@example.com',
+                telephone: '06 11 22 33 44',
+                service: 'micro-entreprise',
+                prix: '79€',
+                statut: 'nouveau',
+                details: 'Demande de création de micro-entreprise pour activité de consultation',
+                dateComplete: now,
+                urgence: 'Normal'
+            };
+            
+            demandes.unshift(testDemande);
+            saveData();
+            updateStats();
+            loadDemandes();
+            
+            addActivity(`Nouvelle demande reçue de ${testDemande.prenom} ${testDemande.nom}`);
+            showNotification('Nouvelle demande simulée avec succès !');
+        }
+
+        // Gestion des statuts
+        function openStatusModal(demandeId, suggestedStatus = null) {
+            currentDemandeId = demandeId;
+            const modal = document.getElementById('statusModal');
+            const statusSelect = document.getElementById('newStatus');
+            const commentField = document.getElementById('statusComment');
+            const emailCheckbox = document.getElementById('sendEmailNotification');
+            
+            if (suggestedStatus) {
+                statusSelect.value = suggestedStatus;
+                commentField.value = defaultMessages[suggestedStatus] || '';
+            }
+            
+            emailCheckbox.checked = settings.emailNotifications;
+            modal.style.display = 'block';
+        }
+
+        function closeStatusModal() {
+            document.getElementById('statusModal').style.display = 'none';
+            currentDemandeId = null;
+        }
+
+        function updateDemandeStatus() {
+            if (!currentDemandeId) return;
+            
+            const newStatus = document.getElementById('newStatus').value;
+            const comment = document.getElementById('statusComment').value;
+            const sendEmail = document.getElementById('sendEmailNotification').checked;
+            
+            const demandeIndex = demandes.findIndex(d => d.id === currentDemandeId);
+            if (demandeIndex === -1) {
+                showNotification('Demande non trouvée', 'error');
+                return;
+            }
+            
+            const demande = demandes[demandeIndex];
+            const oldStatus = demande.statut;
+            
+            demandes[demandeIndex].statut = newStatus;
+            demandes[demandeIndex].lastUpdate = new Date().toISOString();
+            
+            if (!demandes[demandeIndex].statusHistory) {
+                demandes[demandeIndex].statusHistory = [];
+            }
+            
+            demandes[demandeIndex].statusHistory.push({
+                date: new Date().toISOString(),
+                oldStatus: oldStatus,
+                newStatus: newStatus,
+                comment: comment,
+                updatedBy: 'admin'
+            });
+            
+            if (sendEmail) {
+                sendEmailNotification(demande, oldStatus, newStatus, comment);
+            }
+            
+            saveData();
+            updateStats();
+            loadDemandes();
+            closeStatusModal();
+            
+            showNotification(`Statut mis à jour: ${getStatusName(newStatus)}`);
+            addActivity(`Demande ${currentDemandeId} passée de "${getStatusName(oldStatus)}" à "${getStatusName(newStatus)}"`);
+        }
+
+        // Email notifications
+        function sendEmailNotification(demande, oldStatus, newStatus, customMessage = '') {
+            if (!settings.emailNotifications || !emailjsConfig.serviceId) {
+                console.log('Notifications email désactivées ou non configurées');
+                return;
+            }
+            
+            const message = customMessage || defaultMessages[newStatus] || '';
+            const portalLink = window.location.origin + '/client.html?id=' + demande.id;
+            
+            const params = {
+                to_email: demande.email,
+                client_name: `${demande.prenom} ${demande.nom}`,
+                request_id: demande.id,
+                old_status_display: getStatusName(oldStatus),
+                new_status_display: getStatusName(newStatus),
+                status_message: message,
+                client_portal_link: portalLink,
+                admin_email: settings.adminEmail
+            };
+            
+            if (typeof emailjs !== 'undefined') {
+                emailjs.send(emailjsConfig.serviceId, emailjsConfig.templateId, params)
+                    .then(() => {
+                        showNotification(`Email envoyé à ${demande.prenom} ${demande.nom}`);
+                        emailsSentCount++;
+                        addActivity(`Email envoyé à ${demande.prenom} ${demande.nom} - Statut: ${getStatusName(newStatus)}`);
+                        saveData();
+                        updateStats();
+                    })
+                    .catch((error) => {
+                        console.error('Erreur envoi email:', error);
+                        showNotification('Erreur lors de l\'envoi de l\'email', 'error');
+                    });
+            } else {
+                showNotification('EmailJS non disponible', 'warning');
+            }
+        }
+
+        // Configuration email
+        function saveEmailConfiguration() {
+            emailjsConfig.serviceId = document.getElementById('emailjsServiceId').value;
+            emailjsConfig.templateId = document.getElementById('emailjsTemplateId').value;
+            emailjsConfig.publicKey = document.getElementById('emailjsPublicKey').value;
+            
+            localStorage.setItem('monentreprise_email_config', JSON.stringify(emailjsConfig));
+            
+            if (emailjsConfig.publicKey && typeof emailjs !== 'undefined') {
+                emailjs.init(emailjsConfig.publicKey);
+            }
+            
+            showNotification('Configuration email sauvegardée');
+        }
+
+        function testEmailConfiguration() {
+            if (!emailjsConfig.serviceId || !emailjsConfig.templateId || !emailjsConfig.publicKey) {
+                showNotification('Veuillez remplir tous les champs de configuration', 'error');
+                return;
+            }
+            
+            const testParams = {
+                to_email: settings.adminEmail,
+                client_name: 'Test Client',
+                request_id: 'TEST-001',
+                old_status_display: 'Nouveau',
+                new_status_display: 'En cours',
+                status_message: 'Ceci est un email de test pour vérifier la configuration.',
+                client_portal_link: window.location.origin + '/client.html?id=TEST-001',
+                admin_email: settings.adminEmail
+            };
+            
+            showNotification('Envoi de l\'email de test...', 'warning');
+            
+            if (typeof emailjs !== 'undefined') {
+                emailjs.send(emailjsConfig.serviceId, emailjsConfig.templateId, testParams)
+                    .then(() => {
+                        showNotification('Email de test envoyé avec succès !');
+                        emailsSentCount++;
+                        saveData();
+                        updateStats();
+                    })
+                    .catch((error) => {
+                        console.error('Erreur envoi email:', error);
+                        showNotification('Erreur lors de l\'envoi de l\'email de test', 'error');
+                    });
+            } else {
+                showNotification('EmailJS non disponible', 'error');
+            }
+        }
+
+        function saveDefaultMessages() {
+            defaultMessages['en-cours'] = document.getElementById('messageEnCours').value;
+            defaultMessages['documents-requis'] = document.getElementById('messageDocumentsRequis').value;
+            defaultMessages['termine'] = document.getElementById('messageTermine').value;
+            
+            localStorage.setItem('monentreprise_default_messages', JSON.stringify(defaultMessages));
+            showNotification('Messages par défaut sauvegardés');
+        }
+
+        // Gestion des documents
+        function loadDocuments() {
+            const documentsList = document.getElementById('documentsList');
+            const documentsEmpty = document.getElementById('documentsEmpty');
+            
+            if (documents.length === 0) {
+                documentsEmpty.style.display = 'block';
+                documentsList.innerHTML = '';
+                return;
+            }
+            
+            documentsEmpty.style.display = 'none';
+            
+            documentsList.innerHTML = documents.map(doc => `
+                <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0; margin: 0.5rem 0;">
+                    <div style="font-size: 1.5rem;">📄</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600;">${doc.name}</div>
+                        <div style="font-size: 0.8rem; color: #666;">
+                            Client: ${doc.clientName} • ${formatFileSize(doc.size)} • ${formatDate(doc.uploadDate)}
+                        </div>
+                    </div>
+                    <div>
+                        <button class="action-btn btn-view" onclick="viewDocument('${doc.id}')">Voir</button>
+                        <button class="action-btn btn-confirm" onclick="downloadDocument('${doc.id}')">Télécharger</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadClients() {
+            const clientsList = document.getElementById('clientsList');
+            const clientsEmpty = document.getElementById('clientsEmpty');
+            
+            if (clients.length === 0) {
+                if (clientsEmpty) clientsEmpty.style.display = 'block';
+                if (clientsList) clientsList.innerHTML = '';
+                return;
+            }
+            
+            if (clientsEmpty) clientsEmpty.style.display = 'none';
+            
+            if (clientsList) {
+                clientsList.innerHTML = clients.map(client => `
+                    <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0; margin: 0.5rem 0;">
+                        <div style="font-size: 1.5rem;">👤</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600;">${client.nom}</div>
+                            <div style="font-size: 0.8rem; color: #666;">
+                                ${client.email} • ${client.telephone} • ${client.demandes ? client.demandes.length : 0} demande(s)
+                            </div>
+                        </div>
+                        <div>
+                            <span style="padding: 0.25rem 0.75rem; background: #d4edda; color: #155724; border-radius: 15px; font-size: 0.8rem;">
+                                ${client.statutCompte || 'Actif'}
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Affichage des détails
+        function viewDemande(demandeId) {
+            const demande = demandes.find(d => d.id === demandeId);
+            if (!demande) return;
+            
+            const relatedDocs = documents.filter(doc => doc.demandeId === demandeId);
+            const modal = document.getElementById('detailModal');
+            const content = document.getElementById('modalContent');
+            
+            const details = `
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px; margin: 1rem 0;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div><strong>ID:</strong> ${demande.id}</div>
+                        <div><strong>Client:</strong> ${demande.prenom} ${demande.nom}</div>
+                        <div><strong>Email:</strong> ${demande.email}</div>
+                        <div><strong>Service:</strong> ${getServiceName(demande.service)}</div>
+                        <div><strong>Prix:</strong> ${demande.prix}</div>
+                        <div><strong>Date:</strong> ${formatDate(demande.dateComplete)}</div>
+                    </div>
+                    
+                    ${demande.details ? `
+                        <div style="margin-top: 1rem;">
+                            <strong>Message:</strong><br>
+                            ${demande.details}
+                        </div>
+                    ` : ''}
+                    
+                    ${relatedDocs.length > 0 ? `
+                        <div style="margin-top: 1rem;">
+                            <strong>Documents reçus (${relatedDocs.length}):</strong><br>
+                            ${relatedDocs.map(doc => `• ${doc.name}`).join('<br>')}
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div style="margin-top: 1rem;">
+                    <button class="btn" onclick="openStatusModal('${demande.id}')" style="width: auto; margin-right: 1rem;">Changer le statut</button>
+                    <button class="btn" onclick="closeModal()" style="width: auto; background: #6c757d;">Fermer</button>
+                </div>
+            `;
+            
+            content.innerHTML = details;
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+
+        // Fonctions utilitaires
+        function getServiceName(service) {
+            const services = {
+                'micro-entreprise': 'Création Micro-Entreprise',
+                'titre-sejour': 'Titre de séjour',
+                'prefecture': 'Rendez-vous préfecture',
+                'etat-civil': 'État civil',
+                'securite-sociale': 'Sécurité sociale',
+                'logement': 'Logement',
+                'emploi': 'Emploi',
+                'transport': 'Transport',
+                'fiscalite': 'Fiscalité',
+                'numerique': 'Services numériques',
+                'autre': 'Autre'
+            };
+            return services[service] || service;
+        }
+
+        function getStatusName(status) {
+            const statuses = {
+                'nouveau': 'Nouveau',
+                'en-cours': 'En cours',
+                'documents-requis': 'Documents requis',
+                'termine': 'Terminé',
+                'refuse': 'Refusé'
+            };
+            return statuses[status] || status;
         }
 
         function formatDate(dateString) {
             const date = new Date(dateString);
             return date.toLocaleDateString('fr-FR', {
                 year: 'numeric',
-                month: 'long', 
+                month: 'long',
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit'
             });
         }
 
-        // === GESTION DE SESSION ===
-        function createSession() {
-            const sessionData = {
-                isLoggedIn: true,
-                loginTime: Date.now(),
-                expiryTime: Date.now() + SESSION_CONFIG.sessionDuration
-            };
-            
-            localStorage.setItem(SESSION_CONFIG.sessionKey, JSON.stringify(sessionData));
-            console.log('Session créée pour 10 minutes');
-            startSessionTimer();
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        function isSessionValid() {
-            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey
+        function filterDemandes() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const serviceFilter = document.getElementById('serviceFilter').value;
+            
+            const rows = document.querySelectorAll('#demandesTableBody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const statusCell = row.querySelector('.status');
+                const serviceCell = row.cells[2];
+                
+                const matchesSearch = text.includes(searchTerm);
+                const matchesStatus = !statusFilter || statusCell.classList.contains(statusFilter);
+                const matchesService = !serviceFilter || serviceCell.textContent.toLowerCase().includes(serviceFilter);
+                
+                if (matchesSearch && matchesStatus && matchesService) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function addActivity(message) {
+            const activityList = document.querySelector('#recentActivity .activity-list');
+            if (activityList) {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div>
+                        <strong>${new Date().toLocaleTimeString('fr-FR')}</strong><br>
+                        <small>${message}</small>
+                    </div>
+                `;
+                activityList.insertBefore(li, activityList.firstChild);
+                
+                while (activityList.children.length > 10) {
+                    activityList.removeChild(activityList.lastChild);
+                }
+            }
+        }
+
+        function viewDocument(docId) {
+            showNotification(`Ouverture du document: ${docId}`);
+        }
+
+        function downloadDocument(docId) {
+            showNotification(`Téléchargement du document: ${docId}`);
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        function exportData() {
+            const data = {
+                demandes: demandes,
+                clients: clients,
+                documents: documents,
+                emailConfig: emailjsConfig,
+                emailsSent: emailsSentCount,
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `monentreprise-export-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showNotification('Données exportées avec succès');
+        }
+
+        function saveSettings() {
+            settings.adminEmail = document.getElementById('adminEmail').value;
+            settings.companyName = document.getElementById('companyName').value;
+            settings.emailNotifications = document.getElementById('emailNotifications').checked;
+            
+            const newPassword = document.getElementById('newPassword').value;
+            if (newPassword) {
+                settings.adminPassword = newPassword;
+            }
+            
+            localStorage.setItem('monentreprise_settings', JSON.stringify(settings));
+            showNotification('Paramètres sauvegardés');
+        }
+
+        function logout() {
+            if (sessionTimer) {
+                clearInterval(sessionTimer);
+            }
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            showNotification('Déconnexion réussie');
+        }
+
+        // Navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Panel Admin MonEntreprise.fr chargé');
+            
+            // Navigation entre sections
+            document.querySelectorAll('.sidebar a[data-section]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const section = this.getAttribute('data-section');
+                    
+                    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
+                    
+                    const targetSection = document.getElementById(section);
+                    if (targetSection) {
+                        targetSection.classList.remove('hidden');
+                    }
+                    
+                    const titles = {
+                        'overview': 'Vue d\'ensemble',
+                        'demandes': 'Gestion des demandes',
+                        'notifications': 'Configuration des notifications',
+                        'documents': 'Documents reçus',
+                        'clients': 'Gestion des clients',
+                        'finances': 'Gestion financière',
+                        'parametres': 'Paramètres'
+                    };
+                    
+                    document.getElementById('pageTitle').textContent = titles[section] || section;
+                });
+            });
+            
+            // Gestion des modals
+            window.addEventListener('click', function(event) {
+                const detailModal = document.getElementById('detailModal');
+                const statusModal = document.getElementById('statusModal');
+                
+                if (event.target === detailModal) {
+                    closeModal();
+                }
+                if (event.target === statusModal) {
+                    closeStatusModal();
+                }
+            });
+            
+            // Login avec Entrée
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleLogin();
+                }
+            });
+
+            // Charger configuration sauvegardée
+            const savedEmailConfig = localStorage.getItem('monentreprise_email_config');
+            if (savedEmailConfig) {
+                const config = JSON.parse(savedEmailConfig);
+                emailjsConfig = { ...emailjsConfig, ...config };
+                
+                document.getElementById('emailjsServiceId').value = emailjsConfig.serviceId;
+                document.getElementById('emailjsTemplateId').value = emailjsConfig.templateId;
+                document.getElementById('emailjsPublicKey').value = emailjsConfig.publicKey;
+                
+                if (emailjsConfig.publicKey && typeof emailjs !== 'undefined') {
+                    emailjs.init(emailjsConfig.publicKey);
+                }
+            }
+
+            // Charger messages par défaut
+            const savedMessages = localStorage.getItem('monentreprise_default_messages');
+            if (savedMessages) {
+                defaultMessages = { ...defaultMessages, ...JSON.parse(savedMessages) };
+                document.getElementById('messageEnCours').value = defaultMessages['en-cours'];
+                document.getElementById('messageDocumentsRequis').value = defaultMessages['documents-requis'];
+                document.getElementById('messageTermine').value = defaultMessages['termine'];
+            }
+        });
+
+        console.log('Panel Admin MonEntreprise.fr initialisé');
+    </script>
+</body>
+</html>
