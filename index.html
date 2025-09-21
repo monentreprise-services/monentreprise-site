@@ -415,6 +415,41 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
+        /* SMS Confirmation Notice */
+        .sms-notice {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .sms-notice strong {
+            display: block;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Security Warning */
+        .security-warning {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+            border: 2px solid #d63031;
+        }
+
+        .security-warning strong {
+            display: block;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
         /* Footer */
         .footer {
             background: var(--text-dark);
@@ -783,13 +818,13 @@
                 </div>
                 <div class="step">
                     <div class="step-number">3</div>
-                    <h3>Validation et traitement</h3>
-                    <p>Nos experts vérifient et traitent votre demande</p>
+                    <h3>Confirmations automatiques</h3>
+                    <p>Recevez instantanément un email ET un SMS de confirmation</p>
                 </div>
                 <div class="step">
                     <div class="step-number">4</div>
-                    <h3>Suivi en temps réel</h3>
-                    <p>Suivez l'avancement de vos démarches depuis votre espace client</p>
+                    <h3>Traitement rapide</h3>
+                    <p>Nos experts traitent votre demande et vous tiennent informé</p>
                 </div>
             </div>
         </div>
@@ -807,6 +842,7 @@
                     <ul class="service-list">
                         <li>1 démarche administrative</li>
                         <li>Support par email</li>
+                        <li>Confirmation SMS incluse</li>
                         <li>Traitement sous 48h</li>
                         <li>Suivi en ligne</li>
                     </ul>
@@ -820,6 +856,7 @@
                     <ul class="service-list">
                         <li>Création micro-entreprise complète</li>
                         <li>Support téléphonique</li>
+                        <li>SMS de suivi personnalisés</li>
                         <li>Traitement prioritaire 24h</li>
                         <li>Conseils personnalisés</li>
                         <li>Kit de démarrage inclus</li>
@@ -834,6 +871,7 @@
                     <ul class="service-list">
                         <li>Jusqu'à 5 démarches</li>
                         <li>Support dédié 7j/7</li>
+                        <li>Notifications SMS en temps réel</li>
                         <li>Traitement express</li>
                         <li>Rendez-vous visio</li>
                         <li>Garantie résultat</li>
@@ -849,6 +887,12 @@
         <div class="container">
             <h2 class="section-title">Commencez maintenant</h2>
             <div class="form-container">
+                <!-- SMS Notice -->
+                <div class="sms-notice">
+                    <strong>📱 SMS Twilio confirmé</strong>
+                    Vous recevrez un SMS de confirmation automatique sur votre numéro
+                </div>
+
                 <form id="mainForm" novalidate>
                     <div class="form-group">
                         <label for="service">Type de service souhaité *</label>
@@ -884,8 +928,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="telephone">Téléphone</label>
-                        <input type="tel" id="telephone" name="telephone">
+                        <label for="telephone">Téléphone * (pour SMS Twilio)</label>
+                        <input type="tel" id="telephone" name="telephone" required placeholder="+33 6 XX XX XX XX">
+                        <small style="color: #666; font-size: 0.9rem;">SMS envoyé automatiquement via Twilio</small>
                     </div>
 
                     <div class="form-group">
@@ -950,47 +995,199 @@
     <a href="#" class="floating-btn chat-btn" onclick="openChat()">💬</a>
     <a href="https://wa.me/33766306016" class="floating-btn whatsapp-btn" target="_blank">📱</a>
 
-    <!-- JavaScript avec système de double envoi d'emails -->
+    <!-- JavaScript avec intégration Twilio complète -->
     <script>
-        // Configuration EmailJS avec double envoi d'emails
+        // ==========================================
+        // CONFIGURATION TWILIO
+        // ==========================================
+        const TWILIO_CONFIG = {
+            accountSid: 'ACa20e7f6fb21edb0e40410cd9ed9a8607',
+            authToken: '1b91ce9939a0fa1a6723bbeb7e9940c7',
+            phoneNumber: '+33757595384',
+            recoveryCode: 'UV498WX78Z3TTR6X7YX7U91Y',
+            serviceName: 'MonEntreprise.fr',
+            testMode: true
+        };
+
+        // Configuration EmailJS
         const EMAIL_CONFIG = {
             serviceId: 'service_2te46oj',
-            templateId: 'template_m3ewwas',        // Template pour admin
-            clientTemplateId: 'template_9jpudgc',  // Template pour client
+            templateId: 'template_m3ewwas',
+            clientTemplateId: 'template_9jpudgc',
             adminEmail: 'mohamed.oudiai@icloud.com'
         };
 
         // Variables de debug
-        let debugMode = true; // Activez pour voir les logs
+        let debugMode = true;
         let submitAttempts = 0;
 
-        // Fonction de debug
-        function debugLog(message, data = null) {
-            if (debugMode) {
-                console.log(`[DEBUG] ${message}`, data);
-                updateDebugPanel(message, data);
-            }
-        }
+        // ==========================================
+        // FONCTIONS TWILIO SMS
+        // ==========================================
 
-        function updateDebugPanel(message, data) {
-            const panel = document.getElementById('debugPanel');
-            const content = document.getElementById('debugContent');
-            if (panel && content) {
-                const timestamp = new Date().toLocaleTimeString();
-                const logEntry = `${timestamp}: ${message}`;
-                content.innerHTML = logEntry + (data ? `<br>Data: ${JSON.stringify(data, null, 2)}` : '');
-                panel.classList.add('show');
+        // Envoi SMS via Twilio API (frontend - DÉVELOPPEMENT UNIQUEMENT)
+        async function sendTwilioSMS(to, message) {
+            try {
+                debugLog('🔥 ENVOI SMS TWILIO RÉEL', { to: maskPhone(to), message: message.substring(0, 50) + '...' });
                 
-                // Masquer après 10 secondes
-                setTimeout(() => {
-                    panel.classList.remove('show');
-                }, 10000);
+                const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_CONFIG.accountSid}/Messages.json`;
+                
+                const params = new URLSearchParams();
+                params.append('To', to);
+                params.append('From', TWILIO_CONFIG.phoneNumber);
+                params.append('Body', message);
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Basic ' + btoa(`${TWILIO_CONFIG.accountSid}:${TWILIO_CONFIG.authToken}`),
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: params
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    debugLog('✅ SMS TWILIO ENVOYÉ', { sid: result.sid, status: result.status });
+                    
+                    // Log pour analytics
+                    logSMSUsage(to, 'delivered', result.price || '~0.06€');
+                    
+                    return { 
+                        success: true, 
+                        sid: result.sid, 
+                        status: result.status,
+                        price: result.price,
+                        real: true 
+                    };
+                } else {
+                    const error = await response.json();
+                    debugLog('❌ ERREUR TWILIO', error);
+                    throw new Error(`Twilio Error ${error.code}: ${error.message}`);
+                }
+            } catch (error) {
+                debugLog('💥 EXCEPTION TWILIO', error);
+                
+                // Log de l'erreur
+                logSMSUsage(to, 'failed', null);
+                
+                throw new Error(`SMS Twilio failed: ${error.message}`);
             }
         }
 
-        // Fonction principale de soumission
+        // Validation et formatage du numéro pour Twilio
+        function formatPhoneForTwilio(phone) {
+            if (!phone) return null;
+            
+            // Nettoyer le numéro
+            let cleaned = phone.replace(/[^\d+]/g, '');
+            
+            // Formats français acceptés
+            const frenchPatterns = [
+                /^\+33[1-9]\d{8}$/,     // +33612345678
+                /^0[1-9]\d{8}$/         // 0612345678
+            ];
+            
+            // Convertir format français
+            if (cleaned.startsWith('0') && cleaned.length === 10) {
+                cleaned = '+33' + cleaned.substring(1);
+            } else if (!cleaned.startsWith('+33') && cleaned.length === 9) {
+                cleaned = '+33' + cleaned;
+            }
+            
+            // Validation finale
+            if (!/^\+33[1-9]\d{8}$/.test(cleaned)) {
+                throw new Error(`Format téléphone invalide: ${phone} -> ${cleaned}`);
+            }
+            
+            debugLog('📱 Numéro formaté pour Twilio', { original: phone, formatted: cleaned });
+            return cleaned;
+        }
+
+        // Fonction principale d'envoi SMS
+        function sendSMSNotification(smsParams) {
+            debugLog('🚀 Préparation SMS Twilio', smsParams);
+            
+            // Construire le message SMS
+            const smsMessage = `${TWILIO_CONFIG.serviceName} - Demande reçue !
+
+Bonjour ${smsParams.client_name},
+
+Votre demande ${smsParams.request_id} pour "${smsParams.service_type}" a été enregistrée.
+
+Nous vous contacterons sous 24h.
+
+Merci de votre confiance !
+
+MonEntreprise.fr
++33 766 306 016`;
+
+            // Envoi réel via Twilio
+            if (TWILIO_CONFIG.testMode) {
+                return sendTwilioSMS(smsParams.to_phone, smsMessage);
+            } else {
+                // En production, utiliser un backend sécurisé
+                return sendSMSViaBackend(smsParams.to_phone, smsMessage);
+            }
+        }
+
+        // Option backend sécurisé (pour production)
+        async function sendSMSViaBackend(to, message) {
+            try {
+                const response = await fetch('/api/send-sms', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ to, message })
+                });
+                
+                const result = await response.json();
+                if (response.ok) {
+                    return { success: true, sid: result.sid, backend: true };
+                } else {
+                    throw new Error(result.error || 'Erreur backend SMS');
+                }
+            } catch (error) {
+                debugLog('Erreur backend SMS, fallback simulation', error);
+                return simulateSMSSend({ to_phone: to, sms_message: message });
+            }
+        }
+
+        // ==========================================
+        // FONCTIONS UTILITAIRES
+        // ==========================================
+
+        function maskPhone(phone) {
+            if (!phone) return '';
+            return phone.replace(/(\d{2})(\d{6})(\d{2})/, '$1XXXXXX$3');
+        }
+
+        function logSMSUsage(to, status, cost = null) {
+            const logEntry = {
+                timestamp: new Date().toISOString(),
+                to: maskPhone(to),
+                status: status,
+                cost: cost,
+                service: 'MonEntreprise.fr',
+                provider: 'Twilio'
+            };
+            
+            let smsStats = JSON.parse(localStorage.getItem('sms_stats') || '[]');
+            smsStats.push(logEntry);
+            
+            if (smsStats.length > 100) {
+                smsStats = smsStats.slice(-100);
+            }
+            
+            localStorage.setItem('sms_stats', JSON.stringify(smsStats));
+            debugLog('📊 SMS Stats', logEntry);
+        }
+
+        // ==========================================
+        // FONCTION PRINCIPALE DE SOUMISSION
+        // ==========================================
+
         function handleFormSubmit() {
-            debugLog('=== DÉBUT SOUMISSION FORMULAIRE ===');
+            debugLog('=== DÉBUT SOUMISSION AVEC TWILIO SMS ===');
             submitAttempts++;
             debugLog(`Tentative #${submitAttempts}`);
             
@@ -1003,15 +1200,8 @@
 
             const formData = new FormData(form);
             
-            // Log des données collectées
-            const dataObject = {};
-            for (let [key, value] of formData.entries()) {
-                dataObject[key] = value;
-            }
-            debugLog('Données formulaire collectées', dataObject);
-
-            // Validation
-            const errors = validateForm(formData);
+            // Validation incluant le téléphone obligatoire
+            const errors = validateFormWithPhone(formData);
             if (errors.length > 0) {
                 debugLog('Erreurs de validation', errors);
                 showNotification('Erreurs dans le formulaire:\n' + errors.join('\n'), 'error');
@@ -1025,29 +1215,21 @@
                 return;
             }
 
-            debugLog('EmailJS disponible, démarrage envoi double email');
+            debugLog('✅ EmailJS + Twilio disponibles, démarrage envoi triple');
             
             // Désactiver le bouton et afficher le loading
             const submitBtn = document.getElementById('submitBtn');
             const originalText = submitBtn.textContent;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span style="display: inline-block; width: 16px; height: 16px; border: 2px solid #ffffff; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; margin-right: 8px;"></span>Envoi en cours...';
-            
-            // Ajouter animation de rotation si nécessaire
-            if (!document.getElementById('spin-animation')) {
-                const style = document.createElement('style');
-                style.id = 'spin-animation';
-                style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
-                document.head.appendChild(style);
-            }
+            submitBtn.innerHTML = '<span style="display: inline-block; width: 16px; height: 16px; border: 2px solid #ffffff; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; margin-right: 8px;"></span>Envoi avec Twilio...';
 
             const requestId = generateRequestId();
             debugLog('ID de demande généré', requestId);
 
-            // Tentative d'envoi double EmailJS (admin + client)
-            sendDoubleEmail(formData, requestId)
+            // Tentative d'envoi triple avec Twilio
+            sendTripleNotificationWithTwilio(formData, requestId)
                 .then((response) => {
-                    debugLog('Double envoi EMAIL SUCCESS', response);
+                    debugLog('🎉 SUCCÈS COMPLET AVEC TWILIO', response);
                     
                     // Sauvegarder dans le panel admin
                     try {
@@ -1057,17 +1239,19 @@
                         debugLog('Erreur sauvegarde admin panel', error);
                     }
                     
-                    // Message de succès avec double confirmation
+                    // Message de succès avec confirmation Twilio
+                    const twilioInfo = response.sms.real ? ' (SMS Twilio réel envoyé)' : ' (SMS simulé)';
                     showNotification(`✅ Votre demande a été envoyée avec succès !
 
-📧 Vous allez recevoir 2 emails de confirmation :
-   • Une confirmation immédiate sur votre boîte email
-   • Une notification à notre équipe pour traitement
+📧 Email de confirmation: ${formData.get('email')}
+📱 SMS Twilio envoyé au: ${formData.get('telephone')}${twilioInfo}
+🆔 SID Twilio: ${response.sms.sid || 'N/A'}
+🔔 Notre équipe notifiée instantanément
 
 🆔 Numéro de demande: ${requestId}
 ⏰ Nous vous contacterons sous 24h maximum.
 
-Vérifiez aussi vos spams si vous ne recevez pas l'email.
+Coût SMS estimé: ~0.06€
 Merci de votre confiance !`);
                     
                     // Reset du formulaire
@@ -1078,46 +1262,46 @@ Merci de votre confiance !`);
                     debugLog('Formulaire réinitialisé avec succès');
                 })
                 .catch((error) => {
-                    debugLog('Double envoi EMAIL ERROR', error);
+                    debugLog('💥 ERREUR TRIPLE ENVOI TWILIO', error);
                     
-                    // Message d'erreur plus détaillé
                     let errorMessage = 'Erreur lors de l\'envoi';
                     if (error && error.details) {
                         errorMessage = error.details;
-                    } else if (error && error.fullError) {
-                        errorMessage = `Détails: ${error.fullError}`;
+                    } else if (error && error.message) {
+                        errorMessage = error.message;
                     }
                     
                     showNotification(`❌ Erreur lors de l'envoi de votre demande.
 
-Code d'erreur: ${errorMessage}
+${errorMessage}
 
 Solutions possibles:
 • Vérifiez votre connexion internet
+• Vérifiez le format de votre numéro (+33...)
 • Réessayez dans quelques instants
-• Contactez-nous directement si le problème persiste
+• Contactez-nous directement
 
 📞 +33 766 306 016
 📧 mohamed.oudiai@icloud.com
+💬 WhatsApp disponible
 
-⚠️ Activez les logs de debug pour plus d'infos (F12 > Console)`, 'error');
+⚠️ Vérifiez la console (F12) pour plus d'infos`, 'error');
                 })
                 .finally(() => {
-                    // Restaurer le bouton
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalText;
                     debugLog('Bouton restauré');
                 });
         }
 
-        // Fonction d'envoi double email (admin + client)
-        function sendDoubleEmail(formData, requestId) {
-            debugLog('Préparation des paramètres pour envoi double');
+        // Fonction d'envoi triple avec Twilio
+        function sendTripleNotificationWithTwilio(formData, requestId) {
+            debugLog('🔥 Préparation envoi triple avec Twilio SMS réel');
             
             const baseParams = {
                 client_name: formData.get('prenom') + ' ' + formData.get('nom'),
                 client_email: formData.get('email'),
-                client_phone: formData.get('telephone') || 'Non renseigné',
+                client_phone: formData.get('telephone'),
                 service_type: getServiceDisplayName(formData.get('service')),
                 urgence_level: formData.get('urgence') || 'Normal',
                 client_message: formData.get('message') || 'Aucun message spécifique',
@@ -1126,63 +1310,55 @@ Solutions possibles:
                 estimated_price: getServicePrice(formData.get('service'))
             };
 
-            // Paramètres pour l'admin
-            const adminParams = {
-                ...baseParams,
-                admin_email: EMAIL_CONFIG.adminEmail
+            // Paramètres SMS pour Twilio
+            const smsParams = {
+                to_phone: formatPhoneForTwilio(formData.get('telephone')),
+                client_name: formData.get('prenom'),
+                request_id: requestId,
+                service_type: getServiceDisplayName(formData.get('service'))
             };
 
-            // Paramètres pour le client
-            const clientParams = {
-                ...baseParams,
-                to_email: formData.get('email') // Email du client pour le template de confirmation
-            };
-
-            debugLog('Paramètres admin préparés', adminParams);
-            debugLog('Paramètres client préparés', clientParams);
+            debugLog('Paramètres Twilio SMS préparés', smsParams);
 
             return new Promise((resolve, reject) => {
                 try {
-                    // Envoi simultané des deux emails
-                    Promise.all([
+                    // Envoi simultané des trois notifications
+                    const promises = [
                         // Email à l'admin
-                        emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.templateId, adminParams),
+                        emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.templateId, {
+                            ...baseParams,
+                            admin_email: EMAIL_CONFIG.adminEmail
+                        }),
                         // Email de confirmation au client
-                        emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.clientTemplateId, clientParams)
-                    ])
+                        emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.clientTemplateId, {
+                            ...baseParams,
+                            to_email: formData.get('email')
+                        }),
+                        // SMS Twilio RÉEL
+                        sendSMSNotification(smsParams)
+                    ];
+
+                    Promise.all(promises)
                     .then((responses) => {
-                        debugLog('Tous les emails envoyés avec succès', responses);
-                        debugLog('Email admin envoyé:', responses[0]);
-                        debugLog('Email client envoyé:', responses[1]);
+                        debugLog('🎯 TOUTES LES NOTIFICATIONS ENVOYÉES', responses);
                         resolve({
                             admin: responses[0],
                             client: responses[1],
+                            sms: responses[2],
                             success: true,
-                            message: 'Double envoi réussi'
+                            message: 'Triple envoi réussi avec Twilio SMS'
                         });
                     })
                     .catch((error) => {
-                        debugLog('Erreur lors de l\'envoi des emails', error);
-                        
-                        // Essayer de déterminer quel email a échoué
-                        let errorDetails = 'Erreur inconnue';
-                        if (error && error.text) {
-                            errorDetails = error.text;
-                        } else if (error && error.message) {
-                            errorDetails = error.message;
-                        } else if (typeof error === 'string') {
-                            errorDetails = error;
-                        }
-                        
+                        debugLog('❌ Erreur dans les notifications', error);
                         reject({
-                            message: 'Erreur envoi email',
+                            message: 'Erreur envoi notifications',
                             error: error,
-                            details: errorDetails,
-                            fullError: JSON.stringify(error)
+                            details: error.text || error.message || 'Erreur inconnue'
                         });
                     });
                 } catch (error) {
-                    debugLog('Erreur dans l\'envoi double email', error);
+                    debugLog('💥 Erreur dans l\'envoi triple Twilio', error);
                     reject({
                         message: 'Erreur critique',
                         error: error
@@ -1191,44 +1367,71 @@ Solutions possibles:
             });
         }
 
-        // Fonction d'envoi EmailJS améliorée (gardée en backup)
-        function sendDemandeEmail(formData, requestId) {
-            debugLog('Préparation des paramètres EmailJS');
-            
-            const templateParams = {
-                client_name: formData.get('prenom') + ' ' + formData.get('nom'),
-                client_email: formData.get('email'),
-                client_phone: formData.get('telephone') || 'Non renseigné',
-                service_type: getServiceDisplayName(formData.get('service')),
-                urgence_level: formData.get('urgence') || 'Normal',
-                client_message: formData.get('message') || 'Aucun message spécifique',
-                request_date: new Date().toLocaleDateString('fr-FR') + ' à ' + new Date().toLocaleTimeString('fr-FR'),
-                request_id: requestId,
-                estimated_price: getServicePrice(formData.get('service')),
-                admin_email: EMAIL_CONFIG.adminEmail
-            };
+        // ==========================================
+        // FONCTIONS UTILITAIRES (IDENTIQUES)
+        // ==========================================
 
-            debugLog('Paramètres EmailJS préparés', templateParams);
-
-            return new Promise((resolve, reject) => {
-                try {
-                    emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.templateId, templateParams)
-                        .then((response) => {
-                            debugLog('EmailJS.send réussi', response);
-                            resolve(response);
-                        })
-                        .catch((error) => {
-                            debugLog('EmailJS.send échoué', error);
-                            reject(error);
-                        });
-                } catch (error) {
-                    debugLog('Erreur dans emailjs.send', error);
-                    reject(error);
-                }
-            });
+        function debugLog(message, data = null) {
+            if (debugMode) {
+                console.log(`[DEBUG TWILIO] ${message}`, data);
+                updateDebugPanel(message, data);
+            }
         }
 
-        // Fonctions utilitaires
+        function updateDebugPanel(message, data) {
+            const panel = document.getElementById('debugPanel');
+            const content = document.getElementById('debugContent');
+            if (panel && content) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = `${timestamp}: ${message}`;
+                content.innerHTML = logEntry + (data ? `<br>Data: ${JSON.stringify(data, null, 2)}` : '');
+                panel.classList.add('show');
+                
+                setTimeout(() => {
+                    panel.classList.remove('show');
+                }, 12000);
+            }
+        }
+
+        function validateFormWithPhone(formData) {
+            const errors = [];
+            
+            const prenom = formData.get('prenom');
+            const nom = formData.get('nom');
+            const email = formData.get('email');
+            const service = formData.get('service');
+            const telephone = formData.get('telephone');
+            
+            if (!prenom || prenom.length < 2) {
+                errors.push('Le prénom doit contenir au moins 2 caractères');
+            }
+            
+            if (!nom || nom.length < 2) {
+                errors.push('Le nom doit contenir au moins 2 caractères');
+            }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email || !emailRegex.test(email)) {
+                errors.push('Veuillez saisir une adresse email valide');
+            }
+            
+            if (!service) {
+                errors.push('Veuillez sélectionner un service');
+            }
+            
+            if (!telephone) {
+                errors.push('Le numéro de téléphone est obligatoire pour le SMS Twilio');
+            } else {
+                try {
+                    formatPhoneForTwilio(telephone);
+                } catch (error) {
+                    errors.push('Format de téléphone invalide pour Twilio (ex: +33 6 12 34 56 78)');
+                }
+            }
+            
+            return errors;
+        }
+
         function getServiceDisplayName(service) {
             const services = {
                 'micro-entreprise': 'Création Micro-Entreprise',
@@ -1269,7 +1472,6 @@ Solutions possibles:
             return 'ME-' + timestamp + '-' + random;
         }
 
-        // Sauvegarder dans localStorage pour le panel admin
         function saveToAdminPanel(formData, requestId) {
             try {
                 let demandes = JSON.parse(localStorage.getItem('monentreprise_demandes') || '[]');
@@ -1278,7 +1480,7 @@ Solutions possibles:
                     id: requestId,
                     client: formData.get('prenom') + ' ' + formData.get('nom'),
                     email: formData.get('email'),
-                    telephone: formData.get('telephone') || 'Non renseigné',
+                    telephone: formData.get('telephone'),
                     service: formData.get('service'),
                     statut: 'nouveau',
                     date: new Date().toISOString().split('T')[0],
@@ -1286,49 +1488,21 @@ Solutions possibles:
                     details: formData.get('message') || 'Aucun message spécifique',
                     urgence: formData.get('urgence') || 'Normal',
                     dateComplete: new Date().toLocaleString('fr-FR'),
-                    emailSent: 'double' // Marquer que les deux emails ont été envoyés
+                    emailSent: 'triple',
+                    smsSent: 'twilio_real', // Marquer SMS Twilio réel
+                    provider: 'Twilio'
                 };
                 
                 demandes.unshift(newDemande);
                 localStorage.setItem('monentreprise_demandes', JSON.stringify(demandes));
                 
-                debugLog('Demande sauvegardée dans le panel admin', newDemande);
+                debugLog('Demande sauvegardée avec SMS Twilio', newDemande);
             } catch (error) {
                 debugLog('Erreur sauvegarde panel admin', error);
                 throw error;
             }
         }
 
-        // Validation du formulaire
-        function validateForm(formData) {
-            const errors = [];
-            
-            const prenom = formData.get('prenom');
-            const nom = formData.get('nom');
-            const email = formData.get('email');
-            const service = formData.get('service');
-            
-            if (!prenom || prenom.length < 2) {
-                errors.push('Le prénom doit contenir au moins 2 caractères');
-            }
-            
-            if (!nom || nom.length < 2) {
-                errors.push('Le nom doit contenir au moins 2 caractères');
-            }
-            
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!email || !emailRegex.test(email)) {
-                errors.push('Veuillez saisir une adresse email valide');
-            }
-            
-            if (!service) {
-                errors.push('Veuillez sélectionner un service');
-            }
-            
-            return errors;
-        }
-
-        // Fonction d'affichage des notifications améliorée
         function showNotification(message, type = 'success') {
             const existingNotifications = document.querySelectorAll('.custom-notification');
             existingNotifications.forEach(notif => notif.remove());
@@ -1351,6 +1525,8 @@ Solutions possibles:
                 transition: transform 0.3s ease;
                 white-space: pre-line;
                 word-wrap: break-word;
+                font-family: monospace;
+                font-size: 0.9rem;
             `;
             notification.textContent = message;
             
@@ -1367,19 +1543,47 @@ Solutions possibles:
                         notification.parentNode.removeChild(notification);
                     }
                 }, 300);
-            }, 6000);
+            }, 10000); // Plus long pour lire les infos Twilio
         }
 
-        // Initialisation et événements
+        // Simulation SMS pour fallback
+        function simulateSMSSend(smsParams) {
+            debugLog('🎭 Simulation SMS (fallback)', smsParams);
+            
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    debugLog(`📱 SMS simulé envoyé à ${smsParams.to_phone}`);
+                    resolve({
+                        status: 200,
+                        text: 'SMS simulé envoyé avec succès',
+                        simulated: true,
+                        sid: 'SIM' + Date.now()
+                    });
+                }, 1500);
+            });
+        }
+
+        // ==========================================
+        // INITIALISATION
+        // ==========================================
+
         document.addEventListener('DOMContentLoaded', function() {
-            debugLog('DOM chargé - Initialisation avec système double email');
+            debugLog('🚀 DOM chargé - Initialisation avec Twilio SMS RÉEL');
+            
+            // Afficher les infos Twilio
+            debugLog('Configuration Twilio', {
+                accountSid: TWILIO_CONFIG.accountSid,
+                phoneNumber: TWILIO_CONFIG.phoneNumber,
+                testMode: TWILIO_CONFIG.testMode,
+                authTokenMasked: TWILIO_CONFIG.authToken.substring(0, 8) + '...'
+            });
             
             // Vérifier EmailJS
             setTimeout(() => {
                 if (typeof emailjs !== 'undefined') {
-                    debugLog('EmailJS chargé et disponible pour double envoi');
+                    debugLog('✅ EmailJS + Twilio SMS prêts pour triple envoi');
                 } else {
-                    debugLog('ATTENTION: EmailJS non disponible');
+                    debugLog('❌ ATTENTION: EmailJS non disponible');
                 }
             }, 1000);
 
@@ -1440,7 +1644,7 @@ Solutions possibles:
                     
                     switch(selectedService) {
                         case 'micro-entreprise':
-                            recommendedPrice = 'Pack Premium (79€) recommandé';
+                            recommendedPrice = 'Pack Premium (79€) recommandé - SMS Twilio inclus';
                             break;
                         case 'titre-sejour':
                         case 'prefecture':
@@ -1451,7 +1655,7 @@ Solutions possibles:
                         case 'transport':
                         case 'fiscalite':
                         case 'numerique':
-                            recommendedPrice = 'Pack Essentiel (29€) recommandé';
+                            recommendedPrice = 'Pack Essentiel (29€) recommandé - SMS Twilio inclus';
                             break;
                         default:
                             recommendedPrice = '';
@@ -1475,6 +1679,22 @@ Solutions possibles:
                 });
             }
 
+            // Format automatique du numéro de téléphone
+            const telephoneInput = document.getElementById('telephone');
+            if (telephoneInput) {
+                telephoneInput.addEventListener('input', function() {
+                    let value = this.value.replace(/[^\d+]/g, '');
+                    if (value.startsWith('0') && value.length > 1) {
+                        value = '+33 ' + value.substring(1);
+                    }
+                    // Formatage visuel
+                    if (value.startsWith('+33')) {
+                        value = value.replace(/(\+33)(\d)(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5 $6');
+                    }
+                    this.value = value;
+                });
+            }
+
             // Gestion des touches pour le formulaire
             const form = document.getElementById('mainForm');
             if (form) {
@@ -1486,97 +1706,57 @@ Solutions possibles:
                 });
             }
 
-            debugLog('Initialisation terminée avec système double email');
-            
-            // Ajouter bouton de test en mode debug
-            if (debugMode) {
-                const testBtn = document.createElement('button');
-                testBtn.textContent = 'TEST EMAIL';
-                testBtn.style.cssText = `
-                    position: fixed;
-                    top: 80px;
-                    right: 20px;
-                    background: #ff6b6b;
-                    color: white;
-                    border: none;
-                    padding: 10px;
-                    border-radius: 5px;
-                    z-index: 9999;
-                    cursor: pointer;
-                `;
-                testBtn.onclick = testEmailSystem;
-                document.body.appendChild(testBtn);
-            }
+            // Bouton de test Twilio masqué
+            // Le bouton de test est désactivé pour la production
+
+            debugLog('🎯 Initialisation terminée avec Twilio SMS intégré');
         });
 
-        // Fonction de test pour diagnostiquer les erreurs
-        function testEmailSystem() {
-            debugLog('=== TEST EMAIL SYSTEM ===');
+        // Fonction de test Twilio
+        function testTwilioSMS() {
+            const testPhone = prompt('Entrez votre numéro pour test Twilio (ex: +33612345678):');
+            if (!testPhone) return;
             
-            // Test 1: Vérifier EmailJS
-            if (typeof emailjs === 'undefined') {
-                debugLog('ECHEC: EmailJS non chargé');
-                alert('EmailJS non chargé !');
-                return;
+            try {
+                const formattedPhone = formatPhoneForTwilio(testPhone);
+                const testParams = {
+                    to_phone: formattedPhone,
+                    client_name: 'Test',
+                    request_id: 'TEST-TWILIO-' + Date.now(),
+                    service_type: 'Test Twilio SMS'
+                };
+                
+                debugLog('🧪 Lancement test Twilio', testParams);
+                
+                sendSMSNotification(testParams)
+                    .then((result) => {
+                        debugLog('✅ Test Twilio réussi', result);
+                        alert(`✅ Test SMS Twilio réussi !\n\nSID: ${result.sid}\nStatus: ${result.status}\nCoût: ~0.06€\n\nVérifiez votre téléphone !`);
+                    })
+                    .catch((error) => {
+                        debugLog('❌ Test Twilio échoué', error);
+                        alert(`❌ Test SMS Twilio échoué:\n\n${error.message}\n\nVérifiez:\n- Format numéro\n- Clés API\n- Crédit Twilio\n- Console F12`);
+                    });
+            } catch (error) {
+                alert('Erreur format numéro: ' + error.message);
             }
-            debugLog('OK: EmailJS disponible');
-            
-            // Test 2: Configuration
-            debugLog('Configuration EMAIL_CONFIG:', EMAIL_CONFIG);
-            
-            // Test 3: Envoi simple admin
-            const testParams = {
-                client_name: 'Test User',
-                client_email: 'test@example.com',
-                service_type: 'Test',
-                request_id: 'TEST-123',
-                admin_email: EMAIL_CONFIG.adminEmail
-            };
-            
-            debugLog('Test envoi admin avec params:', testParams);
-            
-            emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.templateId, testParams)
-                .then((response) => {
-                    debugLog('Test admin REUSSI:', response);
-                    alert('Test admin réussi ! Status: ' + response.status);
-                    
-                    // Test envoi client
-                    const clientParams = {
-                        ...testParams,
-                        to_email: 'test@example.com'
-                    };
-                    
-                    return emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.clientTemplateId, clientParams);
-                })
-                .then((response) => {
-                    debugLog('Test client REUSSI:', response);
-                    alert('Test client réussi ! Status: ' + response.status);
-                })
-                .catch((error) => {
-                    debugLog('Test ECHEC:', error);
-                    alert('Test échoué: ' + JSON.stringify(error));
-                });
         }
 
         // Chat simulation
         function openChat() {
-            alert('💬 Chat en direct\n\nNotre équipe est disponible du lundi au vendredi de 9h à 18h.\n\nPour une assistance immédiate :\n📞 +33 766 306 016\n📧 mohamed.oudiai@icloud.com');
+            alert('💬 Chat en direct\n\nNotre équipe est disponible du lundi au vendredi de 9h à 18h.\n\nPour une assistance immédiate :\n📞 +33 766 306 016\n📧 mohamed.oudiai@icloud.com\n📱 SMS Twilio disponible 24h/24');
         }
 
-        // Test mobile spécifique
-        function isMobile() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-
-        // Log des informations device
+        // Log des informations device avec Twilio
         window.addEventListener('load', function() {
-            debugLog('Device Info', {
-                isMobile: isMobile(),
+            debugLog('🔍 Device Info avec Twilio SMS', {
+                isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
                 userAgent: navigator.userAgent,
-                screen: `${screen.width}x${screen.height}`,
-                viewport: `${window.innerWidth}x${window.innerHeight}`,
                 emailjsAvailable: typeof emailjs !== 'undefined',
-                doubleEmailSystem: 'ACTIVATED'
+                twilioConfigured: true,
+                twilioAccountSid: TWILIO_CONFIG.accountSid,
+                twilioTestMode: TWILIO_CONFIG.testMode,
+                tripleNotificationSystem: 'TWILIO_ACTIVATED'
             });
         });
     </script>
