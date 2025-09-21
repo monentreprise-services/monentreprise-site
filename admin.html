@@ -53,16 +53,17 @@
             color: #333;
         }
 
-        .form-group input {
+        .form-group input, .form-group textarea, .form-group select {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
             font-size: 1rem;
             transition: all 0.3s ease;
+            font-family: inherit;
         }
 
-        .form-group input:focus {
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -230,6 +231,11 @@
             color: #155724;
         }
 
+        .status.refuse {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
         .action-btn {
             padding: 0.5rem 1rem;
             border: none;
@@ -237,6 +243,7 @@
             cursor: pointer;
             font-size: 0.8rem;
             margin: 0 0.2rem;
+            font-weight: 600;
         }
 
         .btn-view {
@@ -244,14 +251,19 @@
             color: white;
         }
 
-        .btn-edit {
-            background: #ffc107;
-            color: #333;
+        .btn-confirm {
+            background: #28a745;
+            color: white;
         }
 
-        .btn-delete {
+        .btn-refuse {
             background: #dc3545;
             color: white;
+        }
+
+        .btn-progress {
+            background: #ffc107;
+            color: #333;
         }
 
         .modal {
@@ -304,6 +316,15 @@
 
         .notification.show {
             transform: translateX(0);
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+
+        .notification.warning {
+            background: #ffc107;
+            color: #333;
         }
 
         .export-btn {
@@ -389,6 +410,112 @@
             border: 2px solid rgba(102, 126, 234, 0.2);
         }
 
+        .progress-tracker {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .progress-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: #e0e0e0;
+            z-index: 1;
+        }
+
+        .progress-step.completed::after {
+            background: #28a745;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            z-index: 2;
+            position: relative;
+        }
+
+        .step-circle.completed {
+            background: #28a745;
+        }
+
+        .step-circle.current {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .step-label {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            text-align: center;
+            color: #666;
+        }
+
+        .step-label.completed {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .step-label.current {
+            color: #ffc107;
+            font-weight: 600;
+        }
+
+        .demande-details {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: #333;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -418,6 +545,15 @@
 
             .header-right {
                 justify-content: center;
+            }
+
+            .progress-steps {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .progress-step::after {
+                display: none;
             }
         }
     </style>
@@ -509,6 +645,7 @@
                         <option value="nouveau">Nouveau</option>
                         <option value="en-cours">En cours</option>
                         <option value="termine">Terminé</option>
+                        <option value="refuse">Refusé</option>
                     </select>
                     <select id="serviceFilter" onchange="filterDemandes()">
                         <option value="">Tous les services</option>
@@ -623,6 +760,33 @@
         </div>
     </div>
 
+    <!-- Modal pour mise à jour du statut -->
+    <div id="statusModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeStatusModal()">&times;</span>
+            <h2>Mettre à jour le statut</h2>
+            <div id="statusModalContent">
+                <div class="form-group">
+                    <label for="newStatus">Nouveau statut</label>
+                    <select id="newStatus">
+                        <option value="nouveau">Nouveau</option>
+                        <option value="en-cours">En cours</option>
+                        <option value="termine">Terminé</option>
+                        <option value="refuse">Refusé</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="statusComment">Commentaire (optionnel)</label>
+                    <textarea id="statusComment" rows="3" placeholder="Ajoutez un commentaire sur cette mise à jour..."></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn" onclick="updateDemandeStatus()" style="width: auto;">Confirmer</button>
+                    <button class="btn" onclick="closeStatusModal()" style="width: auto; background: #6c757d;">Annuler</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Notification -->
     <div id="notification" class="notification"></div>
 
@@ -637,6 +801,7 @@
         // Variables globales
         let demandes = [];
         let clients = [];
+        let currentDemandeId = null;
         let settings = {
             adminEmail: '',
             adminPassword: 'admin123',
@@ -875,29 +1040,235 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${demande.id}</td>
-                    <td>${demande.client}</td>
+                    <td>${demande.prenom} ${demande.nom}</td>
                     <td>${getServiceName(demande.service)}</td>
-                    <td>${formatDate(demande.date)}</td>
+                    <td>${formatDate(demande.dateComplete)}</td>
                     <td><span class="status ${demande.statut}">${getStatusName(demande.statut)}</span></td>
                     <td>${demande.prix}</td>
                     <td>
                         <button class="action-btn btn-view" onclick="viewDemande('${demande.id}')">Voir</button>
-                        <button class="action-btn btn-edit" onclick="editDemande('${demande.id}')">Modifier</button>
-                        <button class="action-btn btn-delete" onclick="deleteDemande('${demande.id}')">Supprimer</button>
+                        <button class="action-btn btn-confirm" onclick="openStatusModal('${demande.id}', 'termine')">Confirmer</button>
+                        <button class="action-btn btn-refuse" onclick="openStatusModal('${demande.id}', 'refuse')">Refuser</button>
+                        <button class="action-btn btn-progress" onclick="openStatusModal('${demande.id}', 'en-cours')">En cours</button>
                     </td>
                 `;
                 tbody.appendChild(row);
             });
         }
 
+        // === GESTION DES STATUTS ===
+        function openStatusModal(demandeId, suggestedStatus = null) {
+            currentDemandeId = demandeId;
+            const modal = document.getElementById('statusModal');
+            const statusSelect = document.getElementById('newStatus');
+            const commentField = document.getElementById('statusComment');
+            
+            if (suggestedStatus) {
+                statusSelect.value = suggestedStatus;
+            }
+            
+            commentField.value = '';
+            modal.style.display = 'block';
+        }
+
+        function closeStatusModal() {
+            document.getElementById('statusModal').style.display = 'none';
+            currentDemandeId = null;
+        }
+
+        function updateDemandeStatus() {
+            if (!currentDemandeId) return;
+            
+            const newStatus = document.getElementById('newStatus').value;
+            const comment = document.getElementById('statusComment').value;
+            
+            // Trouver la demande
+            const demandeIndex = demandes.findIndex(d => d.id === currentDemandeId);
+            if (demandeIndex === -1) {
+                showNotification('Demande non trouvée', 'error');
+                return;
+            }
+            
+            const demande = demandes[demandeIndex];
+            const oldStatus = demande.statut;
+            
+            // Mettre à jour le statut
+            demandes[demandeIndex].statut = newStatus;
+            demandes[demandeIndex].lastUpdate = new Date().toISOString();
+            
+            // Ajouter l'historique des changements
+            if (!demandes[demandeIndex].statusHistory) {
+                demandes[demandeIndex].statusHistory = [];
+            }
+            
+            demandes[demandeIndex].statusHistory.push({
+                date: new Date().toISOString(),
+                oldStatus: oldStatus,
+                newStatus: newStatus,
+                comment: comment,
+                updatedBy: 'admin'
+            });
+            
+            // Sauvegarder
+            saveData();
+            
+            // Mettre à jour l'affichage
+            updateStats();
+            loadDemandes();
+            
+            // Fermer le modal
+            closeStatusModal();
+            
+            // Notification
+            showNotification(`Statut mis à jour: ${getStatusName(newStatus)}`);
+            
+            console.log(`Demande ${currentDemandeId} mise à jour: ${oldStatus} → ${newStatus}`);
+        }
+
+        // === FONCTIONS D'AFFICHAGE ===
+        function viewDemande(demandeId) {
+            const demande = demandes.find(d => d.id === demandeId);
+            if (!demande) return;
+            
+            const modal = document.getElementById('detailModal');
+            const content = document.getElementById('modalContent');
+            
+            // Créer le tracker de progression
+            const progressTracker = createProgressTracker(demande.statut);
+            
+            // Créer les détails
+            const details = `
+                <div class="demande-details">
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Numéro de demande</div>
+                            <div class="detail-value">${demande.id}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Client</div>
+                            <div class="detail-value">${demande.prenom} ${demande.nom}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Email</div>
+                            <div class="detail-value">${demande.email}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Téléphone</div>
+                            <div class="detail-value">${demande.telephone}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Service</div>
+                            <div class="detail-value">${getServiceName(demande.service)}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Prix</div>
+                            <div class="detail-value">${demande.prix}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Date de demande</div>
+                            <div class="detail-value">${formatDate(demande.dateComplete)}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Urgence</div>
+                            <div class="detail-value">${demande.urgence || 'Normal'}</div>
+                        </div>
+                    </div>
+                    
+                    ${demande.details && demande.details !== 'Aucun message' ? `
+                        <div style="margin-top: 1rem;">
+                            <div class="detail-label">Message du client</div>
+                            <div class="detail-value">${demande.details}</div>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                ${progressTracker}
+                
+                ${demande.statusHistory && demande.statusHistory.length > 0 ? `
+                    <div style="margin-top: 1.5rem;">
+                        <h4>Historique des modifications</h4>
+                        <div class="activity-list">
+                            ${demande.statusHistory.map(history => `
+                                <li>
+                                    <div>
+                                        <strong>${formatDate(history.date)}</strong><br>
+                                        ${getStatusName(history.oldStatus)} → ${getStatusName(history.newStatus)}
+                                        ${history.comment ? `<br><em>${history.comment}</em>` : ''}
+                                    </div>
+                                </li>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <div style="margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <button class="btn" onclick="openStatusModal('${demande.id}')" style="width: auto;">Changer le statut</button>
+                    <button class="btn" onclick="closeModal()" style="width: auto; background: #6c757d;">Fermer</button>
+                </div>
+            `;
+            
+            content.innerHTML = details;
+            modal.style.display = 'block';
+        }
+
+        function createProgressTracker(currentStatus) {
+            const steps = [
+                { id: 'nouveau', label: 'Reçue', number: 1 },
+                { id: 'en-cours', label: 'En cours', number: 2 },
+                { id: 'termine', label: 'Terminée', number: 3 }
+            ];
+            
+            const statusOrder = ['nouveau', 'en-cours', 'termine'];
+            const currentIndex = statusOrder.indexOf(currentStatus);
+            
+            let stepsHtml = '';
+            steps.forEach((step, index) => {
+                let stepClass = '';
+                if (index < currentIndex || (currentStatus === 'termine' && index <= currentIndex)) {
+                    stepClass = 'completed';
+                } else if (index === currentIndex) {
+                    stepClass = 'current';
+                }
+                
+                stepsHtml += `
+                    <div class="progress-step ${stepClass}">
+                        <div class="step-circle ${stepClass}">${step.number}</div>
+                        <div class="step-label ${stepClass}">${step.label}</div>
+                    </div>
+                `;
+            });
+            
+            return `
+                <div class="progress-tracker">
+                    <h4 style="margin-bottom: 1rem;">Progression de la demande</h4>
+                    <div class="progress-steps">
+                        ${stepsHtml}
+                    </div>
+                    <div style="text-align: center; margin-top: 1rem; color: #666;">
+                        Statut actuel: <strong>${getStatusName(currentStatus)}</strong>
+                    </div>
+                </div>
+            `;
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+
         // === FONCTIONS UTILITAIRES ===
         function getServiceName(service) {
             const services = {
-                'micro-entreprise': 'Micro-entreprise',
+                'micro-entreprise': 'Création Micro-Entreprise',
                 'titre-sejour': 'Titre de séjour',
-                'prefecture': 'Préfecture',
+                'prefecture': 'Rendez-vous préfecture',
                 'etat-civil': 'État civil',
-                'logement': 'Logement'
+                'securite-sociale': 'Sécurité sociale',
+                'logement': 'Logement',
+                'emploi': 'Emploi',
+                'transport': 'Transport',
+                'fiscalite': 'Fiscalité',
+                'numerique': 'Services numériques',
+                'autre': 'Autre'
             };
             return services[service] || service;
         }
@@ -906,285 +1277,156 @@
             const statuses = {
                 'nouveau': 'Nouveau',
                 'en-cours': 'En cours',
-                'termine': 'Terminé'
+                'termine': 'Terminé',
+                'refuse': 'Refusé'
             };
             return statuses[status] || status;
         }
 
-        function formatDate(dateStr) {
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('fr-FR');
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
         }
 
-        function addNewDemande(demandeData) {
-            const newDemande = {
-                id: String(demandes.length + 1).padStart(3, '0'),
-                client: demandeData.prenom + ' ' + demandeData.nom,
-                email: demandeData.email,
-                telephone: demandeData.telephone || 'Non renseigné',
-                service: demandeData.service,
-                statut: 'nouveau',
-                date: new Date().toISOString().split('T')[0],
-                prix: getPrixService(demandeData.service),
-                details: demandeData.message || 'Aucun message',
-                urgence: demandeData.urgence || 'Normal'
-            };
-            
-            demandes.unshift(newDemande);
-            saveData();
-            updateStats();
-            loadDemandes();
-            showNotification('Nouvelle demande reçue !');
-        }
-
-        function getPrixService(service) {
-            const prix = {
-                'micro-entreprise': '79€',
-                'titre-sejour': '29€',
-                'prefecture': '29€',
-                'etat-civil': '29€',
-                'logement': '29€',
-                'emploi': '29€',
-                'transport': '29€',
-                'fiscalite': '29€',
-                'numerique': '29€'
-            };
-            return prix[service] || '29€';
-        }
-
-        // === ACTIONS SUR LES DEMANDES ===
-        function viewDemande(id) {
-            const demande = demandes.find(d => d.id === id);
-            if (demande) {
-                document.getElementById('modalContent').innerHTML = `
-                    <p><strong>Client:</strong> ${demande.client}</p>
-                    <p><strong>Email:</strong> ${demande.email}</p>
-                    <p><strong>Téléphone:</strong> ${demande.telephone}</p>
-                    <p><strong>Service:</strong> ${getServiceName(demande.service)}</p>
-                    <p><strong>Date:</strong> ${formatDate(demande.date)}</p>
-                    <p><strong>Statut:</strong> ${getStatusName(demande.statut)}</p>
-                    <p><strong>Prix:</strong> ${demande.prix}</p>
-                    <p><strong>Urgence:</strong> ${demande.urgence}</p>
-                    <p><strong>Détails:</strong> ${demande.details}</p>
-                `;
-                document.getElementById('detailModal').style.display = 'block';
-            }
-        }
-
-        function editDemande(id) {
-            const demande = demandes.find(d => d.id === id);
-            if (demande) {
-                const newStatus = prompt('Nouveau statut (nouveau/en-cours/termine):', demande.statut);
-                if (newStatus && ['nouveau', 'en-cours', 'termine'].includes(newStatus)) {
-                    demande.statut = newStatus;
-                    saveData();
-                    loadDemandes();
-                    updateStats();
-                    showNotification('Statut mis à jour !');
-                }
-            }
-        }
-
-        function deleteDemande(id) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer cette demande ?')) {
-                demandes = demandes.filter(d => d.id !== id);
-                saveData();
-                updateStats();
-                loadDemandes();
-                showNotification('Demande supprimée avec succès');
-            }
-        }
-
-        // === FILTRES ===
         function filterDemandes() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const statusFilter = document.getElementById('statusFilter').value;
             const serviceFilter = document.getElementById('serviceFilter').value;
             
-            const filteredDemandes = demandes.filter(demande => {
-                const matchesSearch = demande.client.toLowerCase().includes(searchTerm) ||
-                                    demande.email.toLowerCase().includes(searchTerm);
-                const matchesStatus = !statusFilter || demande.statut === statusFilter;
-                const matchesService = !serviceFilter || demande.service === serviceFilter;
+            const rows = document.querySelectorAll('#demandesTableBody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const statusCell = row.querySelector('.status');
+                const serviceCell = row.cells[2];
                 
-                return matchesSearch && matchesStatus && matchesService;
+                const matchesSearch = text.includes(searchTerm);
+                const matchesStatus = !statusFilter || statusCell.classList.contains(statusFilter);
+                const matchesService = !serviceFilter || serviceCell.textContent.toLowerCase().includes(serviceFilter);
+                
+                if (matchesSearch && matchesStatus && matchesService) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
             });
-            
-            displayFilteredDemandes(filteredDemandes);
-        }
-
-        function displayFilteredDemandes(filteredDemandes) {
-            const tbody = document.getElementById('demandesTableBody');
-            tbody.innerHTML = '';
-            
-            if (filteredDemandes.length === 0) {
-                const row = tbody.insertRow();
-                const cell = row.insertCell();
-                cell.colSpan = 7;
-                cell.innerHTML = '<div class="empty-state"><p>Aucune demande trouvée avec ces critères</p></div>';
-                return;
-            }
-            
-            filteredDemandes.forEach(demande => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${demande.id}</td>
-                    <td>${demande.client}</td>
-                    <td>${getServiceName(demande.service)}</td>
-                    <td>${formatDate(demande.date)}</td>
-                    <td><span class="status ${demande.statut}">${getStatusName(demande.statut)}</span></td>
-                    <td>${demande.prix}</td>
-                    <td>
-                        <button class="action-btn btn-view" onclick="viewDemande('${demande.id}')">Voir</button>
-                        <button class="action-btn btn-edit" onclick="editDemande('${demande.id}')">Modifier</button>
-                        <button class="action-btn btn-delete" onclick="deleteDemande('${demande.id}')">Supprimer</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // === NAVIGATION ===
-        function showSection(sectionName) {
-            const sections = document.querySelectorAll('.content-section');
-            sections.forEach(section => section.classList.add('hidden'));
-            
-            const targetSection = document.getElementById(sectionName);
-            if (targetSection) {
-                targetSection.classList.remove('hidden');
-            }
-            
-            const titles = {
-                'overview': '📊 Vue d\'ensemble',
-                'demandes': '📋 Gestion des demandes',
-                'clients': '👥 Gestion des clients',
-                'finances': '💰 Gestion financière',
-                'rapports': '📈 Rapports et statistiques',
-                'parametres': '⚙️ Paramètres'
-            };
-            
-            document.getElementById('pageTitle').textContent = titles[sectionName] || 'Dashboard';
-        }
-
-        // === PARAMÈTRES ===
-        function saveSettings() {
-            const adminEmail = document.getElementById('adminEmail').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const companyName = document.getElementById('companyName').value;
-            const emailNotifications = document.getElementById('emailNotifications').checked;
-            
-            if (adminEmail) settings.adminEmail = adminEmail;
-            if (newPassword) settings.adminPassword = newPassword;
-            if (companyName) settings.companyName = companyName;
-            settings.emailNotifications = emailNotifications;
-            
-            saveData();
-            showNotification('Paramètres sauvegardés !');
-            
-            if (newPassword) {
-                showNotification('Mot de passe mis à jour ! Pensez à le noter.', 'success');
-            }
-        }
-
-        // === UTILITAIRES ===
-        function closeModal() {
-            document.getElementById('detailModal').style.display = 'none';
         }
 
         function showNotification(message, type = 'success') {
             const notification = document.getElementById('notification');
             notification.textContent = message;
-            notification.className = 'notification show';
-            notification.style.background = type === 'error' ? '#f44336' : '#4CAF50';
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
             
             setTimeout(() => {
                 notification.classList.remove('show');
-            }, 3000);
+            }, 4000);
         }
 
         function exportData() {
-            if (demandes.length === 0) {
-                showNotification('Aucune donnée à exporter', 'error');
-                return;
+            const data = {
+                demandes: demandes,
+                clients: clients,
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `monentreprise-export-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showNotification('Données exportées avec succès');
+        }
+
+        function saveSettings() {
+            settings.adminEmail = document.getElementById('adminEmail').value;
+            settings.companyName = document.getElementById('companyName').value;
+            settings.emailNotifications = document.getElementById('emailNotifications').checked;
+            
+            const newPassword = document.getElementById('newPassword').value;
+            if (newPassword) {
+                settings.adminPassword = newPassword;
             }
             
-            const csv = convertToCSV(demandes);
-            downloadCSV(csv, 'demandes.csv');
-            showNotification('Données exportées avec succès !');
-        }
-
-        function convertToCSV(data) {
-            const headers = ['ID', 'Client', 'Email', 'Téléphone', 'Service', 'Statut', 'Date', 'Prix', 'Urgence', 'Détails'];
-            const csvContent = [
-                headers.join(','),
-                ...data.map(row => [
-                    row.id,
-                    row.client,
-                    row.email,
-                    row.telephone,
-                    row.service,
-                    row.statut,
-                    row.date,
-                    row.prix,
-                    row.urgence,
-                    row.details
-                ].map(field => `"${field}"`).join(','))
-            ].join('\n');
-            
-            return csvContent;
-        }
-
-        function downloadCSV(csv, filename) {
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('hidden', '');
-            a.setAttribute('href', url);
-            a.setAttribute('download', filename);
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            localStorage.setItem('monentreprise_settings', JSON.stringify(settings));
+            showNotification('Paramètres sauvegardés');
         }
 
         function logout() {
-            if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
-                destroySession();
-                document.getElementById('dashboard').style.display = 'none';
-                document.getElementById('loginContainer').style.display = 'flex';
-                showNotification('Déconnexion réussie');
-            }
+            destroySession();
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            showNotification('Déconnexion réussie');
         }
 
-        // === ÉVÉNEMENTS ET INITIALISATION ===
+        // === NAVIGATION ===
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page chargée - Vérification de session');
-            checkSessionOnLoad();
+            console.log('Panel Admin MonEntreprise.fr chargé');
             
-            // Navigation
-            const navLinks = document.querySelectorAll('.sidebar a[data-section]');
-            navLinks.forEach(link => {
+            // Vérifier la session au chargement
+            if (!checkSessionOnLoad()) {
+                console.log('Aucune session valide, affichage du formulaire de connexion');
+            }
+            
+            // Navigation entre sections
+            document.querySelectorAll('.sidebar a[data-section]').forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
-                    const section = this.getAttribute('data-section');
-                    showSection(section);
                     
-                    navLinks.forEach(l => l.classList.remove('active'));
+                    const section = this.getAttribute('data-section');
+                    
+                    // Mettre à jour les liens actifs
+                    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
                     this.classList.add('active');
+                    
+                    // Masquer toutes les sections
+                    document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
+                    
+                    // Afficher la section sélectionnée
+                    const targetSection = document.getElementById(section);
+                    if (targetSection) {
+                        targetSection.classList.remove('hidden');
+                    }
+                    
+                    // Mettre à jour le titre
+                    const titles = {
+                        'overview': '📊 Vue d\'ensemble',
+                        'demandes': '📋 Gestion des demandes',
+                        'clients': '👥 Gestion des clients',
+                        'finances': '💰 Gestion financière',
+                        'rapports': '📈 Rapports et statistiques',
+                        'parametres': '⚙️ Paramètres'
+                    };
+                    
+                    document.getElementById('pageTitle').textContent = titles[section] || section;
                 });
             });
             
-            // Paramètres par défaut
-            document.getElementById('adminEmail').value = settings.adminEmail;
-            document.getElementById('companyName').value = settings.companyName;
-            document.getElementById('emailNotifications').checked = settings.emailNotifications;
-            
-            // Gestion de la touche Entrée pour la connexion
-            document.getElementById('username').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    handleLogin();
+            // Gestion des modals
+            window.addEventListener('click', function(event) {
+                const detailModal = document.getElementById('detailModal');
+                const statusModal = document.getElementById('statusModal');
+                
+                if (event.target === detailModal) {
+                    closeModal();
+                }
+                if (event.target === statusModal) {
+                    closeStatusModal();
                 }
             });
             
+            // Gestion de la touche Entrée pour la connexion
             document.getElementById('password').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     handleLogin();
@@ -1192,27 +1434,9 @@
             });
         });
 
-        // Fermer modal en cliquant en dehors
-        window.onclick = function(event) {
-            const modal = document.getElementById('detailModal');
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        }
-
-        // API pour recevoir les demandes du site principal
-        window.addEventListener('message', function(event) {
-            if (event.data && event.data.type === 'nouvelle_demande') {
-                addNewDemande(event.data.demande);
-            }
-        });
-
-        // Interface pour connecter avec EmailJS
-        window.MonEntreprise = {
-            addDemande: addNewDemande,
-            getDemandes: () => demandes,
-            updateStats: updateStats
-        };
+        // Log pour le débogage
+        console.log('Panel Admin MonEntreprise.fr initialisé');
     </script>
 </body>
 </html>
+
