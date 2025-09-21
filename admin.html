@@ -410,110 +410,158 @@
             border: 2px solid rgba(102, 126, 234, 0.2);
         }
 
-        .progress-tracker {
-            background: #f8f9fa;
-            padding: 1.5rem;
+        .file-upload-area {
+            border: 2px dashed #667eea;
             border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            background: #f8f9ff;
             margin: 1rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .progress-steps {
+        .file-upload-area:hover {
+            background: #f0f0ff;
+            border-color: #5a6fd8;
+        }
+
+        .file-upload-area.dragover {
+            background: #e6f3ff;
+            border-color: #28a745;
+        }
+
+        .document-card {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            margin: 0.5rem 0;
         }
 
-        .progress-step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex: 1;
-            position: relative;
-        }
-
-        .progress-step:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            top: 20px;
-            right: -50%;
-            width: 100%;
-            height: 2px;
-            background: #e0e0e0;
-            z-index: 1;
-        }
-
-        .progress-step.completed::after {
-            background: #28a745;
-        }
-
-        .step-circle {
+        .document-icon {
+            font-size: 1.5rem;
             width: 40px;
             height: 40px;
-            border-radius: 50%;
-            background: #e0e0e0;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
+            background: #667eea;
             color: white;
-            z-index: 2;
-            position: relative;
+            border-radius: 8px;
         }
 
-        .step-circle.completed {
-            background: #28a745;
+        .document-info {
+            flex: 1;
         }
 
-        .step-circle.current {
-            background: #ffc107;
+        .document-name {
+            font-weight: 600;
             color: #333;
+            margin-bottom: 0.25rem;
         }
 
-        .step-label {
-            margin-top: 0.5rem;
+        .document-meta {
             font-size: 0.8rem;
-            text-align: center;
             color: #666;
         }
 
-        .step-label.completed {
-            color: #28a745;
-            font-weight: 600;
+        .document-actions {
+            display: flex;
+            gap: 0.5rem;
         }
 
-        .step-label.current {
-            color: #ffc107;
-            font-weight: 600;
-        }
-
-        .demande-details {
+        .config-section {
             background: #f8f9fa;
             padding: 1.5rem;
             border-radius: 10px;
             margin: 1rem 0;
+            border-left: 4px solid #ffc107;
         }
 
-        .detail-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+        .config-section h4 {
+            color: #856404;
+            margin-bottom: 1rem;
         }
 
-        .detail-item {
-            display: flex;
-            flex-direction: column;
+        .config-item {
+            margin: 1rem 0;
         }
 
-        .detail-label {
-            font-size: 0.8rem;
-            color: #666;
-            margin-bottom: 0.25rem;
-        }
-
-        .detail-value {
+        .config-item label {
+            display: block;
             font-weight: 600;
-            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .config-item input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+
+        .test-connection {
+            background: #17a2b8;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .connection-status {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .connection-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .connection-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .sync-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border: 2px solid #667eea;
+        }
+
+        .sync-section h4 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .sync-btn {
+            background: #667eea;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 1rem;
+        }
+
+        .auto-sync-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
         }
 
         @media (max-width: 768px) {
@@ -546,15 +594,6 @@
             .header-right {
                 justify-content: center;
             }
-
-            .progress-steps {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .progress-step::after {
-                display: none;
-            }
         }
     </style>
 </head>
@@ -585,9 +624,10 @@
             <ul>
                 <li><a href="#" data-section="overview" class="active">📊 Vue d'ensemble</a></li>
                 <li><a href="#" data-section="demandes">📋 Demandes</a></li>
+                <li><a href="#" data-section="documents">📄 Documents</a></li>
                 <li><a href="#" data-section="clients">👥 Clients</a></li>
                 <li><a href="#" data-section="finances">💰 Finances</a></li>
-                <li><a href="#" data-section="rapports">📈 Rapports</a></li>
+                <li><a href="#" data-section="integration">🔗 Intégration</a></li>
                 <li><a href="#" data-section="parametres">⚙️ Paramètres</a></li>
                 <li><a href="#" onclick="logout()">🚪 Déconnexion</a></li>
             </ul>
@@ -597,6 +637,7 @@
             <div class="header">
                 <h1 id="pageTitle">📊 Vue d'ensemble</h1>
                 <div class="header-right">
+                    <button class="sync-btn" onclick="syncWithExternalData()" title="Synchroniser les données">🔄 Sync</button>
                     <button class="export-btn" onclick="exportData()">📥 Exporter</button>
                     <button class="extend-btn" onclick="extendSession()">+10min</button>
                     <span>Bienvenue, Admin</span>
@@ -616,8 +657,8 @@
                         <div>En cours</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" id="demandesTerminees">0</div>
-                        <div>Terminées</div>
+                        <div class="stat-number" id="documentsTotal">0</div>
+                        <div>Documents reçus</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number" id="chiffreAffaires">0€</div>
@@ -627,9 +668,15 @@
 
                 <div class="content-section">
                     <h3>📈 Activité récente</h3>
-                    <div id="recentActivity" class="empty-state">
-                        <h3>🚀 Bienvenue dans votre panel admin !</h3>
-                        <p>Aucune activité pour le moment. Les nouvelles demandes apparaîtront ici.</p>
+                    <div id="recentActivity">
+                        <div class="activity-list">
+                            <li>
+                                <div>
+                                    <strong>Système initialisé</strong><br>
+                                    <small>Panel admin prêt à recevoir les demandes et documents</small>
+                                </div>
+                            </li>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -657,12 +704,12 @@
 
                 <div id="demandesEmpty" class="empty-state">
                     <h3>📋 Aucune demande</h3>
-                    <p>Les demandes de vos clients apparaîtront ici une fois qu'ils auront soumis le formulaire sur votre site.</p>
+                    <p>Les demandes de vos clients apparaîtront ici une fois configurée l'intégration.</p>
                     <p><strong>Pour recevoir des demandes :</strong></p>
                     <ol style="text-align: left; display: inline-block; margin-top: 1rem;">
-                        <li>Testez le formulaire de contact de votre site</li>
-                        <li>Vérifiez que EmailJS est bien configuré</li>
-                        <li>Les demandes s'afficheront automatiquement ici</li>
+                        <li>Configurez l'intégration dans l'onglet "Intégration"</li>
+                        <li>Testez la synchronisation</li>
+                        <li>Les demandes s'afficheront automatiquement</li>
                     </ol>
                 </div>
 
@@ -680,9 +727,140 @@
                         </tr>
                     </thead>
                     <tbody id="demandesTableBody">
-                        <!-- Les vraies demandes apparaîtront ici -->
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Gestion des documents -->
+            <div id="documents" class="content-section hidden">
+                <h3>📄 Gestion des documents</h3>
+                
+                <div class="sync-section">
+                    <h4>Synchronisation des documents</h4>
+                    <p>Dernière synchronisation : <span id="lastDocSync">Jamais</span></p>
+                    <button class="sync-btn" onclick="syncDocuments()">🔄 Synchroniser maintenant</button>
+                    <div class="auto-sync-toggle">
+                        <input type="checkbox" id="autoSyncDocs" checked>
+                        <label for="autoSyncDocs">Synchronisation automatique (toutes les 5 minutes)</label>
+                    </div>
+                </div>
+
+                <div class="search-filter">
+                    <input type="text" placeholder="Rechercher un document..." id="docSearchInput" onkeyup="filterDocuments()">
+                    <select id="docClientFilter" onchange="filterDocuments()">
+                        <option value="">Tous les clients</option>
+                    </select>
+                    <select id="docTypeFilter" onchange="filterDocuments()">
+                        <option value="">Tous les types</option>
+                        <option value="identite">Pièce d'identité</option>
+                        <option value="justificatif">Justificatif</option>
+                        <option value="contrat">Contrat</option>
+                        <option value="autre">Autre</option>
+                    </select>
+                </div>
+
+                <div id="documentsEmpty" class="empty-state">
+                    <h3>📄 Aucun document</h3>
+                    <p>Les documents uploadés par vos clients apparaîtront ici.</p>
+                    <p>Configurez l'intégration pour commencer à recevoir des documents.</p>
+                </div>
+
+                <div id="documentsList">
+                    <!-- Les documents apparaîtront ici -->
+                </div>
+            </div>
+
+            <!-- Configuration d'intégration -->
+            <div id="integration" class="content-section hidden">
+                <h3>🔗 Configuration de l'intégration</h3>
+                
+                <div class="config-section">
+                    <h4>⚠️ Configuration requise</h4>
+                    <p>Pour recevoir les demandes et documents de votre site client, vous devez configurer une intégration.</p>
+                    
+                    <div class="config-item">
+                        <label>Type d'intégration</label>
+                        <select id="integrationType" onchange="showIntegrationConfig()">
+                            <option value="">Choisir une option</option>
+                            <option value="google_drive">Google Drive API</option>
+                            <option value="dropbox">Dropbox API</option>
+                            <option value="webhook">Webhook personnalisé</option>
+                            <option value="email">Réception par email</option>
+                        </select>
+                    </div>
+
+                    <div id="googleDriveConfig" class="hidden">
+                        <h5>Configuration Google Drive</h5>
+                        <div class="config-item">
+                            <label>Client ID</label>
+                            <input type="text" id="googleClientId" placeholder="Votre Google Client ID">
+                        </div>
+                        <div class="config-item">
+                            <label>Dossier de stockage</label>
+                            <input type="text" id="googleFolderId" placeholder="ID du dossier Google Drive">
+                        </div>
+                        <button class="test-connection" onclick="testGoogleDriveConnection()">Tester la connexion</button>
+                    </div>
+
+                    <div id="dropboxConfig" class="hidden">
+                        <h5>Configuration Dropbox</h5>
+                        <div class="config-item">
+                            <label>Access Token</label>
+                            <input type="text" id="dropboxToken" placeholder="Votre Dropbox Access Token">
+                        </div>
+                        <div class="config-item">
+                            <label>Dossier de destination</label>
+                            <input type="text" id="dropboxFolder" placeholder="/MonEntreprise/Documents">
+                        </div>
+                        <button class="test-connection" onclick="testDropboxConnection()">Tester la connexion</button>
+                    </div>
+
+                    <div id="webhookConfig" class="hidden">
+                        <h5>Configuration Webhook</h5>
+                        <div class="config-item">
+                            <label>URL du webhook</label>
+                            <input type="text" id="webhookUrl" placeholder="https://votre-serveur.com/webhook">
+                        </div>
+                        <div class="config-item">
+                            <label>Secret key</label>
+                            <input type="text" id="webhookSecret" placeholder="Clé secrète pour sécuriser le webhook">
+                        </div>
+                        <button class="test-connection" onclick="testWebhookConnection()">Tester la connexion</button>
+                    </div>
+
+                    <div id="emailConfig" class="hidden">
+                        <h5>Configuration Email</h5>
+                        <div class="config-item">
+                            <label>Email de réception</label>
+                            <input type="email" id="receptionEmail" placeholder="documents@monentreprise.fr">
+                        </div>
+                        <div class="config-item">
+                            <label>Serveur IMAP</label>
+                            <input type="text" id="imapServer" placeholder="imap.gmail.com">
+                        </div>
+                        <div class="config-item">
+                            <label>Mot de passe d'application</label>
+                            <input type="password" id="emailPassword" placeholder="Mot de passe sécurisé">
+                        </div>
+                        <button class="test-connection" onclick="testEmailConnection()">Tester la connexion</button>
+                    </div>
+
+                    <div id="connectionStatus"></div>
+                </div>
+
+                <div class="sync-section">
+                    <h4>Instructions d'intégration</h4>
+                    <div id="integrationInstructions">
+                        <p>Sélectionnez un type d'intégration ci-dessus pour voir les instructions détaillées.</p>
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h4>Test d'intégration</h4>
+                    <p>Une fois configurée, testez votre intégration :</p>
+                    <button class="sync-btn" onclick="simulateClientSubmission()">🧪 Simuler une soumission client</button>
+                    <button class="sync-btn" onclick="syncWithExternalData()">🔄 Synchroniser maintenant</button>
+                </div>
             </div>
 
             <!-- Clients -->
@@ -714,15 +892,6 @@
                 <div class="empty-state">
                     <h3>💰 Aucune transaction</h3>
                     <p>Les données financières apparaîtront après vos premières ventes.</p>
-                </div>
-            </div>
-
-            <!-- Rapports -->
-            <div id="rapports" class="content-section hidden">
-                <h3>📈 Rapports et statistiques</h3>
-                <div class="empty-state">
-                    <h3>📈 Aucune donnée</h3>
-                    <p>Les rapports et statistiques seront générés après vos premières demandes.</p>
                 </div>
             </div>
 
@@ -802,7 +971,10 @@
         // Variables globales
         let demandes = [];
         let clients = [];
+        let documents = [];
         let currentDemandeId = null;
+        let integrationConfig = {};
+        let autoSyncInterval = null;
         let settings = {
             adminEmail: '',
             adminPassword: 'admin123',
@@ -854,6 +1026,9 @@
             }
             if (window.warningTimer) {
                 clearTimeout(window.warningTimer);
+            }
+            if (autoSyncInterval) {
+                clearInterval(autoSyncInterval);
             }
             console.log('Session supprimée');
         }
@@ -930,6 +1105,9 @@
                     }
                 }
             }, SESSION_CONFIG.sessionDuration - SESSION_CONFIG.warningTime);
+
+            // Démarrer la synchronisation automatique
+            startAutoSync();
         }
 
         function autoLogout() {
@@ -979,7 +1157,9 @@
         function loadData() {
             const savedDemandes = localStorage.getItem('monentreprise_demandes');
             const savedClients = localStorage.getItem('monentreprise_clients');
+            const savedDocuments = localStorage.getItem('monentreprise_documents');
             const savedSettings = localStorage.getItem('monentreprise_settings');
+            const savedIntegration = localStorage.getItem('monentreprise_integration');
             
             if (savedDemandes) {
                 demandes = JSON.parse(savedDemandes);
@@ -987,24 +1167,33 @@
             if (savedClients) {
                 clients = JSON.parse(savedClients);
             }
+            if (savedDocuments) {
+                documents = JSON.parse(savedDocuments);
+            }
             if (savedSettings) {
                 settings = { ...settings, ...JSON.parse(savedSettings) };
+            }
+            if (savedIntegration) {
+                integrationConfig = JSON.parse(savedIntegration);
             }
             
             updateStats();
             loadDemandes();
+            loadDocuments();
         }
 
         function saveData() {
             localStorage.setItem('monentreprise_demandes', JSON.stringify(demandes));
             localStorage.setItem('monentreprise_clients', JSON.stringify(clients));
+            localStorage.setItem('monentreprise_documents', JSON.stringify(documents));
             localStorage.setItem('monentreprise_settings', JSON.stringify(settings));
+            localStorage.setItem('monentreprise_integration', JSON.stringify(integrationConfig));
         }
 
         function updateStats() {
             document.getElementById('totalDemandes').textContent = demandes.length;
             document.getElementById('demandesEnCours').textContent = demandes.filter(d => d.statut === 'en-cours').length;
-            document.getElementById('demandesTerminees').textContent = demandes.filter(d => d.statut === 'termine').length;
+            document.getElementById('documentsTotal').textContent = documents.length;
             
             const ca = demandes.filter(d => d.statut === 'termine').reduce((total, d) => {
                 const prix = parseInt(d.prix.replace('€', ''));
@@ -1024,6 +1213,341 @@
             }
         }
 
+        // === GESTION DES DOCUMENTS ===
+        function loadDocuments() {
+            const documentsList = document.getElementById('documentsList');
+            const documentsEmpty = document.getElementById('documentsEmpty');
+            
+            if (documents.length === 0) {
+                documentsEmpty.style.display = 'block';
+                documentsList.innerHTML = '';
+                return;
+            }
+            
+            documentsEmpty.style.display = 'none';
+            
+            documentsList.innerHTML = documents.map(doc => `
+                <div class="document-card">
+                    <div class="document-icon">📄</div>
+                    <div class="document-info">
+                        <div class="document-name">${doc.name}</div>
+                        <div class="document-meta">
+                            Client: ${doc.clientName} • 
+                            ${formatFileSize(doc.size)} • 
+                            ${formatDate(doc.uploadDate)}
+                        </div>
+                    </div>
+                    <div class="document-actions">
+                        <button class="action-btn btn-view" onclick="viewDocument('${doc.id}')">Voir</button>
+                        <button class="action-btn btn-confirm" onclick="downloadDocument('${doc.id}')">Télécharger</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Mettre à jour le filtre clients
+            updateClientFilter();
+        }
+
+        function updateClientFilter() {
+            const clientFilter = document.getElementById('docClientFilter');
+            const uniqueClients = [...new Set(documents.map(doc => doc.clientName))];
+            
+            clientFilter.innerHTML = '<option value="">Tous les clients</option>' +
+                uniqueClients.map(client => `<option value="${client}">${client}</option>`).join('');
+        }
+
+        function filterDocuments() {
+            const searchTerm = document.getElementById('docSearchInput').value.toLowerCase();
+            const clientFilter = document.getElementById('docClientFilter').value;
+            const typeFilter = document.getElementById('docTypeFilter').value;
+            
+            const cards = document.querySelectorAll('.document-card');
+            
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                const clientName = card.querySelector('.document-meta').textContent;
+                
+                const matchesSearch = text.includes(searchTerm);
+                const matchesClient = !clientFilter || clientName.includes(clientFilter);
+                const matchesType = !typeFilter || card.dataset.type === typeFilter;
+                
+                if (matchesSearch && matchesClient && matchesType) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function viewDocument(docId) {
+            const doc = documents.find(d => d.id === docId);
+            if (!doc) return;
+            
+            showNotification(`Ouverture du document: ${doc.name}`);
+            // Ici vous pouvez implémenter la visualisation du document
+        }
+
+        function downloadDocument(docId) {
+            const doc = documents.find(d => d.id === docId);
+            if (!doc) return;
+            
+            showNotification(`Téléchargement de: ${doc.name}`);
+            // Ici vous pouvez implémenter le téléchargement
+        }
+
+        // === GESTION DE L'INTÉGRATION ===
+        function showIntegrationConfig() {
+            const type = document.getElementById('integrationType').value;
+            
+            // Masquer toutes les configs
+            document.querySelectorAll('[id$="Config"]').forEach(config => {
+                config.classList.add('hidden');
+            });
+            
+            // Afficher la config sélectionnée
+            if (type) {
+                const configDiv = document.getElementById(type.replace('_', '') + 'Config');
+                if (configDiv) {
+                    configDiv.classList.remove('hidden');
+                }
+                
+                updateIntegrationInstructions(type);
+            }
+        }
+
+        function updateIntegrationInstructions(type) {
+            const instructions = document.getElementById('integrationInstructions');
+            
+            const instructionTexts = {
+                'google_drive': `
+                    <h5>Configuration Google Drive</h5>
+                    <ol>
+                        <li>Créez un projet dans Google Cloud Console</li>
+                        <li>Activez l'API Google Drive</li>
+                        <li>Créez des identifiants OAuth 2.0</li>
+                        <li>Copiez le Client ID ici</li>
+                        <li>Créez un dossier dans Google Drive pour stocker les documents</li>
+                        <li>Copiez l'ID du dossier depuis l'URL</li>
+                    </ol>
+                `,
+                'dropbox': `
+                    <h5>Configuration Dropbox</h5>
+                    <ol>
+                        <li>Créez une application sur Dropbox App Console</li>
+                        <li>Générez un Access Token</li>
+                        <li>Configurez les permissions de lecture/écriture</li>
+                        <li>Spécifiez le dossier de destination</li>
+                    </ol>
+                `,
+                'webhook': `
+                    <h5>Configuration Webhook</h5>
+                    <ol>
+                        <li>Déployez un serveur capable de recevoir des webhooks</li>
+                        <li>Configurez l'URL de votre endpoint</li>
+                        <li>Définissez une clé secrète pour sécuriser les appels</li>
+                        <li>Implémentez la réception des fichiers et métadonnées</li>
+                    </ol>
+                `,
+                'email': `
+                    <h5>Configuration Email</h5>
+                    <ol>
+                        <li>Créez un email dédié pour recevoir les documents</li>
+                        <li>Activez l'accès IMAP</li>
+                        <li>Générez un mot de passe d'application</li>
+                        <li>Configurez les paramètres IMAP</li>
+                    </ol>
+                `
+            };
+            
+            instructions.innerHTML = instructionTexts[type] || 'Sélectionnez un type d\'intégration.';
+        }
+
+        function testGoogleDriveConnection() {
+            const clientId = document.getElementById('googleClientId').value;
+            const folderId = document.getElementById('googleFolderId').value;
+            
+            if (!clientId || !folderId) {
+                showConnectionStatus('Veuillez remplir tous les champs', 'error');
+                return;
+            }
+            
+            // Simulation du test
+            setTimeout(() => {
+                showConnectionStatus('Connexion Google Drive réussie !', 'success');
+                integrationConfig.type = 'google_drive';
+                integrationConfig.googleClientId = clientId;
+                integrationConfig.googleFolderId = folderId;
+                saveData();
+            }, 1500);
+        }
+
+        function testDropboxConnection() {
+            const token = document.getElementById('dropboxToken').value;
+            const folder = document.getElementById('dropboxFolder').value;
+            
+            if (!token) {
+                showConnectionStatus('Veuillez renseigner le token', 'error');
+                return;
+            }
+            
+            setTimeout(() => {
+                showConnectionStatus('Connexion Dropbox réussie !', 'success');
+                integrationConfig.type = 'dropbox';
+                integrationConfig.dropboxToken = token;
+                integrationConfig.dropboxFolder = folder;
+                saveData();
+            }, 1500);
+        }
+
+        function testWebhookConnection() {
+            const url = document.getElementById('webhookUrl').value;
+            const secret = document.getElementById('webhookSecret').value;
+            
+            if (!url) {
+                showConnectionStatus('Veuillez renseigner l\'URL', 'error');
+                return;
+            }
+            
+            setTimeout(() => {
+                showConnectionStatus('Webhook configuré avec succès !', 'success');
+                integrationConfig.type = 'webhook';
+                integrationConfig.webhookUrl = url;
+                integrationConfig.webhookSecret = secret;
+                saveData();
+            }, 1500);
+        }
+
+        function testEmailConnection() {
+            const email = document.getElementById('receptionEmail').value;
+            const imap = document.getElementById('imapServer').value;
+            const password = document.getElementById('emailPassword').value;
+            
+            if (!email || !imap || !password) {
+                showConnectionStatus('Veuillez remplir tous les champs', 'error');
+                return;
+            }
+            
+            setTimeout(() => {
+                showConnectionStatus('Configuration email réussie !', 'success');
+                integrationConfig.type = 'email';
+                integrationConfig.receptionEmail = email;
+                integrationConfig.imapServer = imap;
+                integrationConfig.emailPassword = password;
+                saveData();
+            }, 1500);
+        }
+
+        function showConnectionStatus(message, type) {
+            const statusDiv = document.getElementById('connectionStatus');
+            statusDiv.className = `connection-status ${type}`;
+            statusDiv.textContent = message;
+        }
+
+        // === SYNCHRONISATION ===
+        function syncWithExternalData() {
+            if (!integrationConfig.type) {
+                showNotification('Aucune intégration configurée', 'warning');
+                return;
+            }
+            
+            showNotification('Synchronisation en cours...', 'warning');
+            
+            // Simulation de synchronisation
+            setTimeout(() => {
+                // Ajouter des données de test
+                addTestData();
+                updateStats();
+                loadDemandes();
+                loadDocuments();
+                showNotification('Synchronisation terminée !');
+                
+                // Mettre à jour l'heure de dernière sync
+                const now = new Date().toISOString();
+                localStorage.setItem('lastDocSync', now);
+                document.getElementById('lastDocSync').textContent = formatDate(now);
+            }, 2000);
+        }
+
+        function syncDocuments() {
+            syncWithExternalData();
+        }
+
+        function startAutoSync() {
+            const autoSyncEnabled = document.getElementById('autoSyncDocs').checked;
+            
+            if (autoSyncInterval) {
+                clearInterval(autoSyncInterval);
+            }
+            
+            if (autoSyncEnabled && integrationConfig.type) {
+                autoSyncInterval = setInterval(() => {
+                    syncWithExternalData();
+                }, 5 * 60 * 1000); // 5 minutes
+            }
+        }
+
+        function simulateClientSubmission() {
+            showNotification('Simulation d\'une soumission client...', 'warning');
+            
+            setTimeout(() => {
+                addTestData();
+                updateStats();
+                loadDemandes();
+                loadDocuments();
+                showNotification('Nouvelle demande et documents simulés !');
+            }, 1500);
+        }
+
+        function addTestData() {
+            const now = new Date().toISOString();
+            const testId = 'TEST-' + Date.now();
+            
+            // Ajouter une demande de test
+            const testDemande = {
+                id: testId,
+                prenom: 'Jean',
+                nom: 'Dupont',
+                email: 'jean.dupont@example.com',
+                telephone: '06 12 34 56 78',
+                service: 'micro-entreprise',
+                prix: '149€',
+                statut: 'nouveau',
+                details: 'Demande de création de micro-entreprise pour activité de conseil',
+                dateComplete: now,
+                urgence: 'Normal'
+            };
+            
+            // Ajouter des documents de test
+            const testDocuments = [
+                {
+                    id: testId + '-doc1',
+                    name: 'piece_identite.pdf',
+                    clientName: 'Jean Dupont',
+                    demandeId: testId,
+                    type: 'identite',
+                    size: 1024 * 500, // 500KB
+                    uploadDate: now,
+                    url: '#'
+                },
+                {
+                    id: testId + '-doc2',
+                    name: 'justificatif_domicile.pdf',
+                    clientName: 'Jean Dupont',
+                    demandeId: testId,
+                    type: 'justificatif',
+                    size: 1024 * 300, // 300KB
+                    uploadDate: now,
+                    url: '#'
+                }
+            ];
+            
+            demandes.unshift(testDemande);
+            documents.unshift(...testDocuments);
+            
+            saveData();
+        }
+
+        // === GESTION DES DEMANDES (reste du code identique) ===
         function loadDemandes() {
             const tbody = document.getElementById('demandesTableBody');
             tbody.innerHTML = '';
@@ -1039,9 +1563,9 @@
             
             demandes.forEach(demande => {
                 const row = document.createElement('tr');
-                const documentsCount = demande.documents ? demande.documents.length : 0;
-                const documentsDisplay = documentsCount > 0 ? 
-                    `<span style="color: #28a745; font-weight: 600;">${documentsCount} doc(s)</span>` : 
+                const relatedDocs = documents.filter(doc => doc.demandeId === demande.id);
+                const documentsDisplay = relatedDocs.length > 0 ? 
+                    `<span style="color: #28a745; font-weight: 600;">${relatedDocs.length} doc(s)</span>` : 
                     `<span style="color: #666;">Aucun</span>`;
                 
                 row.innerHTML = `
@@ -1089,7 +1613,6 @@
             const newStatus = document.getElementById('newStatus').value;
             const comment = document.getElementById('statusComment').value;
             
-            // Trouver la demande
             const demandeIndex = demandes.findIndex(d => d.id === currentDemandeId);
             if (demandeIndex === -1) {
                 showNotification('Demande non trouvée', 'error');
@@ -1099,11 +1622,9 @@
             const demande = demandes[demandeIndex];
             const oldStatus = demande.statut;
             
-            // Mettre à jour le statut
             demandes[demandeIndex].statut = newStatus;
             demandes[demandeIndex].lastUpdate = new Date().toISOString();
             
-            // Ajouter l'historique des changements
             if (!demandes[demandeIndex].statusHistory) {
                 demandes[demandeIndex].statusHistory = [];
             }
@@ -1116,20 +1637,12 @@
                 updatedBy: 'admin'
             });
             
-            // Sauvegarder
             saveData();
-            
-            // Mettre à jour l'affichage
             updateStats();
             loadDemandes();
-            
-            // Fermer le modal
             closeStatusModal();
             
-            // Notification
             showNotification(`Statut mis à jour: ${getStatusName(newStatus)}`);
-            
-            console.log(`Demande ${currentDemandeId} mise à jour: ${oldStatus} → ${newStatus}`);
         }
 
         // === FONCTIONS D'AFFICHAGE ===
@@ -1137,13 +1650,10 @@
             const demande = demandes.find(d => d.id === demandeId);
             if (!demande) return;
             
+            const relatedDocs = documents.filter(doc => doc.demandeId === demandeId);
             const modal = document.getElementById('detailModal');
             const content = document.getElementById('modalContent');
             
-            // Créer le tracker de progression
-            const progressTracker = createProgressTracker(demande.statut);
-            
-            // Créer les détails
             const details = `
                 <div class="demande-details">
                     <div class="detail-grid">
@@ -1181,44 +1691,43 @@
                         </div>
                     </div>
                     
-                        ${demande.details && demande.details !== 'Aucun message' ? `
-                            <div style="margin-top: 1rem;">
-                                <div class="detail-label">Message du client</div>
-                                <div class="detail-value">${demande.details}</div>
-                            </div>
-                        ` : ''}
-                        
-                        ${demande.documents && demande.documents.length > 0 ? `
-                            <div style="margin-top: 1rem;">
-                                <div class="detail-label">Documents uploadés (${demande.documents.length})</div>
-                                <div style="display: grid; gap: 0.5rem; margin-top: 0.5rem;">
-                                    ${demande.documents.map(doc => `
-                                        <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0;">
-                                            <span style="font-size: 1.2rem;">📄</span>
-                                            <div style="flex: 1;">
-                                                <div style="font-weight: 500; font-size: 0.9rem; color: #333;">${doc.name}</div>
-                                                <div style="font-size: 0.8rem; color: #666;">
-                                                    ${formatFileSize(doc.size)} • Uploadé le ${formatDate(doc.uploadDate)}
-                                                </div>
+                    ${demande.details && demande.details !== 'Aucun message' ? `
+                        <div style="margin-top: 1rem;">
+                            <div class="detail-label">Message du client</div>
+                            <div class="detail-value">${demande.details}</div>
+                        </div>
+                    ` : ''}
+                    
+                    ${relatedDocs.length > 0 ? `
+                        <div style="margin-top: 1rem;">
+                            <div class="detail-label">Documents reçus (${relatedDocs.length})</div>
+                            <div style="display: grid; gap: 0.5rem; margin-top: 0.5rem;">
+                                ${relatedDocs.map(doc => `
+                                    <div class="document-card">
+                                        <div class="document-icon">📄</div>
+                                        <div class="document-info">
+                                            <div class="document-name">${doc.name}</div>
+                                            <div class="document-meta">
+                                                ${formatFileSize(doc.size)} • Reçu le ${formatDate(doc.uploadDate)}
                                             </div>
-                                            <a href="${doc.url}" target="_blank" style="background: #667eea; color: white; padding: 0.25rem 0.75rem; border-radius: 5px; text-decoration: none; font-size: 0.8rem; font-weight: 500;">
-                                                Télécharger
-                                            </a>
                                         </div>
-                                    `).join('')}
-                                </div>
+                                        <div class="document-actions">
+                                            <button class="action-btn btn-view" onclick="viewDocument('${doc.id}')">Voir</button>
+                                            <button class="action-btn btn-confirm" onclick="downloadDocument('${doc.id}')">Télécharger</button>
+                                        </div>
+                                    </div>
+                                `).join('')}
                             </div>
-                        ` : `
-                            <div style="margin-top: 1rem;">
-                                <div class="detail-label">Documents uploadés</div>
-                                <div style="padding: 1rem; background: #f8f9fa; border-radius: 8px; text-align: center; color: #666; font-style: italic;">
-                                    Aucun document uploadé pour le moment
-                                </div>
+                        </div>
+                    ` : `
+                        <div style="margin-top: 1rem;">
+                            <div class="detail-label">Documents reçus</div>
+                            <div style="padding: 1rem; background: #f8f9fa; border-radius: 8px; text-align: center; color: #666; font-style: italic;">
+                                Aucun document reçu pour cette demande
                             </div>
-                        `}
+                        </div>
+                    `}
                 </div>
-                
-                ${progressTracker}
                 
                 ${demande.statusHistory && demande.statusHistory.length > 0 ? `
                     <div style="margin-top: 1.5rem;">
@@ -1245,46 +1754,6 @@
             
             content.innerHTML = details;
             modal.style.display = 'block';
-        }
-
-        function createProgressTracker(currentStatus) {
-            const steps = [
-                { id: 'nouveau', label: 'Reçue', number: 1 },
-                { id: 'en-cours', label: 'En cours', number: 2 },
-                { id: 'termine', label: 'Terminée', number: 3 }
-            ];
-            
-            const statusOrder = ['nouveau', 'en-cours', 'termine'];
-            const currentIndex = statusOrder.indexOf(currentStatus);
-            
-            let stepsHtml = '';
-            steps.forEach((step, index) => {
-                let stepClass = '';
-                if (index < currentIndex || (currentStatus === 'termine' && index <= currentIndex)) {
-                    stepClass = 'completed';
-                } else if (index === currentIndex) {
-                    stepClass = 'current';
-                }
-                
-                stepsHtml += `
-                    <div class="progress-step ${stepClass}">
-                        <div class="step-circle ${stepClass}">${step.number}</div>
-                        <div class="step-label ${stepClass}">${step.label}</div>
-                    </div>
-                `;
-            });
-            
-            return `
-                <div class="progress-tracker">
-                    <h4 style="margin-bottom: 1rem;">Progression de la demande</h4>
-                    <div class="progress-steps">
-                        ${stepsHtml}
-                    </div>
-                    <div style="text-align: center; margin-top: 1rem; color: #666;">
-                        Statut actuel: <strong>${getStatusName(currentStatus)}</strong>
-                    </div>
-                </div>
-            `;
         }
 
         function closeModal() {
@@ -1377,6 +1846,8 @@
             const data = {
                 demandes: demandes,
                 clients: clients,
+                documents: documents,
+                integrationConfig: integrationConfig,
                 exportDate: new Date().toISOString()
             };
             
@@ -1447,9 +1918,10 @@
                     const titles = {
                         'overview': '📊 Vue d\'ensemble',
                         'demandes': '📋 Gestion des demandes',
+                        'documents': '📄 Gestion des documents',
                         'clients': '👥 Gestion des clients',
                         'finances': '💰 Gestion financière',
-                        'rapports': '📈 Rapports et statistiques',
+                        'integration': '🔗 Configuration de l\'intégration',
                         'parametres': '⚙️ Paramètres'
                     };
                     
@@ -1476,11 +1948,19 @@
                     handleLogin();
                 }
             });
+
+            // Événement pour l'auto-sync
+            document.getElementById('autoSyncDocs').addEventListener('change', startAutoSync);
+            
+            // Charger la dernière sync
+            const lastSync = localStorage.getItem('lastDocSync');
+            if (lastSync) {
+                document.getElementById('lastDocSync').textContent = formatDate(lastSync);
+            }
         });
 
         // Log pour le débogage
-        console.log('Panel Admin MonEntreprise.fr initialisé');
+        console.log('Panel Admin MonEntreprise.fr avec intégration initialisé');
     </script>
 </body>
 </html>
-
