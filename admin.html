@@ -674,6 +674,7 @@
                             <th>Service</th>
                             <th>Date</th>
                             <th>Statut</th>
+                            <th>Documents</th>
                             <th>Prix</th>
                             <th>Actions</th>
                         </tr>
@@ -1038,12 +1039,18 @@
             
             demandes.forEach(demande => {
                 const row = document.createElement('tr');
+                const documentsCount = demande.documents ? demande.documents.length : 0;
+                const documentsDisplay = documentsCount > 0 ? 
+                    `<span style="color: #28a745; font-weight: 600;">${documentsCount} doc(s)</span>` : 
+                    `<span style="color: #666;">Aucun</span>`;
+                
                 row.innerHTML = `
                     <td>${demande.id}</td>
                     <td>${demande.prenom} ${demande.nom}</td>
                     <td>${getServiceName(demande.service)}</td>
                     <td>${formatDate(demande.dateComplete)}</td>
                     <td><span class="status ${demande.statut}">${getStatusName(demande.statut)}</span></td>
+                    <td>${documentsDisplay}</td>
                     <td>${demande.prix}</td>
                     <td>
                         <button class="action-btn btn-view" onclick="viewDemande('${demande.id}')">Voir</button>
@@ -1174,12 +1181,41 @@
                         </div>
                     </div>
                     
-                    ${demande.details && demande.details !== 'Aucun message' ? `
-                        <div style="margin-top: 1rem;">
-                            <div class="detail-label">Message du client</div>
-                            <div class="detail-value">${demande.details}</div>
-                        </div>
-                    ` : ''}
+                        ${demande.details && demande.details !== 'Aucun message' ? `
+                            <div style="margin-top: 1rem;">
+                                <div class="detail-label">Message du client</div>
+                                <div class="detail-value">${demande.details}</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${demande.documents && demande.documents.length > 0 ? `
+                            <div style="margin-top: 1rem;">
+                                <div class="detail-label">Documents uploadés (${demande.documents.length})</div>
+                                <div style="display: grid; gap: 0.5rem; margin-top: 0.5rem;">
+                                    ${demande.documents.map(doc => `
+                                        <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0;">
+                                            <span style="font-size: 1.2rem;">📄</span>
+                                            <div style="flex: 1;">
+                                                <div style="font-weight: 500; font-size: 0.9rem; color: #333;">${doc.name}</div>
+                                                <div style="font-size: 0.8rem; color: #666;">
+                                                    ${formatFileSize(doc.size)} • Uploadé le ${formatDate(doc.uploadDate)}
+                                                </div>
+                                            </div>
+                                            <a href="${doc.url}" target="_blank" style="background: #667eea; color: white; padding: 0.25rem 0.75rem; border-radius: 5px; text-decoration: none; font-size: 0.8rem; font-weight: 500;">
+                                                Télécharger
+                                            </a>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : `
+                            <div style="margin-top: 1rem;">
+                                <div class="detail-label">Documents uploadés</div>
+                                <div style="padding: 1rem; background: #f8f9fa; border-radius: 8px; text-align: center; color: #666; font-style: italic;">
+                                    Aucun document uploadé pour le moment
+                                </div>
+                            </div>
+                        `}
                 </div>
                 
                 ${progressTracker}
@@ -1292,6 +1328,14 @@
                 hour: '2-digit',
                 minute: '2-digit'
             });
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
         function filterDemandes() {
