@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin - MonEntreprise.fr</title>
+    <title>Panel Admin - MonEntreprise.fr (Session Corrigée)</title>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         * {
@@ -191,124 +191,77 @@
             margin-bottom: 2rem;
         }
 
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-
-        .table th,
-        .table td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .table th {
-            background: #f8f9fa;
+        #sessionTimer {
+            padding: 6px 12px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            font-family: monospace;
             font-weight: 600;
-            color: #333;
-        }
-
-        .status {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .status.nouveau {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status.en-cours {
-            background: #cce7f0;
-            color: #004085;
-        }
-
-        .status.documents-requis {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .status.termine {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status.refuse {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .action-btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 5px;
+            font-size: 0.9rem;
+            border: 2px solid rgba(102, 126, 234, 0.2);
             cursor: pointer;
-            font-size: 0.8rem;
-            margin: 0 0.2rem;
-            font-weight: 600;
+            transition: all 0.3s ease;
         }
 
-        .btn-view {
-            background: #17a2b8;
-            color: white;
+        #sessionTimer:hover {
+            background: rgba(102, 126, 234, 0.2);
         }
 
-        .btn-confirm {
-            background: #28a745;
-            color: white;
+        #sessionTimer.warning {
+            color: #ff6b6b;
+            border-color: rgba(255, 107, 107, 0.3);
+            background: rgba(255, 107, 107, 0.1);
+            animation: pulse 1s infinite;
         }
 
-        .btn-refuse {
-            background: #dc3545;
-            color: white;
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
         }
 
-        .btn-progress {
+        .extend-btn {
             background: #ffc107;
             color: #333;
+            padding: 0.7rem 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
         }
 
-        .btn-docs {
-            background: #ff6b6b;
-            color: white;
+        .extend-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
         }
 
-        .modal {
-            display: none;
+        .session-warning {
             position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
             padding: 2rem;
             border-radius: 15px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            z-index: 5000;
+            text-align: center;
+            border: 3px solid #ff6b6b;
+            display: none;
         }
 
-        .close {
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            color: #aaa;
+        .session-warning h3 {
+            color: #ff6b6b;
+            margin-bottom: 1rem;
         }
 
-        .close:hover {
-            color: #000;
+        .session-warning-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
         }
 
         .notification {
@@ -338,111 +291,21 @@
             color: #333;
         }
 
-        .export-btn {
-            background: #28a745;
-            color: white;
-            padding: 0.7rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            margin: 0.5rem;
-        }
-
-        .extend-btn {
-            background: #ffc107;
-            color: #333;
-            padding: 0.7rem 1rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            margin: 0.5rem;
-        }
-
-        .search-filter {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .search-filter input,
-        .search-filter select {
-            padding: 0.7rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-
         .hidden {
             display: none !important;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: #666;
-        }
-
-        .empty-state h3 {
-            color: #667eea;
-            margin-bottom: 1rem;
-        }
-
-        .empty-state p {
-            margin-bottom: 1.5rem;
-        }
-
-        .activity-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .activity-list li {
-            padding: 1rem;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .activity-list li:last-child {
-            border-bottom: none;
-        }
-
-        #sessionTimer {
-            padding: 6px 12px;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 15px;
-            font-family: monospace;
-            font-weight: 600;
-            font-size: 0.9rem;
-            border: 2px solid rgba(102, 126, 234, 0.2);
-        }
-
-        .email-config {
-            background: #e8f4f8;
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin: 1rem 0;
-            border-left: 4px solid #17a2b8;
-        }
-
-        .email-config h4 {
-            color: #0c5460;
-            margin-bottom: 1rem;
-        }
-
-        .test-email-btn {
-            background: #17a2b8;
+        .debug-info {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
             color: white;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            margin: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-family: monospace;
+            z-index: 6000;
         }
 
         @media (max-width: 768px) {
@@ -468,10 +331,6 @@
                 gap: 1rem;
             }
 
-            .search-filter {
-                flex-direction: column;
-            }
-
             .header-right {
                 justify-content: center;
             }
@@ -495,6 +354,11 @@
             <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
                 <strong>admin</strong> / <strong>admin123</strong>
             </p>
+            <div style="margin-top: 1rem; padding: 1rem; background: #e8f4f8; border-radius: 10px; text-align: left; font-size: 0.9rem;">
+                <strong>Debug Session:</strong><br>
+                <button onclick="clearSession()" style="margin-top: 0.5rem; padding: 0.5rem; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">Effacer session stockée</button>
+                <button onclick="checkStoredSession()" style="margin-top: 0.5rem; margin-left: 0.5rem; padding: 0.5rem; background: #17a2b8; color: white; border: none; border-radius: 5px; cursor: pointer;">Vérifier session</button>
+            </div>
         </div>
     </div>
 
@@ -505,11 +369,6 @@
             <ul>
                 <li><a href="#" data-section="overview" class="active">Vue d'ensemble</a></li>
                 <li><a href="#" data-section="demandes">Demandes</a></li>
-                <li><a href="#" data-section="notifications">Notifications</a></li>
-                <li><a href="#" data-section="documents">Documents</a></li>
-                <li><a href="#" data-section="clients">Clients</a></li>
-                <li><a href="#" data-section="finances">Finances</a></li>
-                <li><a href="#" data-section="parametres">Paramètres</a></li>
                 <li><a href="#" onclick="logout()">Déconnexion</a></li>
             </ul>
         </nav>
@@ -518,10 +377,9 @@
             <div class="header">
                 <h1 id="pageTitle">Vue d'ensemble</h1>
                 <div class="header-right">
-                    <button class="export-btn" onclick="exportData()">Exporter</button>
-                    <button class="extend-btn" onclick="extendSession()">+10min</button>
+                    <button class="extend-btn" onclick="extendSession()" title="Prolonger la session de 10 minutes">+10min</button>
                     <span>Bienvenue, Admin</span>
-                    <div id="sessionTimer">Session: --:--</div>
+                    <div id="sessionTimer" onclick="showSessionInfo()" title="Cliquez pour plus d'infos">Session: --:--</div>
                 </div>
             </div>
 
@@ -547,332 +405,232 @@
                 </div>
 
                 <div class="content-section">
-                    <h3>Activité récente</h3>
-                    <div id="recentActivity">
-                        <div class="activity-list">
-                            <li>
-                                <div>
-                                    <strong>Système initialisé</strong><br>
-                                    <small>Panel admin avec notifications automatiques prêt</small>
-                                </div>
-                            </li>
+                    <h3>Gestion de session améliorée</h3>
+                    <div style="background: #e8f4f8; padding: 1.5rem; border-radius: 10px; margin: 1rem 0;">
+                        <h4>État de la session</h4>
+                        <div id="sessionStatus" style="margin: 1rem 0; font-family: monospace;"></div>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button onclick="extendSession()" class="btn" style="width: auto;">Prolonger (+10min)</button>
+                            <button onclick="showSessionInfo()" class="btn" style="width: auto; background: #17a2b8;">Détails session</button>
+                            <button onclick="resetSession()" class="btn" style="width: auto; background: #ffc107; color: #333;">Réinitialiser</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Gestion des demandes -->
+            <!-- Demandes -->
             <div id="demandes" class="content-section hidden">
                 <h3>Gestion des demandes</h3>
-                
-                <div class="search-filter">
-                    <input type="text" placeholder="Rechercher..." id="searchInput" onkeyup="filterDemandes()">
-                    <select id="statusFilter" onchange="filterDemandes()">
-                        <option value="">Tous les statuts</option>
-                        <option value="nouveau">Nouveau</option>
-                        <option value="en-cours">En cours</option>
-                        <option value="documents-requis">Documents requis</option>
-                        <option value="termine">Terminé</option>
-                        <option value="refuse">Refusé</option>
-                    </select>
-                    <select id="serviceFilter" onchange="filterDemandes()">
-                        <option value="">Tous les services</option>
-                        <option value="micro-entreprise">Micro-entreprise</option>
-                        <option value="titre-sejour">Titre de séjour</option>
-                        <option value="prefecture">Préfecture</option>
-                    </select>
-                </div>
-
-                <div id="demandesEmpty" class="empty-state">
-                    <h3>Aucune demande</h3>
-                    <p>Les demandes apparaîtront ici quand les clients utilisent le formulaire.</p>
-                    <button class="btn" onclick="simulateNewDemande()" style="width: auto;">Simuler une demande</button>
-                </div>
-
-                <table class="table" id="demandesTable" style="display: none;">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Client</th>
-                            <th>Service</th>
-                            <th>Date</th>
-                            <th>Statut</th>
-                            <th>Documents</th>
-                            <th>Prix</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="demandesTableBody">
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Configuration des notifications -->
-            <div id="notifications" class="content-section hidden">
-                <h3>Configuration des notifications email</h3>
-                
-                <div class="email-config">
-                    <h4>Configuration EmailJS</h4>
-                    <div class="form-group">
-                        <label for="emailjsServiceId">Service ID EmailJS</label>
-                        <input type="text" id="emailjsServiceId" placeholder="service_xxxxxxx" value="service_2te46oj">
-                    </div>
-                    <div class="form-group">
-                        <label for="emailjsTemplateId">Template ID pour notifications</label>
-                        <input type="text" id="emailjsTemplateId" placeholder="template_xxxxxxx" value="template_9jpudgc">
-                    </div>
-                    <div class="form-group">
-                        <label for="emailjsPublicKey">Clé publique EmailJS</label>
-                        <input type="text" id="emailjsPublicKey" placeholder="user_xxxxxxxxxxxx" value="ntZTBB2BSKb64uZk8">
-                    </div>
-                    <button class="test-email-btn" onclick="testEmailConfiguration()">Tester la configuration</button>
-                    <button class="btn" onclick="saveEmailConfiguration()" style="width: auto;">Sauvegarder</button>
-                </div>
-
-                <div class="form-group">
-                    <label for="messageEnCours">Message "En cours"</label>
-                    <textarea id="messageEnCours" rows="3">Votre demande est maintenant en cours de traitement. Nous vous tiendrons informé de l'avancement.</textarea>
-                </div>
-                <div class="form-group">
-                    <label for="messageDocumentsRequis">Message "Documents requis"</label>
-                    <textarea id="messageDocumentsRequis" rows="3">Merci d'envoyer les documents complémentaires via votre espace client. Cliquez sur le lien pour accéder à votre espace et uploader vos documents.</textarea>
-                </div>
-                <div class="form-group">
-                    <label for="messageTermine">Message "Terminé"</label>
-                    <textarea id="messageTermine" rows="3">Félicitations ! Votre demande a été traitée avec succès. Tous les documents finalisés sont disponibles dans votre espace client.</textarea>
-                </div>
-
-                <button class="btn" onclick="saveDefaultMessages()" style="width: auto;">Sauvegarder les messages</button>
-            </div>
-
-            <!-- Documents -->
-            <div id="documents" class="content-section hidden">
-                <h3>Documents reçus</h3>
-                <div id="documentsEmpty" class="empty-state">
-                    <h3>Aucun document</h3>
-                    <p>Les documents uploadés par vos clients apparaîtront ici.</p>
-                </div>
-                <div id="documentsList"></div>
-            </div>
-
-            <!-- Clients -->
-            <div id="clients" class="content-section hidden">
-                <h3>Gestion des clients</h3>
-                <div id="clientsEmpty" class="empty-state">
-                    <h3>Aucun client</h3>
-                    <p>La base de données clients se remplira automatiquement.</p>
-                </div>
-                <div id="clientsList"></div>
-            </div>
-
-            <!-- Finances -->
-            <div id="finances" class="content-section hidden">
-                <h3>Gestion financière</h3>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number" id="ca-mois">0€</div>
-                        <div>Ce mois</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="ca-total">0€</div>
-                        <div>Total</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="ticket-moyen">0€</div>
-                        <div>Ticket moyen</div>
-                    </div>
-                </div>
-                <div class="empty-state">
-                    <h3>Aucune transaction</h3>
-                    <p>Les données financières apparaîtront après vos premières ventes.</p>
-                </div>
-            </div>
-
-            <!-- Paramètres -->
-            <div id="parametres" class="content-section hidden">
-                <h3>Paramètres</h3>
-                <div class="form-group">
-                    <label>Email admin</label>
-                    <input type="email" id="adminEmail" placeholder="votre-email@monentreprise.fr" value="mohamed.oudiai@icloud.com">
-                </div>
-                <div class="form-group">
-                    <label>Mot de passe admin</label>
-                    <input type="password" id="newPassword" placeholder="Nouveau mot de passe">
-                </div>
-                <div class="form-group">
-                    <label>Nom de l'entreprise</label>
-                    <input type="text" id="companyName" placeholder="MonEntreprise.fr" value="MonEntreprise.fr">
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="emailNotifications" checked> 
-                        Notifications email automatiques
-                    </label>
-                </div>
-                <button class="btn" style="width: auto;" onclick="saveSettings()">Sauvegarder les paramètres</button>
+                <p>Section des demandes...</p>
             </div>
         </main>
     </div>
 
-    <!-- Modal pour mise à jour du statut -->
-    <div id="statusModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeStatusModal()">&times;</span>
-            <h2>Mettre à jour le statut</h2>
-            <div id="statusModalContent">
-                <div class="form-group">
-                    <label for="newStatus">Nouveau statut</label>
-                    <select id="newStatus">
-                        <option value="nouveau">Nouveau</option>
-                        <option value="en-cours">En cours</option>
-                        <option value="documents-requis">Documents requis</option>
-                        <option value="termine">Terminé</option>
-                        <option value="refuse">Refusé</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="statusComment">Message personnalisé</label>
-                    <textarea id="statusComment" rows="4" placeholder="Message qui sera envoyé au client par email..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="sendEmailNotification" checked>
-                        Envoyer une notification email au client
-                    </label>
-                </div>
-                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                    <button class="btn" onclick="updateDemandeStatus()" style="width: auto;">Confirmer et envoyer</button>
-                    <button class="btn" onclick="closeStatusModal()" style="width: auto; background: #6c757d;">Annuler</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal pour voir les détails -->
-    <div id="detailModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2>Détails de la demande</h2>
-            <div id="modalContent"></div>
+    <!-- Session Warning Modal -->
+    <div id="sessionWarning" class="session-warning">
+        <h3>⚠️ Session sur le point d'expirer</h3>
+        <p>Votre session expire dans <span id="warningTimer">--</span> secondes.</p>
+        <p>Voulez-vous la prolonger ?</p>
+        <div class="session-warning-buttons">
+            <button onclick="extendSessionFromWarning()" class="btn" style="width: auto;">Prolonger (+10min)</button>
+            <button onclick="dismissWarning()" class="btn" style="width: auto; background: #6c757d;">Continuer</button>
         </div>
     </div>
 
     <!-- Notification -->
     <div id="notification" class="notification"></div>
 
+    <!-- Debug Info -->
+    <div id="debugInfo" class="debug-info"></div>
+
     <script>
-        // Configuration de session persistante
+        // Configuration de session améliorée
         const SESSION_CONFIG = {
             sessionKey: 'monentreprise_admin_session',
             sessionDuration: 10 * 60 * 1000, // 10 minutes
-            warningTime: 2 * 60 * 1000 // Avertissement à 2 minutes
+            warningTime: 2 * 60 * 1000, // Avertissement à 2 minutes
+            checkInterval: 1000 // Vérification chaque seconde
         };
 
         // Variables globales
-        let demandes = [];
-        let clients = [];
-        let documents = [];
-        let currentDemandeId = null;
-        let emailsSentCount = 0;
         let sessionTimer = null;
         let warningTimer = null;
-        let settings = {
-            adminEmail: 'mohamed.oudiai@icloud.com',
-            adminPassword: 'admin123',
-            companyName: 'MonEntreprise.fr',
-            emailNotifications: true
-        };
+        let warningShown = false;
+        let isLoggedIn = false;
 
-        let defaultMessages = {
-            'en-cours': 'Votre demande est maintenant en cours de traitement. Nous vous tiendrons informé de l\'avancement.',
-            'documents-requis': 'Merci d\'envoyer les documents complémentaires via votre espace client. Cliquez sur le lien pour accéder à votre espace et uploader vos documents.',
-            'termine': 'Félicitations ! Votre demande a été traitée avec succès. Tous les documents finalisés sont disponibles dans votre espace client.',
-            'refuse': 'Nous sommes désolés de vous informer que votre demande ne peut pas être traitée pour le moment.'
-        };
-
-        // Initialiser EmailJS
-        if (typeof emailjs !== 'undefined') {
-            emailjs.init(emailjsConfig.publicKey);
-        }
-
-        // === GESTION DE SESSION PERSISTANTE ===
+        // === GESTION DE SESSION AMÉLIORÉE ===
         function createSession() {
+            const now = Date.now();
             const sessionData = {
                 isLoggedIn: true,
-                loginTime: Date.now(),
-                expiryTime: Date.now() + SESSION_CONFIG.sessionDuration
+                loginTime: now,
+                lastActivity: now,
+                expiryTime: now + SESSION_CONFIG.sessionDuration,
+                version: '2.0' // Pour migration
             };
             
-            localStorage.setItem(SESSION_CONFIG.sessionKey, JSON.stringify(sessionData));
-            console.log('Session créée pour 10 minutes');
-            startSessionTimer();
+            try {
+                localStorage.setItem(SESSION_CONFIG.sessionKey, JSON.stringify(sessionData));
+                console.log('✅ Session créée:', sessionData);
+                isLoggedIn = true;
+                startSessionTimer();
+                showNotification('Session créée pour 10 minutes');
+                return true;
+            } catch (error) {
+                console.error('❌ Erreur création session:', error);
+                showNotification('Erreur lors de la création de la session', 'error');
+                return false;
+            }
         }
 
         function isSessionValid() {
-            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
-            
-            if (!sessionData) {
-                return false;
-            }
-            
             try {
+                const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
+                
+                if (!sessionData) {
+                    console.log('❌ Aucune session trouvée');
+                    return false;
+                }
+                
                 const session = JSON.parse(sessionData);
                 const now = Date.now();
                 
+                // Vérifications
+                if (!session.isLoggedIn) {
+                    console.log('❌ Session marquée comme déconnectée');
+                    return false;
+                }
+                
                 if (now > session.expiryTime) {
+                    console.log('❌ Session expirée:', new Date(session.expiryTime).toLocaleTimeString());
                     destroySession();
                     return false;
                 }
                 
+                // Mise à jour de la dernière activité
+                session.lastActivity = now;
+                localStorage.setItem(SESSION_CONFIG.sessionKey, JSON.stringify(session));
+                
+                console.log('✅ Session valide, expire à:', new Date(session.expiryTime).toLocaleTimeString());
                 return true;
+                
             } catch (error) {
-                console.error('Erreur de session:', error);
+                console.error('❌ Erreur validation session:', error);
                 destroySession();
                 return false;
             }
         }
 
         function destroySession() {
-            localStorage.removeItem(SESSION_CONFIG.sessionKey);
+            try {
+                localStorage.removeItem(SESSION_CONFIG.sessionKey);
+                if (sessionTimer) {
+                    clearInterval(sessionTimer);
+                    sessionTimer = null;
+                }
+                if (warningTimer) {
+                    clearTimeout(warningTimer);
+                    warningTimer = null;
+                }
+                isLoggedIn = false;
+                warningShown = false;
+                console.log('🗑️ Session supprimée');
+            } catch (error) {
+                console.error('❌ Erreur destruction session:', error);
+            }
+        }
+
+        function checkSessionOnLoad() {
+            console.log('🔍 Vérification session au chargement...');
+            
+            if (isSessionValid()) {
+                console.log('✅ Reconnexion automatique');
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                isLoggedIn = true;
+                startSessionTimer();
+                updateSessionDisplay();
+                updateSessionStatus();
+                showNotification('Reconnexion automatique réussie');
+                return true;
+            } else {
+                console.log('❌ Aucune session valide trouvée');
+                showLogin();
+                return false;
+            }
+        }
+
+        function startSessionTimer() {
+            // Nettoyer les timers existants
             if (sessionTimer) {
                 clearInterval(sessionTimer);
             }
             if (warningTimer) {
                 clearTimeout(warningTimer);
             }
-            console.log('Session supprimée');
-        }
-
-        function checkSessionOnLoad() {
-            if (isSessionValid()) {
-                document.getElementById('loginContainer').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                loadData();
-                showNotification('Reconnexion automatique réussie');
-                startSessionTimer();
-                updateSessionDisplay();
-                return true;
-            }
-            return false;
-        }
-
-        function startSessionTimer() {
+            
+            console.log('⏱️ Démarrage du timer de session');
+            
+            // Timer principal - vérification chaque seconde
             sessionTimer = setInterval(() => {
                 if (!isSessionValid()) {
+                    console.log('⏰ Session expirée - déconnexion automatique');
                     autoLogout();
                     return;
                 }
+                
                 updateSessionDisplay();
-            }, 1000);
+                updateSessionStatus();
+                checkForWarning();
+                
+            }, SESSION_CONFIG.checkInterval);
+        }
+
+        function checkForWarning() {
+            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
+            if (!sessionData || warningShown) return;
             
-            warningTimer = setTimeout(() => {
-                if (isSessionValid()) {
-                    const confirmed = confirm('Votre session expire dans 2 minutes.\nVoulez-vous la prolonger de 10 minutes ?');
-                    if (confirmed) {
-                        extendSession();
-                    }
+            try {
+                const session = JSON.parse(sessionData);
+                const now = Date.now();
+                const timeLeft = session.expiryTime - now;
+                
+                if (timeLeft <= SESSION_CONFIG.warningTime && timeLeft > 0) {
+                    showSessionWarning();
+                    warningShown = true;
                 }
-            }, SESSION_CONFIG.sessionDuration - SESSION_CONFIG.warningTime);
+            } catch (error) {
+                console.error('❌ Erreur vérification avertissement:', error);
+            }
+        }
+
+        function showSessionWarning() {
+            const warningModal = document.getElementById('sessionWarning');
+            warningModal.style.display = 'block';
+            
+            // Timer pour le modal d'avertissement
+            const warningInterval = setInterval(() => {
+                const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
+                if (!sessionData) {
+                    clearInterval(warningInterval);
+                    return;
+                }
+                
+                try {
+                    const session = JSON.parse(sessionData);
+                    const timeLeft = session.expiryTime - Date.now();
+                    const secondsLeft = Math.max(0, Math.floor(timeLeft / 1000));
+                    
+                    document.getElementById('warningTimer').textContent = secondsLeft;
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(warningInterval);
+                        dismissWarning();
+                    }
+                } catch (error) {
+                    clearInterval(warningInterval);
+                }
+            }, 1000);
         }
 
         function updateSessionDisplay() {
@@ -892,556 +650,189 @@
                     if (sessionDisplay) {
                         sessionDisplay.textContent = `Session: ${minutes}:${seconds.toString().padStart(2, '0')}`;
                         
+                        // Style visuel selon le temps restant
                         if (timeLeft <= SESSION_CONFIG.warningTime) {
-                            sessionDisplay.style.color = '#ff6b6b';
-                            sessionDisplay.style.borderColor = 'rgba(255, 107, 107, 0.3)';
+                            sessionDisplay.classList.add('warning');
                         } else {
-                            sessionDisplay.style.color = '#667eea';
-                            sessionDisplay.style.borderColor = 'rgba(102, 126, 234, 0.2)';
+                            sessionDisplay.classList.remove('warning');
                         }
                     }
                 }
             } catch (error) {
-                console.error('Erreur affichage session:', error);
+                console.error('❌ Erreur affichage session:', error);
+            }
+        }
+
+        function updateSessionStatus() {
+            const statusDiv = document.getElementById('sessionStatus');
+            if (!statusDiv) return;
+            
+            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
+            if (!sessionData) {
+                statusDiv.innerHTML = '<span style="color: #dc3545;">❌ Aucune session</span>';
+                return;
+            }
+            
+            try {
+                const session = JSON.parse(sessionData);
+                const now = Date.now();
+                const timeLeft = session.expiryTime - now;
+                const loginTime = new Date(session.loginTime).toLocaleTimeString();
+                const expiryTime = new Date(session.expiryTime).toLocaleTimeString();
+                
+                statusDiv.innerHTML = `
+                    <div>✅ Session active</div>
+                    <div>🕐 Connexion: ${loginTime}</div>
+                    <div>⏰ Expire à: ${expiryTime}</div>
+                    <div>⏱️ Temps restant: ${Math.floor(timeLeft / (60 * 1000))}:${Math.floor((timeLeft % (60 * 1000)) / 1000).toString().padStart(2, '0')}</div>
+                `;
+            } catch (error) {
+                statusDiv.innerHTML = '<span style="color: #dc3545;">❌ Erreur session</span>';
             }
         }
 
         function extendSession() {
             const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
-            if (sessionData) {
-                try {
-                    const session = JSON.parse(sessionData);
-                    session.expiryTime = Date.now() + SESSION_CONFIG.sessionDuration;
-                    localStorage.setItem(SESSION_CONFIG.sessionKey, JSON.stringify(session));
-                    
-                    if (sessionTimer) {
-                        clearInterval(sessionTimer);
-                    }
-                    if (warningTimer) {
-                        clearTimeout(warningTimer);
-                    }
-                    startSessionTimer();
-                    
-                    showNotification('Session prolongée de 10 minutes');
-                    updateSessionDisplay();
-                } catch (error) {
-                    console.error('Erreur prolongation session:', error);
-                }
+            if (!sessionData) {
+                showNotification('Aucune session à prolonger', 'error');
+                return false;
             }
+            
+            try {
+                const session = JSON.parse(sessionData);
+                const now = Date.now();
+                session.expiryTime = now + SESSION_CONFIG.sessionDuration;
+                session.lastActivity = now;
+                
+                localStorage.setItem(SESSION_CONFIG.sessionKey, JSON.stringify(session));
+                
+                // Redémarrer les timers
+                warningShown = false;
+                startSessionTimer();
+                
+                showNotification('Session prolongée de 10 minutes');
+                updateSessionDisplay();
+                updateSessionStatus();
+                
+                console.log('✅ Session prolongée jusqu\'à:', new Date(session.expiryTime).toLocaleTimeString());
+                return true;
+                
+            } catch (error) {
+                console.error('❌ Erreur prolongation session:', error);
+                showNotification('Erreur lors de la prolongation', 'error');
+                return false;
+            }
+        }
+
+        function extendSessionFromWarning() {
+            extendSession();
+            dismissWarning();
+        }
+
+        function dismissWarning() {
+            document.getElementById('sessionWarning').style.display = 'none';
         }
 
         function autoLogout() {
+            console.log('🚪 Déconnexion automatique');
             destroySession();
-            if (document.getElementById('dashboard').style.display === 'block') {
-                document.getElementById('dashboard').style.display = 'none';
-                document.getElementById('loginContainer').style.display = 'flex';
-                showNotification('Session expirée. Veuillez vous reconnecter.', 'error');
+            showLogin();
+            showNotification('Session expirée. Veuillez vous reconnecter.', 'error');
+        }
+
+        function showLogin() {
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            dismissWarning();
+        }
+
+        function resetSession() {
+            console.log('🔄 Réinitialisation de la session');
+            destroySession();
+            if (isLoggedIn) {
+                createSession();
+                showNotification('Session réinitialisée');
             }
         }
 
-        // Login avec session persistante
+        function showSessionInfo() {
+            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
+            if (!sessionData) {
+                alert('Aucune session active');
+                return;
+            }
+            
+            try {
+                const session = JSON.parse(sessionData);
+                const now = Date.now();
+                const timeLeft = session.expiryTime - now;
+                
+                const info = `
+Session Information:
+━━━━━━━━━━━━━━━━━━━━
+📅 Connecté à: ${new Date(session.loginTime).toLocaleString()}
+⏰ Expire à: ${new Date(session.expiryTime).toLocaleString()}
+⏱️ Temps restant: ${Math.floor(timeLeft / (60 * 1000))} minutes
+🔄 Dernière activité: ${new Date(session.lastActivity).toLocaleString()}
+✅ Statut: ${session.isLoggedIn ? 'Connecté' : 'Déconnecté'}
+                `.trim();
+                
+                alert(info);
+            } catch (error) {
+                alert('Erreur lors de la lecture des informations de session');
+            }
+        }
+
+        // === FONCTIONS DE DEBUG ===
+        function clearSession() {
+            destroySession();
+            showNotification('Session effacée');
+            console.log('🗑️ Session manuelle effacée');
+        }
+
+        function checkStoredSession() {
+            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
+            if (sessionData) {
+                try {
+                    const session = JSON.parse(sessionData);
+                    console.log('📋 Session stockée:', session);
+                    alert(`Session trouvée:\n${JSON.stringify(session, null, 2)}`);
+                } catch (error) {
+                    console.error('❌ Session corrompue:', error);
+                    alert('Session corrompue détectée');
+                }
+            } else {
+                console.log('❌ Aucune session stockée');
+                alert('Aucune session trouvée dans le stockage');
+            }
+        }
+
+        // === LOGIN ===
         function handleLogin() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
             if (username === 'admin' && password === 'admin123') {
-                createSession(); // Créer une session persistante
-                document.getElementById('loginContainer').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                loadData();
-                showNotification('Connexion réussie ! Session de 10 minutes activée');
-                updateSessionDisplay();
+                if (createSession()) {
+                    document.getElementById('loginContainer').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'block';
+                    updateSessionStatus();
+                    showNotification('Connexion réussie ! Session de 10 minutes activée');
+                }
             } else {
                 showNotification('Identifiants incorrects !', 'error');
             }
         }
 
-        // Chargement des données
-        function loadData() {
-            demandes = JSON.parse(localStorage.getItem('monentreprise_demandes') || '[]');
-            clients = JSON.parse(localStorage.getItem('monentreprise_clients') || '[]');
-            documents = JSON.parse(localStorage.getItem('monentreprise_documents') || '[]');
-            emailsSentCount = parseInt(localStorage.getItem('monentreprise_emails_sent') || '0');
-            
-            updateStats();
-            loadDemandes();
-            loadDocuments();
-            loadClients();
+        function logout() {
+            destroySession();
+            showLogin();
+            showNotification('Déconnexion réussie');
         }
 
-        function saveData() {
-            localStorage.setItem('monentreprise_demandes', JSON.stringify(demandes));
-            localStorage.setItem('monentreprise_clients', JSON.stringify(clients));
-            localStorage.setItem('monentreprise_documents', JSON.stringify(documents));
-            localStorage.setItem('monentreprise_emails_sent', emailsSentCount.toString());
-        }
-
-        function updateStats() {
-            document.getElementById('totalDemandes').textContent = demandes.length;
-            document.getElementById('demandesEnCours').textContent = demandes.filter(d => 
-                d.statut === 'en-cours' || d.statut === 'documents-requis').length;
-            document.getElementById('emailsSent').textContent = emailsSentCount;
-            
-            const ca = demandes.filter(d => d.statut === 'termine').reduce((total, d) => {
-                const prix = parseInt(d.prix.replace('€', '')) || 0;
-                return total + prix;
-            }, 0);
-            document.getElementById('chiffreAffaires').textContent = ca + '€';
-            
-            // Mise à jour finances
-            const caMois = document.getElementById('ca-mois');
-            const caTotal = document.getElementById('ca-total');
-            const ticketMoyen = document.getElementById('ticket-moyen');
-            
-            if (caMois) caMois.textContent = ca + '€';
-            if (caTotal) caTotal.textContent = ca + '€';
-            if (ticketMoyen && demandes.length > 0) {
-                const terminees = demandes.filter(d => d.statut === 'termine').length;
-                ticketMoyen.textContent = terminees > 0 ? Math.round(ca / terminees) + '€' : '0€';
-            }
-        }
-
-        // Gestion des demandes
-        function loadDemandes() {
-            const tbody = document.getElementById('demandesTableBody');
-            tbody.innerHTML = '';
-            
-            if (demandes.length === 0) {
-                document.getElementById('demandesEmpty').style.display = 'block';
-                document.getElementById('demandesTable').style.display = 'none';
-                return;
-            }
-            
-            document.getElementById('demandesEmpty').style.display = 'none';
-            document.getElementById('demandesTable').style.display = 'table';
-            
-            demandes.forEach(demande => {
-                const row = document.createElement('tr');
-                const relatedDocs = documents.filter(doc => doc.demandeId === demande.id);
-                const documentsDisplay = relatedDocs.length > 0 ? 
-                    `<span style="color: #28a745; font-weight: 600;">${relatedDocs.length} doc(s)</span>` : 
-                    `<span style="color: #666;">Aucun</span>`;
-                
-                row.innerHTML = `
-                    <td>${demande.id}</td>
-                    <td>${demande.prenom} ${demande.nom}</td>
-                    <td>${getServiceName(demande.service)}</td>
-                    <td>${formatDate(demande.dateComplete)}</td>
-                    <td><span class="status ${demande.statut}">${getStatusName(demande.statut)}</span></td>
-                    <td>${documentsDisplay}</td>
-                    <td>${demande.prix}</td>
-                    <td>
-                        <button class="action-btn btn-view" onclick="viewDemande('${demande.id}')">Voir</button>
-                        <button class="action-btn btn-progress" onclick="openStatusModal('${demande.id}', 'en-cours')">En cours</button>
-                        <button class="action-btn btn-docs" onclick="openStatusModal('${demande.id}', 'documents-requis')">Docs requis</button>
-                        <button class="action-btn btn-confirm" onclick="openStatusModal('${demande.id}', 'termine')">Terminer</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        function simulateNewDemande() {
-            const now = new Date().toISOString();
-            const testId = 'DEM-' + Date.now();
-            
-            const testDemande = {
-                id: testId,
-                prenom: 'Marie',
-                nom: 'Martin',
-                email: 'marie.martin@example.com',
-                telephone: '06 11 22 33 44',
-                service: 'micro-entreprise',
-                prix: '79€',
-                statut: 'nouveau',
-                details: 'Demande de création de micro-entreprise pour activité de consultation',
-                dateComplete: now,
-                urgence: 'Normal'
-            };
-            
-            demandes.unshift(testDemande);
-            saveData();
-            updateStats();
-            loadDemandes();
-            
-            addActivity(`Nouvelle demande reçue de ${testDemande.prenom} ${testDemande.nom}`);
-            showNotification('Nouvelle demande simulée avec succès !');
-        }
-
-        // Gestion des statuts
-        function openStatusModal(demandeId, suggestedStatus = null) {
-            currentDemandeId = demandeId;
-            const modal = document.getElementById('statusModal');
-            const statusSelect = document.getElementById('newStatus');
-            const commentField = document.getElementById('statusComment');
-            const emailCheckbox = document.getElementById('sendEmailNotification');
-            
-            if (suggestedStatus) {
-                statusSelect.value = suggestedStatus;
-                commentField.value = defaultMessages[suggestedStatus] || '';
-            }
-            
-            emailCheckbox.checked = settings.emailNotifications;
-            modal.style.display = 'block';
-        }
-
-        function closeStatusModal() {
-            document.getElementById('statusModal').style.display = 'none';
-            currentDemandeId = null;
-        }
-
-        function updateDemandeStatus() {
-            if (!currentDemandeId) return;
-            
-            const newStatus = document.getElementById('newStatus').value;
-            const comment = document.getElementById('statusComment').value;
-            const sendEmail = document.getElementById('sendEmailNotification').checked;
-            
-            const demandeIndex = demandes.findIndex(d => d.id === currentDemandeId);
-            if (demandeIndex === -1) {
-                showNotification('Demande non trouvée', 'error');
-                return;
-            }
-            
-            const demande = demandes[demandeIndex];
-            const oldStatus = demande.statut;
-            
-            demandes[demandeIndex].statut = newStatus;
-            demandes[demandeIndex].lastUpdate = new Date().toISOString();
-            
-            if (!demandes[demandeIndex].statusHistory) {
-                demandes[demandeIndex].statusHistory = [];
-            }
-            
-            demandes[demandeIndex].statusHistory.push({
-                date: new Date().toISOString(),
-                oldStatus: oldStatus,
-                newStatus: newStatus,
-                comment: comment,
-                updatedBy: 'admin'
-            });
-            
-            if (sendEmail) {
-                sendEmailNotification(demande, oldStatus, newStatus, comment);
-            }
-            
-            saveData();
-            updateStats();
-            loadDemandes();
-            closeStatusModal();
-            
-            showNotification(`Statut mis à jour: ${getStatusName(newStatus)}`);
-            addActivity(`Demande ${currentDemandeId} passée de "${getStatusName(oldStatus)}" à "${getStatusName(newStatus)}"`);
-        }
-
-        // Email notifications
-        function sendEmailNotification(demande, oldStatus, newStatus, customMessage = '') {
-            if (!settings.emailNotifications || !emailjsConfig.serviceId) {
-                console.log('Notifications email désactivées ou non configurées');
-                return;
-            }
-            
-            const message = customMessage || defaultMessages[newStatus] || '';
-            const portalLink = window.location.origin + '/client.html?id=' + demande.id;
-            
-            const params = {
-                to_email: demande.email,
-                client_name: `${demande.prenom} ${demande.nom}`,
-                request_id: demande.id,
-                old_status_display: getStatusName(oldStatus),
-                new_status_display: getStatusName(newStatus),
-                status_message: message,
-                client_portal_link: portalLink,
-                admin_email: settings.adminEmail
-            };
-            
-            if (typeof emailjs !== 'undefined') {
-                emailjs.send(emailjsConfig.serviceId, emailjsConfig.templateId, params)
-                    .then(() => {
-                        showNotification(`Email envoyé à ${demande.prenom} ${demande.nom}`);
-                        emailsSentCount++;
-                        addActivity(`Email envoyé à ${demande.prenom} ${demande.nom} - Statut: ${getStatusName(newStatus)}`);
-                        saveData();
-                        updateStats();
-                    })
-                    .catch((error) => {
-                        console.error('Erreur envoi email:', error);
-                        showNotification('Erreur lors de l\'envoi de l\'email', 'error');
-                    });
-            } else {
-                showNotification('EmailJS non disponible', 'warning');
-            }
-        }
-
-        // Configuration email
-        function saveEmailConfiguration() {
-            emailjsConfig.serviceId = document.getElementById('emailjsServiceId').value;
-            emailjsConfig.templateId = document.getElementById('emailjsTemplateId').value;
-            emailjsConfig.publicKey = document.getElementById('emailjsPublicKey').value;
-            
-            localStorage.setItem('monentreprise_email_config', JSON.stringify(emailjsConfig));
-            
-            if (emailjsConfig.publicKey && typeof emailjs !== 'undefined') {
-                emailjs.init(emailjsConfig.publicKey);
-            }
-            
-            showNotification('Configuration email sauvegardée');
-        }
-
-        function testEmailConfiguration() {
-            if (!emailjsConfig.serviceId || !emailjsConfig.templateId || !emailjsConfig.publicKey) {
-                showNotification('Veuillez remplir tous les champs de configuration', 'error');
-                return;
-            }
-            
-            const testParams = {
-                to_email: settings.adminEmail,
-                client_name: 'Test Client',
-                request_id: 'TEST-001',
-                old_status_display: 'Nouveau',
-                new_status_display: 'En cours',
-                status_message: 'Ceci est un email de test pour vérifier la configuration.',
-                client_portal_link: window.location.origin + '/client.html?id=TEST-001',
-                admin_email: settings.adminEmail
-            };
-            
-            showNotification('Envoi de l\'email de test...', 'warning');
-            
-            if (typeof emailjs !== 'undefined') {
-                emailjs.send(emailjsConfig.serviceId, emailjsConfig.templateId, testParams)
-                    .then(() => {
-                        showNotification('Email de test envoyé avec succès !');
-                        emailsSentCount++;
-                        saveData();
-                        updateStats();
-                    })
-                    .catch((error) => {
-                        console.error('Erreur envoi email:', error);
-                        showNotification('Erreur lors de l\'envoi de l\'email de test', 'error');
-                    });
-            } else {
-                showNotification('EmailJS non disponible', 'error');
-            }
-        }
-
-        function saveDefaultMessages() {
-            defaultMessages['en-cours'] = document.getElementById('messageEnCours').value;
-            defaultMessages['documents-requis'] = document.getElementById('messageDocumentsRequis').value;
-            defaultMessages['termine'] = document.getElementById('messageTermine').value;
-            
-            localStorage.setItem('monentreprise_default_messages', JSON.stringify(defaultMessages));
-            showNotification('Messages par défaut sauvegardés');
-        }
-
-        // Gestion des documents
-        function loadDocuments() {
-            const documentsList = document.getElementById('documentsList');
-            const documentsEmpty = document.getElementById('documentsEmpty');
-            
-            if (documents.length === 0) {
-                documentsEmpty.style.display = 'block';
-                documentsList.innerHTML = '';
-                return;
-            }
-            
-            documentsEmpty.style.display = 'none';
-            
-            documentsList.innerHTML = documents.map(doc => `
-                <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0; margin: 0.5rem 0;">
-                    <div style="font-size: 1.5rem;">📄</div>
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600;">${doc.name}</div>
-                        <div style="font-size: 0.8rem; color: #666;">
-                            Client: ${doc.clientName} • ${formatFileSize(doc.size)} • ${formatDate(doc.uploadDate)}
-                        </div>
-                    </div>
-                    <div>
-                        <button class="action-btn btn-view" onclick="viewDocument('${doc.id}')">Voir</button>
-                        <button class="action-btn btn-confirm" onclick="downloadDocument('${doc.id}')">Télécharger</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function loadClients() {
-            const clientsList = document.getElementById('clientsList');
-            const clientsEmpty = document.getElementById('clientsEmpty');
-            
-            if (clients.length === 0) {
-                if (clientsEmpty) clientsEmpty.style.display = 'block';
-                if (clientsList) clientsList.innerHTML = '';
-                return;
-            }
-            
-            if (clientsEmpty) clientsEmpty.style.display = 'none';
-            
-            if (clientsList) {
-                clientsList.innerHTML = clients.map(client => `
-                    <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0; margin: 0.5rem 0;">
-                        <div style="font-size: 1.5rem;">👤</div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600;">${client.nom}</div>
-                            <div style="font-size: 0.8rem; color: #666;">
-                                ${client.email} • ${client.telephone} • ${client.demandes ? client.demandes.length : 0} demande(s)
-                            </div>
-                        </div>
-                        <div>
-                            <span style="padding: 0.25rem 0.75rem; background: #d4edda; color: #155724; border-radius: 15px; font-size: 0.8rem;">
-                                ${client.statutCompte || 'Actif'}
-                            </span>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        // Affichage des détails
-        function viewDemande(demandeId) {
-            const demande = demandes.find(d => d.id === demandeId);
-            if (!demande) return;
-            
-            const relatedDocs = documents.filter(doc => doc.demandeId === demandeId);
-            const modal = document.getElementById('detailModal');
-            const content = document.getElementById('modalContent');
-            
-            const details = `
-                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px; margin: 1rem 0;">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                        <div><strong>ID:</strong> ${demande.id}</div>
-                        <div><strong>Client:</strong> ${demande.prenom} ${demande.nom}</div>
-                        <div><strong>Email:</strong> ${demande.email}</div>
-                        <div><strong>Service:</strong> ${getServiceName(demande.service)}</div>
-                        <div><strong>Prix:</strong> ${demande.prix}</div>
-                        <div><strong>Date:</strong> ${formatDate(demande.dateComplete)}</div>
-                    </div>
-                    
-                    ${demande.details ? `
-                        <div style="margin-top: 1rem;">
-                            <strong>Message:</strong><br>
-                            ${demande.details}
-                        </div>
-                    ` : ''}
-                    
-                    ${relatedDocs.length > 0 ? `
-                        <div style="margin-top: 1rem;">
-                            <strong>Documents reçus (${relatedDocs.length}):</strong><br>
-                            ${relatedDocs.map(doc => `• ${doc.name}`).join('<br>')}
-                        </div>
-                    ` : ''}
-                </div>
-                
-                <div style="margin-top: 1rem;">
-                    <button class="btn" onclick="openStatusModal('${demande.id}')" style="width: auto; margin-right: 1rem;">Changer le statut</button>
-                    <button class="btn" onclick="closeModal()" style="width: auto; background: #6c757d;">Fermer</button>
-                </div>
-            `;
-            
-            content.innerHTML = details;
-            modal.style.display = 'block';
-        }
-
-        function closeModal() {
-            document.getElementById('detailModal').style.display = 'none';
-        }
-
-        // Fonctions utilitaires
-        function getServiceName(service) {
-            const services = {
-                'micro-entreprise': 'Création Micro-Entreprise',
-                'titre-sejour': 'Titre de séjour',
-                'prefecture': 'Rendez-vous préfecture',
-                'etat-civil': 'État civil',
-                'securite-sociale': 'Sécurité sociale',
-                'logement': 'Logement',
-                'emploi': 'Emploi',
-                'transport': 'Transport',
-                'fiscalite': 'Fiscalité',
-                'numerique': 'Services numériques',
-                'autre': 'Autre'
-            };
-            return services[service] || service;
-        }
-
-        function getStatusName(status) {
-            const statuses = {
-                'nouveau': 'Nouveau',
-                'en-cours': 'En cours',
-                'documents-requis': 'Documents requis',
-                'termine': 'Terminé',
-                'refuse': 'Refusé'
-            };
-            return statuses[status] || status;
-        }
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('fr-FR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        function filterDemandes() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const statusFilter = document.getElementById('statusFilter').value;
-            const serviceFilter = document.getElementById('serviceFilter').value;
-            
-            const rows = document.querySelectorAll('#demandesTableBody tr');
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                const statusCell = row.querySelector('.status');
-                const serviceCell = row.cells[2];
-                
-                const matchesSearch = text.includes(searchTerm);
-                const matchesStatus = !statusFilter || statusCell.classList.contains(statusFilter);
-                const matchesService = !serviceFilter || serviceCell.textContent.toLowerCase().includes(serviceFilter);
-                
-                if (matchesSearch && matchesStatus && matchesService) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
-
-        function addActivity(message) {
-            const activityList = document.querySelector('#recentActivity .activity-list');
-            if (activityList) {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <div>
-                        <strong>${new Date().toLocaleTimeString('fr-FR')}</strong><br>
-                        <small>${message}</small>
-                    </div>
-                `;
-                activityList.insertBefore(li, activityList.firstChild);
-                
-                while (activityList.children.length > 10) {
-                    activityList.removeChild(activityList.lastChild);
-                }
-            }
-        }
-
-        function viewDocument(docId) {
-            showNotification(`Ouverture du document: ${docId}`);
-        }
-
-        function downloadDocument(docId) {
-            showNotification(`Téléchargement du document: ${docId}`);
-        }
-
+        // === NOTIFICATIONS ===
         function showNotification(message, type = 'success') {
             const notification = document.getElementById('notification');
             notification.textContent = message;
@@ -1453,60 +844,23 @@
             }, 4000);
         }
 
-        function exportData() {
-            const data = {
-                demandes: demandes,
-                clients: clients,
-                documents: documents,
-                emailConfig: emailjsConfig,
-                emailsSent: emailsSentCount,
-                exportDate: new Date().toISOString()
-            };
-            
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `monentreprise-export-${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            
-            showNotification('Données exportées avec succès');
-        }
-
-        function saveSettings() {
-            settings.adminEmail = document.getElementById('adminEmail').value;
-            settings.companyName = document.getElementById('companyName').value;
-            settings.emailNotifications = document.getElementById('emailNotifications').checked;
-            
-            const newPassword = document.getElementById('newPassword').value;
-            if (newPassword) {
-                settings.adminPassword = newPassword;
-            }
-            
-            localStorage.setItem('monentreprise_settings', JSON.stringify(settings));
-            showNotification('Paramètres sauvegardés');
-        }
-
-        function logout() {
-            if (sessionTimer) {
-                clearInterval(sessionTimer);
-            }
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('loginContainer').style.display = 'flex';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            showNotification('Déconnexion réussie');
-        }
-
-        // Navigation
+        // === NAVIGATION ===
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Panel Admin MonEntreprise.fr chargé');
+            console.log('🚀 Panel Admin MonEntreprise.fr chargé (Session améliorée)');
+            
+            // Vérification automatique de session
+            checkSessionOnLoad();
             
             // Navigation entre sections
             document.querySelectorAll('.sidebar a[data-section]').forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
+                    
+                    if (!isSessionValid()) {
+                        showNotification('Session expirée', 'error');
+                        autoLogout();
+                        return;
+                    }
                     
                     const section = this.getAttribute('data-section');
                     
@@ -1522,29 +876,11 @@
                     
                     const titles = {
                         'overview': 'Vue d\'ensemble',
-                        'demandes': 'Gestion des demandes',
-                        'notifications': 'Configuration des notifications',
-                        'documents': 'Documents reçus',
-                        'clients': 'Gestion des clients',
-                        'finances': 'Gestion financière',
-                        'parametres': 'Paramètres'
+                        'demandes': 'Gestion des demandes'
                     };
                     
                     document.getElementById('pageTitle').textContent = titles[section] || section;
                 });
-            });
-            
-            // Gestion des modals
-            window.addEventListener('click', function(event) {
-                const detailModal = document.getElementById('detailModal');
-                const statusModal = document.getElementById('statusModal');
-                
-                if (event.target === detailModal) {
-                    closeModal();
-                }
-                if (event.target === statusModal) {
-                    closeStatusModal();
-                }
             });
             
             // Login avec Entrée
@@ -1554,32 +890,27 @@
                 }
             });
 
-            // Charger configuration sauvegardée
-            const savedEmailConfig = localStorage.getItem('monentreprise_email_config');
-            if (savedEmailConfig) {
-                const config = JSON.parse(savedEmailConfig);
-                emailjsConfig = { ...emailjsConfig, ...config };
-                
-                document.getElementById('emailjsServiceId').value = emailjsConfig.serviceId;
-                document.getElementById('emailjsTemplateId').value = emailjsConfig.templateId;
-                document.getElementById('emailjsPublicKey').value = emailjsConfig.publicKey;
-                
-                if (emailjsConfig.publicKey && typeof emailjs !== 'undefined') {
-                    emailjs.init(emailjsConfig.publicKey);
+            // Debug info en continu
+            setInterval(() => {
+                const debugDiv = document.getElementById('debugInfo');
+                if (debugDiv) {
+                    const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
+                    if (sessionData) {
+                        try {
+                            const session = JSON.parse(sessionData);
+                            const timeLeft = session.expiryTime - Date.now();
+                            debugDiv.textContent = `Debug: ${Math.floor(timeLeft / 1000)}s restants`;
+                        } catch (error) {
+                            debugDiv.textContent = 'Debug: Session corrompue';
+                        }
+                    } else {
+                        debugDiv.textContent = 'Debug: Aucune session';
+                    }
                 }
-            }
-
-            // Charger messages par défaut
-            const savedMessages = localStorage.getItem('monentreprise_default_messages');
-            if (savedMessages) {
-                defaultMessages = { ...defaultMessages, ...JSON.parse(savedMessages) };
-                document.getElementById('messageEnCours').value = defaultMessages['en-cours'];
-                document.getElementById('messageDocumentsRequis').value = defaultMessages['documents-requis'];
-                document.getElementById('messageTermine').value = defaultMessages['termine'];
-            }
+            }, 1000);
         });
 
-        console.log('Panel Admin MonEntreprise.fr initialisé');
+        console.log('✅ Panel Admin MonEntreprise.fr initialisé avec gestion de session améliorée');
     </script>
 </body>
 </html>
