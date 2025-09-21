@@ -1,4 +1,789 @@
-<!DOCTYPE html>
+function isSessionValid() {
+            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
+            
+            if (!sessionData) {
+                return false;
+            }
+            
+            try {
+                const session = JSON.parse(sessionData);
+                const now = Date.now();
+                
+                if (now > session.expiryTime) {
+                    destroySession();
+                    return false;
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Erreur de session:', error);
+                destroySession();
+                return false;
+            }
+        }
+
+        function destroySession() {
+            localStorage.removeItem(SESSION_CONFIG.sessionKey);
+            if (window.sessionTimer) {
+                clearInterval(window.sessionTimer);
+            }
+            if (window.warningTimer) {
+                clearTimeout(window.warningTimer);
+            }
+            console.log('Session supprimée');
+        }
+
+        function extendSession() {
+            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
+            if (sessionData) {
+                try {
+                    const session = JSON.parse(sessionData);
+                    session.expiryTime = Date.now() + SESSION_CONFIG.sessionDuration;
+                    localStorage.setItem(SESSION_CONFIG.sessionKey, JSON.stringify(session));
+                    
+                    if (window.sessionTimer) {
+                        clearInterval(window.sessionTimer);
+                    }
+                    if (window.warningTimer) {
+                        clearTimeout(window.warningTimer);
+                    }
+                    startSessionTimer();
+                    
+                    showNotification('Session prolongée de 10 minutes');
+                    updateSessionDisplay();
+                } catch (error) {
+                    console.error('Erreur prolongation session:', error);
+                }
+            }
+        }
+
+        function updateSessionDisplay() {
+            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
+            if (!sessionData) return;
+            
+            try {
+                const session = JSON.parse(sessionData);
+                const now = Date.now();
+                const timeLeft = session.expiryTime - now;
+                
+                if (timeLeft > 0) {
+                    const minutes = Math.floor(timeLeft / (60 * 1000));
+                    const seconds = Math.floor((timeLeft % (60 * 1000)) / 1000);
+                    
+                    const sessionDisplay = document.getElementById('sessionTimer');
+                    if (sessionDisplay) {
+                        sessionDisplay.textContent = `Session: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                        
+                        if (timeLeft <= SESSION_CONFIG.warningTime) {
+                            sessionDisplay.style.color = '#ff6b6b';
+                            sessionDisplay.style.borderColor = 'rgba(255, 107, 107, 0.3)';
+                        } else {
+                            sessionDisplay.style.color = '#667eea';
+                            sessionDisplay.style.borderColor = 'rgba(102, 126, 234, 0.2)';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur affichage session:', error);
+            }
+        }
+
+        function startSessionTimer() {
+            window.sessionTimer = setInterval(() => {
+                if (!isSessionValid()) {
+                    autoLogout();
+                    return;
+                }
+                updateSessionDisplay();
+            }, 1000);
+            
+            window.warningTimer = setTimeout(() => {
+                if (isSessionValid()) {
+                    const confirmed = confirm('Votre session expire dans 2 minutes.\nVoulez-vous la prolonger de 10 minutes ?');
+                    if (confirmed) {
+                        extendSession();
+                    }
+                }
+            }, SESSION_CONFIG.sessionDuration - SESSION_CONFIG.warningTime);
+        }
+
+        function autoLogout() {
+            destroySession();
+            if (document.getElementById('dashboard').style.display === 'block') {
+                document.getElementById('dashboard').style.display = 'none';
+                document.getElementById('loginContainer').style.display = 'flex';
+                showNotification('Session expirée. Veuillez vous reconnecter.', 'error');
+            }
+        }
+
+        function checkSessionOnLoad() {
+            if (isSessionValid()) {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                loadData();
+                showNotification('Reconnexion automatique réussie');
+                startSessionTimer();
+                updateSessionDisplay();
+                return true;
+            }
+            return false;
+        }
+
+        // === FONCTION DE CONNEXION ===
+        function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            console.log('Tentative de connexion:', username);
+            
+            if (username === 'admin' && password === 'admin123') {
+                console.log('Connexion réussie');
+                createSession();
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                loadData();
+                showNotification('Connexion réussie ! Système de notifications activé');
+                updateSessionDisplay();
+            } else {
+                console.log('Identifiants incorrects');
+                showNotification('Identifiants incorrects !', 'error');
+            }
+        }
+
+        // === GESTION DES DONNÉES ===
+        function loadData() {
+            const savedDemandes = loadFromStorage(MONENTREPRISE_CONFIG.DEMANDES_KEY);
+            const savedClients = loadFromStorage(MONENTREPRISE_CONFIG.CLIENTS_KEY);
+            const savedDocuments = loadFromStorage(MONENTREPRISE_CONFIG.DOCUMENTS_KEY);
+            const savedSettings = localStorage.getItem('monentreprise_settings');
+            const savedEmailConfig = localStorage.getItem(MONENTREPRISE_CONFIG.EMAIL_CONFIG_KEY);
+            const savedEmailCount = localStorage.getItem('monentreprise_emails_sent');
+            const savedMessages = localStorage.getItem('monentreprise_default_messages');
+            
+            if (savedDemandes) {
+                demandes = savedDemandes;
+            }
+            if (savedClients) {
+                clients = savedClients;
+            }
+            if (savedDocuments) {
+                documents = savedDocuments;
+            }
+            if (savedSettings) {
+                settings = { ...settings, ...JSON.parse(savedSettings) };
+            }
+            if (savedEmailConfig) {
+                emailjsConfig = JSON.parse(savedEmailConfig);
+                loadEmailConfiguration();
+            }
+            if (savedEmailCount) {
+                emailsSentCount = parseInt(savedEmailCount);
+            }
+            if (savedMessages) {
+                defaultMessages = { ...defaultMessages, ...JSON.parse(savedMessages) };
+                loadDefaultMessages();
+            }
+            
+            updateStats();
+            loadDemandes();
+            loadDocuments();
+            loadClients();
+        }
+
+        function saveData() {
+            saveToStorage(MONENTREPRISE_CONFIG.DEMANDES_KEY, demandes);
+            saveToStorage(MONENTREPRISE_CONFIG.CLIENTS_KEY, clients);
+            saveToStorage(MONENTREPRISE_CONFIG.DOCUMENTS_KEY, documents);
+            localStorage.setItem('monentreprise_settings', JSON.stringify(settings));
+            localStorage.setItem('monentreprise_emails_sent', emailsSentCount.toString());
+        }
+
+        function updateStats() {
+            document.getElementById('totalDemandes').textContent = demandes.length;
+            document.getElementById('demandesEnCours').textContent = demandes.filter(d => d.statut === 'en-cours' || d.statut === 'documents-requis').length;
+            document.getElementById('emailsSent').textContent = emailsSentCount;
+            
+            const ca = demandes.filter(d => d.statut === 'termine').reduce((total, d) => {
+                const prix = parseInt(d.prix.replace('€', ''));
+                return total + prix;
+            }, 0);
+            document.getElementById('chiffreAffaires').textContent = ca + '€';
+            
+            // Mise à jour finances
+            const caMois = document.getElementById('ca-mois');
+            const caTotal = document.getElementById('ca-total');
+            const ticketMoyen = document.getElementById('ticket-moyen');
+            
+            if (caMois) caMois.textContent = ca + '€';
+            if (caTotal) caTotal.textContent = ca + '€';
+            if (ticketMoyen && demandes.length > 0) {
+                ticketMoyen.textContent = Math.round(ca / demandes.filter(d => d.statut === 'termine').length || 0) + '€';
+            }
+        }
+
+        // === GESTION DES EMAILS ===
+        function saveEmailConfiguration() {
+            emailjsConfig.serviceId = document.getElementById('emailjsServiceId').value;
+            emailjsConfig.templateId = document.getElementById('emailjsTemplateId').value;
+            emailjsConfig.publicKey = document.getElementById('emailjsPublicKey').value;
+            
+            localStorage.setItem(MONENTREPRISE_CONFIG.EMAIL_CONFIG_KEY, JSON.stringify(emailjsConfig));
+            
+            if (emailjsConfig.publicKey) {
+                emailjs.init(emailjsConfig.publicKey);
+            }
+            
+            showNotification('Configuration email sauvegardée');
+        }
+
+        function loadEmailConfiguration() {
+            document.getElementById('emailjsServiceId').value = emailjsConfig.serviceId || '';
+            document.getElementById('emailjsTemplateId').value = emailjsConfig.templateId || '';
+            document.getElementById('emailjsPublicKey').value = emailjsConfig.publicKey || '';
+            
+            if (emailjsConfig.publicKey) {
+                emailjs.init(emailjsConfig.publicKey);
+            }
+        }
+
+        function loadDefaultMessages() {
+            document.getElementById('messageEnCours').value = defaultMessages['en-cours'];
+            document.getElementById('messageDocumentsRequis').value = defaultMessages['documents-requis'];
+            document.getElementById('messageTermine').value = defaultMessages['termine'];
+        }
+
+        function saveDefaultMessages() {
+            defaultMessages['en-cours'] = document.getElementById('messageEnCours').value;
+            defaultMessages['documents-requis'] = document.getElementById('messageDocumentsRequis').value;
+            defaultMessages['termine'] = document.getElementById('messageTermine').value;
+            
+            localStorage.setItem('monentreprise_default_messages', JSON.stringify(defaultMessages));
+            showNotification('Messages par défaut sauvegardés');
+        }
+
+        function testEmailConfiguration() {
+            if (!emailjsConfig.serviceId || !emailjsConfig.templateId || !emailjsConfig.publicKey) {
+                showNotification('Veuillez remplir tous les champs de configuration', 'error');
+                return;
+            }
+            
+            const testParams = {
+                to_email: settings.adminEmail,
+                client_name: 'Test Client',
+                request_id: 'TEST-001',
+                old_status_display: 'Nouveau',
+                new_status_display: 'En cours',
+                status_message: 'Ceci est un email de test pour vérifier la configuration.',
+                client_portal_link: window.location.origin + '/' + MONENTREPRISE_CONFIG.CLIENT_URL + '?id=TEST-001',
+                admin_email: settings.adminEmail
+            };
+            
+            showNotification('Envoi de l\'email de test...', 'warning');
+            
+            emailjs.send(emailjsConfig.serviceId, emailjsConfig.templateId, testParams)
+                .then(() => {
+                    showNotification('Email de test envoyé avec succès !');
+                    emailsSentCount++;
+                    saveData();
+                    updateStats();
+                })
+                .catch((error) => {
+                    console.error('Erreur envoi email:', error);
+                    showNotification('Erreur lors de l\'envoi de l\'email de test', 'error');
+                });
+        }
+
+        function sendEmailNotification(demande, oldStatus, newStatus, customMessage = '') {
+            if (!settings.emailNotifications || !emailjsConfig.serviceId) {
+                console.log('Notifications email désactivées ou non configurées');
+                return;
+            }
+            
+            const message = customMessage || defaultMessages[newStatus] || '';
+            const portalLink = window.location.origin + '/' + MONENTREPRISE_CONFIG.CLIENT_URL + '?id=' + demande.id;
+            
+            const params = {
+                to_email: demande.email,
+                client_name: `${demande.prenom} ${demande.nom}`,
+                request_id: demande.id,
+                old_status_display: getStatusName(oldStatus),
+                new_status_display: getStatusName(newStatus),
+                status_message: message,
+                client_portal_link: portalLink,
+                admin_email: settings.adminEmail
+            };
+            
+            emailjs.send(emailjsConfig.serviceId, emailjsConfig.templateId, params)
+                .then(() => {
+                    showNotification(`Email envoyé à ${demande.prenom} ${demande.nom}`);
+                    emailsSentCount++;
+                    
+                    addActivity(`Email envoyé à ${demande.prenom} ${demande.nom} - Statut: ${getStatusName(newStatus)}`);
+                    
+                    saveData();
+                    updateStats();
+                })
+                .catch((error) => {
+                    console.error('Erreur envoi email:', error);
+                    showNotification('Erreur lors de l\'envoi de l\'email', 'error');
+                });
+        }
+
+        // === GESTION DES DEMANDES ===
+        function loadDemandes() {
+            const tbody = document.getElementById('demandesTableBody');
+            tbody.innerHTML = '';
+            
+            if (demandes.length === 0) {
+                document.getElementById('demandesEmpty').style.display = 'block';
+                document.getElementById('demandesTable').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('demandesEmpty').style.display = 'none';
+            document.getElementById('demandesTable').style.display = 'table';
+            
+            demandes.forEach(demande => {
+                const row = document.createElement('tr');
+                const relatedDocs = documents.filter(doc => doc.demandeId === demande.id);
+                const documentsDisplay = relatedDocs.length > 0 ? 
+                    `<span style="color: #28a745; font-weight: 600;">${relatedDocs.length} doc(s)</span>` : 
+                    `<span style="color: #666;">Aucun</span>`;
+                
+                row.innerHTML = `
+                    <td>${demande.id}</td>
+                    <td>${demande.prenom} ${demande.nom}</td>
+                    <td>${getServiceName(demande.service)}</td>
+                    <td>${formatDate(demande.dateComplete)}</td>
+                    <td><span class="status ${demande.statut}">${getStatusName(demande.statut)}</span></td>
+                    <td>${documentsDisplay}</td>
+                    <td>${demande.prix}</td>
+                    <td>
+                        <button class="action-btn btn-view" onclick="viewDemande('${demande.id}')">Voir</button>
+                        <button class="action-btn btn-progress" onclick="openStatusModal('${demande.id}', 'en-cours')">En cours</button>
+                        <button class="action-btn btn-docs" onclick="openStatusModal('${demande.id}', 'documents-requis')">Docs requis</button>
+                        <button class="action-btn btn-confirm" onclick="openStatusModal('${demande.id}', 'termine')">Terminer</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function simulateNewDemande() {
+            const now = new Date().toISOString();
+            const testId = generateDemandeId();
+            
+            const testDemande = {
+                id: testId,
+                prenom: 'Marie',
+                nom: 'Martin',
+                email: 'marie.martin@example.com',
+                telephone: '06 11 22 33 44',
+                service: 'micro-entreprise',
+                prix: '79€',
+                statut: 'nouveau',
+                details: 'Demande de création de micro-entreprise pour activité de consultation',
+                dateComplete: now,
+                urgence: 'Normal'
+            };
+            
+            demandes.unshift(testDemande);
+            saveData();
+            updateStats();
+            loadDemandes();
+            
+            addActivity(`Nouvelle demande reçue de ${testDemande.prenom} ${testDemande.nom}`);
+            showNotification('Nouvelle demande simulée avec succès !');
+        }
+
+        // === GESTION DES STATUTS ===
+        function openStatusModal(demandeId, suggestedStatus = null) {
+            currentDemandeId = demandeId;
+            const modal = document.getElementById('statusModal');
+            const statusSelect = document.getElementById('newStatus');
+            const commentField = document.getElementById('statusComment');
+            const emailCheckbox = document.getElementById('sendEmailNotification');
+            
+            if (suggestedStatus) {
+                statusSelect.value = suggestedStatus;
+                commentField.value = defaultMessages[suggestedStatus] || '';
+            }
+            
+            emailCheckbox.checked = settings.emailNotifications;
+            modal.style.display = 'block';
+        }
+
+        function closeStatusModal() {
+            document.getElementById('statusModal').style.display = 'none';
+            currentDemandeId = null;
+        }
+
+        function updateDemandeStatus() {
+            if (!currentDemandeId) return;
+            
+            const newStatus = document.getElementById('newStatus').value;
+            const comment = document.getElementById('statusComment').value;
+            const sendEmail = document.getElementById('sendEmailNotification').checked;
+            
+            const demandeIndex = demandes.findIndex(d => d.id === currentDemandeId);
+            if (demandeIndex === -1) {
+                showNotification('Demande non trouvée', 'error');
+                return;
+            }
+            
+            const demande = demandes[demandeIndex];
+            const oldStatus = demande.statut;
+            
+            demandes[demandeIndex].statut = newStatus;
+            demandes[demandeIndex].lastUpdate = new Date().toISOString();
+            
+            if (!demandes[demandeIndex].statusHistory) {
+                demandes[demandeIndex].statusHistory = [];
+            }
+            
+            demandes[demandeIndex].statusHistory.push({
+                date: new Date().toISOString(),
+                oldStatus: oldStatus,
+                newStatus: newStatus,
+                comment: comment,
+                updatedBy: 'admin'
+            });
+            
+            saveDefaultMessages();
+            
+            if (sendEmail) {
+                sendEmailNotification(demande, oldStatus, newStatus, comment);
+            }
+            
+            saveData();
+            updateStats();
+            loadDemandes();
+            closeStatusModal();
+            
+            showNotification(`Statut mis à jour: ${getStatusName(newStatus)}`);
+            addActivity(`Demande ${currentDemandeId} passée de "${getStatusName(oldStatus)}" à "${getStatusName(newStatus)}"`);
+        }
+
+        // === GESTION DES DOCUMENTS ===
+        function loadDocuments() {
+            const documentsList = document.getElementById('documentsList');
+            const documentsEmpty = document.getElementById('documentsEmpty');
+            
+            if (documents.length === 0) {
+                documentsEmpty.style.display = 'block';
+                documentsList.innerHTML = '';
+                return;
+            }
+            
+            documentsEmpty.style.display = 'none';
+            
+            documentsList.innerHTML = documents.map(doc => `
+                <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0; margin: 0.5rem 0;">
+                    <div style="font-size: 1.5rem;">📄</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600;">${doc.name}</div>
+                        <div style="font-size: 0.8rem; color: #666;">
+                            Client: ${doc.clientName} • ${formatFileSize(doc.size)} • ${formatDate(doc.uploadDate)}
+                        </div>
+                    </div>
+                    <div>
+                        <button class="action-btn btn-view" onclick="viewDocument('${doc.id}')">Voir</button>
+                        <button class="action-btn btn-confirm" onclick="downloadDocument('${doc.id}')">Télécharger</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadClients() {
+            const clientsList = document.getElementById('clientsList');
+            const clientsEmpty = document.getElementById('clientsEmpty');
+            
+            if (clients.length === 0) {
+                if (clientsEmpty) clientsEmpty.style.display = 'block';
+                if (clientsList) clientsList.innerHTML = '';
+                return;
+            }
+            
+            if (clientsEmpty) clientsEmpty.style.display = 'none';
+            
+            if (clientsList) {
+                clientsList.innerHTML = clients.map(client => `
+                    <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0; margin: 0.5rem 0;">
+                        <div style="font-size: 1.5rem;">👤</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600;">${client.nom}</div>
+                            <div style="font-size: 0.8rem; color: #666;">
+                                ${client.email} • ${client.telephone} • ${client.demandes.length} demande(s)
+                            </div>
+                        </div>
+                        <div>
+                            <span style="padding: 0.25rem 0.75rem; background: #d4edda; color: #155724; border-radius: 15px; font-size: 0.8rem;">
+                                ${client.statutCompte}
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function viewDocument(docId) {
+            showNotification(`Ouverture du document: ${docId}`);
+        }
+
+        function downloadDocument(docId) {
+            showNotification(`Téléchargement du document: ${docId}`);
+        }
+
+        // === FONCTIONS D'AFFICHAGE ===
+        function viewDemande(demandeId) {
+            const demande = demandes.find(d => d.id === demandeId);
+            if (!demande) return;
+            
+            const relatedDocs = documents.filter(doc => doc.demandeId === demandeId);
+            const modal = document.getElementById('detailModal');
+            const content = document.getElementById('modalContent');
+            
+            const details = `
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px; margin: 1rem 0;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div><strong>ID:</strong> ${demande.id}</div>
+                        <div><strong>Client:</strong> ${demande.prenom} ${demande.nom}</div>
+                        <div><strong>Email:</strong> ${demande.email}</div>
+                        <div><strong>Service:</strong> ${getServiceName(demande.service)}</div>
+                        <div><strong>Prix:</strong> ${demande.prix}</div>
+                        <div><strong>Date:</strong> ${formatDate(demande.dateComplete)}</div>
+                    </div>
+                    
+                    ${demande.details ? `
+                        <div style="margin-top: 1rem;">
+                            <strong>Message:</strong><br>
+                            ${demande.details}
+                        </div>
+                    ` : ''}
+                    
+                    ${relatedDocs.length > 0 ? `
+                        <div style="margin-top: 1rem;">
+                            <strong>Documents reçus (${relatedDocs.length}):</strong><br>
+                            ${relatedDocs.map(doc => `• ${doc.name}`).join('<br>')}
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div style="margin-top: 1rem;">
+                    <button class="btn" onclick="openStatusModal('${demande.id}')" style="width: auto; margin-right: 1rem;">Changer le statut</button>
+                    <button class="btn" onclick="closeModal()" style="width: auto; background: #6c757d;">Fermer</button>
+                </div>
+            `;
+            
+            content.innerHTML = details;
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+
+        // === ACTIVITÉ ===
+        function addActivity(message) {
+            const activityList = document.querySelector('#recentActivity .activity-list');
+            if (activityList) {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div>
+                        <strong>${new Date().toLocaleTimeString('fr-FR')}</strong><br>
+                        <small>${message}</small>
+                    </div>
+                `;
+                activityList.insertBefore(li, activityList.firstChild);
+                
+                while (activityList.children.length > 10) {
+                    activityList.removeChild(activityList.lastChild);
+                }
+            }
+        }
+
+        // === FONCTIONS UTILITAIRES ===
+        function getServiceName(service) {
+            const services = {
+                'micro-entreprise': 'Création Micro-Entreprise',
+                'titre-sejour': 'Titre de séjour',
+                'prefecture': 'Rendez-vous préfecture',
+                'etat-civil': 'État civil',
+                'securite-sociale': 'Sécurité sociale',
+                'logement': 'Logement',
+                'emploi': 'Emploi',
+                'transport': 'Transport',
+                'fiscalite': 'Fiscalité',
+                'numerique': 'Services numériques',
+                'autre': 'Autre'
+            };
+            return services[service] || service;
+        }
+
+        function getStatusName(status) {
+            const statuses = {
+                'nouveau': 'Nouveau',
+                'en-cours': 'En cours',
+                'documents-requis': 'Documents requis',
+                'termine': 'Terminé',
+                'refuse': 'Refusé'
+            };
+            return statuses[status] || status;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function filterDemandes() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const serviceFilter = document.getElementById('serviceFilter').value;
+            
+            const rows = document.querySelectorAll('#demandesTableBody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const statusCell = row.querySelector('.status');
+                const serviceCell = row.cells[2];
+                
+                const matchesSearch = text.includes(searchTerm);
+                const matchesStatus = !statusFilter || statusCell.classList.contains(statusFilter);
+                const matchesService = !serviceFilter || serviceCell.textContent.toLowerCase().includes(serviceFilter);
+                
+                if (matchesSearch && matchesStatus && matchesService) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        function exportData() {
+            const data = {
+                demandes: demandes,
+                clients: clients,
+                documents: documents,
+                emailConfig: emailjsConfig,
+                emailsSent: emailsSentCount,
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `monentreprise-export-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showNotification('Données exportées avec succès');
+        }
+
+        function saveSettings() {
+            settings.adminEmail = document.getElementById('adminEmail').value;
+            settings.companyName = document.getElementById('companyName').value;
+            settings.emailNotifications = document.getElementById('emailNotifications').checked;
+            
+            const newPassword = document.getElementById('newPassword').value;
+            if (newPassword) {
+                settings.adminPassword = newPassword;
+            }
+            
+            localStorage.setItem('monentreprise_settings', JSON.stringify(settings));
+            showNotification('Paramètres sauvegardés');
+        }
+
+        function logout() {
+            destroySession();
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            showNotification('Déconnexion réussie');
+        }
+
+        // === NAVIGATION ===
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Panel Admin MonEntreprise.fr avec notifications chargé');
+            
+            if (!checkSessionOnLoad()) {
+                console.log('Aucune session valide, affichage du formulaire de connexion');
+            }
+            
+            document.querySelectorAll('.sidebar a[data-section]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const section = this.getAttribute('data-section');
+                    
+                    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
+                    
+                    const targetSection = document.getElementById(section);
+                    if (targetSection) {
+                        targetSection.classList.remove('hidden');
+                    }
+                    
+                    const titles = {
+                        'overview': '📊 Vue d\'ensemble',
+                        'demandes': '📋 Gestion des demandes',
+                        'notifications': '📧 Configuration des notifications',
+                        'documents': '📄 Documents reçus',
+                        'clients': '👥 Gestion des clients',
+                        'finances': '💰 Gestion financière',
+                        'parametres': '⚙️ Paramètres'
+                    };
+                    
+                    document.getElementById('pageTitle').textContent = titles[section] || section;
+                });
+            });
+            
+            window.addEventListener('click', function(event) {
+                const detailModal = document.getElementById('detailModal');
+                const statusModal = document.getElementById('statusModal');
+                
+                if (event.target === detailModal) {
+                    closeModal();
+                }
+                if (event.target === statusModal) {
+                    closeStatusModal();
+                }
+            });
+            
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleLogin();
+                }
+            });
+        });
+
+        // Initialiser EmailJS
+        if (emailjsConfig.publicKey) {
+            emailjs.init(emailjsConfig.publicKey);
+        }
+
+        console.log('Panel Admin MonEntreprise.fr avec système de notifications complet initialisé');
+    </script>
+</body>
+</html><!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -226,6 +1011,11 @@
             color: #004085;
         }
 
+        .status.documents-requis {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
         .status.termine {
             background: #d4edda;
             color: #155724;
@@ -264,6 +1054,11 @@
         .btn-progress {
             background: #ffc107;
             color: #333;
+        }
+
+        .btn-docs {
+            background: #ff6b6b;
+            color: white;
         }
 
         .modal {
@@ -410,101 +1205,20 @@
             border: 2px solid rgba(102, 126, 234, 0.2);
         }
 
-        .file-upload-area {
-            border: 2px dashed #667eea;
-            border-radius: 10px;
-            padding: 2rem;
-            text-align: center;
-            background: #f8f9ff;
-            margin: 1rem 0;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .file-upload-area:hover {
-            background: #f0f0ff;
-            border-color: #5a6fd8;
-        }
-
-        .file-upload-area.dragover {
-            background: #e6f3ff;
-            border-color: #28a745;
-        }
-
-        .document-card {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            margin: 0.5rem 0;
-        }
-
-        .document-icon {
-            font-size: 1.5rem;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #667eea;
-            color: white;
-            border-radius: 8px;
-        }
-
-        .document-info {
-            flex: 1;
-        }
-
-        .document-name {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 0.25rem;
-        }
-
-        .document-meta {
-            font-size: 0.8rem;
-            color: #666;
-        }
-
-        .document-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .config-section {
-            background: #f8f9fa;
+        .email-config {
+            background: #e8f4f8;
             padding: 1.5rem;
             border-radius: 10px;
             margin: 1rem 0;
-            border-left: 4px solid #ffc107;
+            border-left: 4px solid #17a2b8;
         }
 
-        .config-section h4 {
-            color: #856404;
+        .email-config h4 {
+            color: #0c5460;
             margin-bottom: 1rem;
         }
 
-        .config-item {
-            margin: 1rem 0;
-        }
-
-        .config-item label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .config-item input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-        }
-
-        .test-connection {
+        .test-email-btn {
             background: #17a2b8;
             color: white;
             padding: 0.75rem 1.5rem;
@@ -512,56 +1226,7 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
-            margin-top: 1rem;
-        }
-
-        .connection-status {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-        }
-
-        .connection-status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .connection-status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .sync-section {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin: 1rem 0;
-            border: 2px solid #667eea;
-        }
-
-        .sync-section h4 {
-            color: #667eea;
-            margin-bottom: 1rem;
-        }
-
-        .sync-btn {
-            background: #667eea;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            margin-right: 1rem;
-        }
-
-        .auto-sync-toggle {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 1rem;
+            margin: 0.5rem;
         }
 
         @media (max-width: 768px) {
@@ -624,10 +1289,10 @@
             <ul>
                 <li><a href="#" data-section="overview" class="active">📊 Vue d'ensemble</a></li>
                 <li><a href="#" data-section="demandes">📋 Demandes</a></li>
+                <li><a href="#" data-section="notifications">📧 Notifications</a></li>
                 <li><a href="#" data-section="documents">📄 Documents</a></li>
                 <li><a href="#" data-section="clients">👥 Clients</a></li>
                 <li><a href="#" data-section="finances">💰 Finances</a></li>
-                <li><a href="#" data-section="integration">🔗 Intégration</a></li>
                 <li><a href="#" data-section="parametres">⚙️ Paramètres</a></li>
                 <li><a href="#" onclick="logout()">🚪 Déconnexion</a></li>
             </ul>
@@ -637,7 +1302,6 @@
             <div class="header">
                 <h1 id="pageTitle">📊 Vue d'ensemble</h1>
                 <div class="header-right">
-                    <button class="sync-btn" onclick="syncWithExternalData()" title="Synchroniser les données">🔄 Sync</button>
                     <button class="export-btn" onclick="exportData()">📥 Exporter</button>
                     <button class="extend-btn" onclick="extendSession()">+10min</button>
                     <span>Bienvenue, Admin</span>
@@ -657,8 +1321,8 @@
                         <div>En cours</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" id="documentsTotal">0</div>
-                        <div>Documents reçus</div>
+                        <div class="stat-number" id="emailsSent">0</div>
+                        <div>Emails envoyés</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number" id="chiffreAffaires">0€</div>
@@ -673,7 +1337,7 @@
                             <li>
                                 <div>
                                     <strong>Système initialisé</strong><br>
-                                    <small>Panel admin prêt à recevoir les demandes et documents</small>
+                                    <small>Panel admin avec notifications automatiques prêt</small>
                                 </div>
                             </li>
                         </div>
@@ -691,6 +1355,7 @@
                         <option value="">Tous les statuts</option>
                         <option value="nouveau">Nouveau</option>
                         <option value="en-cours">En cours</option>
+                        <option value="documents-requis">Documents requis</option>
                         <option value="termine">Terminé</option>
                         <option value="refuse">Refusé</option>
                     </select>
@@ -704,13 +1369,8 @@
 
                 <div id="demandesEmpty" class="empty-state">
                     <h3>📋 Aucune demande</h3>
-                    <p>Les demandes de vos clients apparaîtront ici une fois configurée l'intégration.</p>
-                    <p><strong>Pour recevoir des demandes :</strong></p>
-                    <ol style="text-align: left; display: inline-block; margin-top: 1rem;">
-                        <li>Configurez l'intégration dans l'onglet "Intégration"</li>
-                        <li>Testez la synchronisation</li>
-                        <li>Les demandes s'afficheront automatiquement</li>
-                    </ol>
+                    <p>Les demandes apparaîtront ici quand les clients utilisent le formulaire.</p>
+                    <button class="btn" onclick="simulateNewDemande()" style="width: auto;">🧪 Simuler une demande</button>
                 </div>
 
                 <table class="table" id="demandesTable" style="display: none;">
@@ -731,145 +1391,62 @@
                 </table>
             </div>
 
-            <!-- Gestion des documents -->
-            <div id="documents" class="content-section hidden">
-                <h3>📄 Gestion des documents</h3>
+            <!-- Configuration des notifications -->
+            <div id="notifications" class="content-section hidden">
+                <h3>📧 Configuration des notifications email</h3>
                 
-                <div class="sync-section">
-                    <h4>Synchronisation des documents</h4>
-                    <p>Dernière synchronisation : <span id="lastDocSync">Jamais</span></p>
-                    <button class="sync-btn" onclick="syncDocuments()">🔄 Synchroniser maintenant</button>
-                    <div class="auto-sync-toggle">
-                        <input type="checkbox" id="autoSyncDocs" checked>
-                        <label for="autoSyncDocs">Synchronisation automatique (toutes les 5 minutes)</label>
+                <div class="email-config">
+                    <h4>Configuration EmailJS</h4>
+                    <div class="form-group">
+                        <label for="emailjsServiceId">Service ID EmailJS</label>
+                        <input type="text" id="emailjsServiceId" placeholder="service_xxxxxxx">
                     </div>
+                    <div class="form-group">
+                        <label for="emailjsTemplateId">Template ID pour notifications</label>
+                        <input type="text" id="emailjsTemplateId" placeholder="template_xxxxxxx">
+                    </div>
+                    <div class="form-group">
+                        <label for="emailjsPublicKey">Clé publique EmailJS</label>
+                        <input type="text" id="emailjsPublicKey" placeholder="user_xxxxxxxxxxxx">
+                    </div>
+                    <button class="test-email-btn" onclick="testEmailConfiguration()">Tester la configuration</button>
+                    <button class="btn" onclick="saveEmailConfiguration()" style="width: auto;">Sauvegarder</button>
                 </div>
 
-                <div class="search-filter">
-                    <input type="text" placeholder="Rechercher un document..." id="docSearchInput" onkeyup="filterDocuments()">
-                    <select id="docClientFilter" onchange="filterDocuments()">
-                        <option value="">Tous les clients</option>
-                    </select>
-                    <select id="docTypeFilter" onchange="filterDocuments()">
-                        <option value="">Tous les types</option>
-                        <option value="identite">Pièce d'identité</option>
-                        <option value="justificatif">Justificatif</option>
-                        <option value="contrat">Contrat</option>
-                        <option value="autre">Autre</option>
-                    </select>
+                <div class="form-group">
+                    <label for="messageEnCours">Message "En cours"</label>
+                    <textarea id="messageEnCours" rows="3">Votre demande est maintenant en cours de traitement. Nous vous tiendrons informé de l'avancement.</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="messageDocumentsRequis">Message "Documents requis"</label>
+                    <textarea id="messageDocumentsRequis" rows="3">Merci d'envoyer les documents complémentaires via votre espace client. Cliquez sur le lien pour accéder à votre espace et uploader vos documents.</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="messageTermine">Message "Terminé"</label>
+                    <textarea id="messageTermine" rows="3">Félicitations ! Votre demande a été traitée avec succès. Tous les documents finalisés sont disponibles dans votre espace client.</textarea>
                 </div>
 
+                <button class="btn" onclick="saveDefaultMessages()" style="width: auto;">Sauvegarder les messages</button>
+            </div>
+
+            <!-- Documents -->
+            <div id="documents" class="content-section hidden">
+                <h3>📄 Documents reçus</h3>
                 <div id="documentsEmpty" class="empty-state">
                     <h3>📄 Aucun document</h3>
                     <p>Les documents uploadés par vos clients apparaîtront ici.</p>
-                    <p>Configurez l'intégration pour commencer à recevoir des documents.</p>
                 </div>
-
-                <div id="documentsList">
-                    <!-- Les documents apparaîtront ici -->
-                </div>
-            </div>
-
-            <!-- Configuration d'intégration -->
-            <div id="integration" class="content-section hidden">
-                <h3>🔗 Configuration de l'intégration</h3>
-                
-                <div class="config-section">
-                    <h4>⚠️ Configuration requise</h4>
-                    <p>Pour recevoir les demandes et documents de votre site client, vous devez configurer une intégration.</p>
-                    
-                    <div class="config-item">
-                        <label>Type d'intégration</label>
-                        <select id="integrationType" onchange="showIntegrationConfig()">
-                            <option value="">Choisir une option</option>
-                            <option value="google_drive">Google Drive API</option>
-                            <option value="dropbox">Dropbox API</option>
-                            <option value="webhook">Webhook personnalisé</option>
-                            <option value="email">Réception par email</option>
-                        </select>
-                    </div>
-
-                    <div id="googleDriveConfig" class="hidden">
-                        <h5>Configuration Google Drive</h5>
-                        <div class="config-item">
-                            <label>Client ID</label>
-                            <input type="text" id="googleClientId" placeholder="Votre Google Client ID">
-                        </div>
-                        <div class="config-item">
-                            <label>Dossier de stockage</label>
-                            <input type="text" id="googleFolderId" placeholder="ID du dossier Google Drive">
-                        </div>
-                        <button class="test-connection" onclick="testGoogleDriveConnection()">Tester la connexion</button>
-                    </div>
-
-                    <div id="dropboxConfig" class="hidden">
-                        <h5>Configuration Dropbox</h5>
-                        <div class="config-item">
-                            <label>Access Token</label>
-                            <input type="text" id="dropboxToken" placeholder="Votre Dropbox Access Token">
-                        </div>
-                        <div class="config-item">
-                            <label>Dossier de destination</label>
-                            <input type="text" id="dropboxFolder" placeholder="/MonEntreprise/Documents">
-                        </div>
-                        <button class="test-connection" onclick="testDropboxConnection()">Tester la connexion</button>
-                    </div>
-
-                    <div id="webhookConfig" class="hidden">
-                        <h5>Configuration Webhook</h5>
-                        <div class="config-item">
-                            <label>URL du webhook</label>
-                            <input type="text" id="webhookUrl" placeholder="https://votre-serveur.com/webhook">
-                        </div>
-                        <div class="config-item">
-                            <label>Secret key</label>
-                            <input type="text" id="webhookSecret" placeholder="Clé secrète pour sécuriser le webhook">
-                        </div>
-                        <button class="test-connection" onclick="testWebhookConnection()">Tester la connexion</button>
-                    </div>
-
-                    <div id="emailConfig" class="hidden">
-                        <h5>Configuration Email</h5>
-                        <div class="config-item">
-                            <label>Email de réception</label>
-                            <input type="email" id="receptionEmail" placeholder="documents@monentreprise.fr">
-                        </div>
-                        <div class="config-item">
-                            <label>Serveur IMAP</label>
-                            <input type="text" id="imapServer" placeholder="imap.gmail.com">
-                        </div>
-                        <div class="config-item">
-                            <label>Mot de passe d'application</label>
-                            <input type="password" id="emailPassword" placeholder="Mot de passe sécurisé">
-                        </div>
-                        <button class="test-connection" onclick="testEmailConnection()">Tester la connexion</button>
-                    </div>
-
-                    <div id="connectionStatus"></div>
-                </div>
-
-                <div class="sync-section">
-                    <h4>Instructions d'intégration</h4>
-                    <div id="integrationInstructions">
-                        <p>Sélectionnez un type d'intégration ci-dessus pour voir les instructions détaillées.</p>
-                    </div>
-                </div>
-
-                <div class="config-section">
-                    <h4>Test d'intégration</h4>
-                    <p>Une fois configurée, testez votre intégration :</p>
-                    <button class="sync-btn" onclick="simulateClientSubmission()">🧪 Simuler une soumission client</button>
-                    <button class="sync-btn" onclick="syncWithExternalData()">🔄 Synchroniser maintenant</button>
-                </div>
+                <div id="documentsList"></div>
             </div>
 
             <!-- Clients -->
             <div id="clients" class="content-section hidden">
                 <h3>👥 Gestion des clients</h3>
-                <div class="empty-state">
+                <div id="clientsEmpty" class="empty-state">
                     <h3>👥 Aucun client</h3>
-                    <p>La base de données clients se remplira automatiquement avec les nouvelles demandes.</p>
+                    <p>La base de données clients se remplira automatiquement.</p>
                 </div>
+                <div id="clientsList"></div>
             </div>
 
             <!-- Finances -->
@@ -913,21 +1490,12 @@
                 <div class="form-group">
                     <label>
                         <input type="checkbox" id="emailNotifications" checked> 
-                        Recevoir les notifications par email
+                        Notifications email automatiques
                     </label>
                 </div>
                 <button class="btn" style="width: auto;" onclick="saveSettings()">Sauvegarder les paramètres</button>
             </div>
         </main>
-    </div>
-
-    <!-- Modal pour voir les détails -->
-    <div id="detailModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2>Détails de la demande</h2>
-            <div id="modalContent"></div>
-        </div>
     </div>
 
     <!-- Modal pour mise à jour du statut -->
@@ -941,31 +1509,67 @@
                     <select id="newStatus">
                         <option value="nouveau">Nouveau</option>
                         <option value="en-cours">En cours</option>
+                        <option value="documents-requis">Documents requis</option>
                         <option value="termine">Terminé</option>
                         <option value="refuse">Refusé</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="statusComment">Commentaire (optionnel)</label>
-                    <textarea id="statusComment" rows="3" placeholder="Ajoutez un commentaire sur cette mise à jour..."></textarea>
+                    <label for="statusComment">Message personnalisé</label>
+                    <textarea id="statusComment" rows="4" placeholder="Message qui sera envoyé au client par email..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="sendEmailNotification" checked>
+                        Envoyer une notification email au client
+                    </label>
                 </div>
                 <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                    <button class="btn" onclick="updateDemandeStatus()" style="width: auto;">Confirmer</button>
+                    <button class="btn" onclick="updateDemandeStatus()" style="width: auto;">Confirmer et envoyer</button>
                     <button class="btn" onclick="closeStatusModal()" style="width: auto; background: #6c757d;">Annuler</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Modal pour voir les détails -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Détails de la demande</h2>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
     <!-- Notification -->
     <div id="notification" class="notification"></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
+        // === CONFIGURATION COMMUNE MONENTREPRISE ===
+        const MONENTREPRISE_CONFIG = {
+            DEMANDES_KEY: 'monentreprise_demandes',
+            CLIENTS_KEY: 'monentreprise_clients', 
+            DOCUMENTS_KEY: 'monentreprise_documents',
+            EMAIL_CONFIG_KEY: 'monentreprise_email_config',
+            
+            SITE_URL: 'index.html',
+            CLIENT_URL: 'client.html',
+            ADMIN_URL: 'admin.html'
+        };
+
+        // Configuration EmailJS
+        let emailjsConfig = {
+            serviceId: 'service_2te46oj',
+            templateId: 'template_9jpudgc', // Template pour notifications client
+            publicKey: 'ntZTBB2BSKb64uZk8'
+        };
+
         // Configuration de session 10 minutes
         const SESSION_CONFIG = {
             sessionKey: 'monentreprise_admin_session',
-            sessionDuration: 10 * 60 * 1000, // 10 minutes
-            warningTime: 2 * 60 * 1000 // Avertissement à 2 minutes
+            sessionDuration: 10 * 60 * 1000,
+            warningTime: 2 * 60 * 1000
         };
 
         // Variables globales
@@ -973,14 +1577,57 @@
         let clients = [];
         let documents = [];
         let currentDemandeId = null;
-        let integrationConfig = {};
-        let autoSyncInterval = null;
+        let emailsSentCount = 0;
         let settings = {
-            adminEmail: '',
+            adminEmail: 'mohamed.oudiai@icloud.com',
             adminPassword: 'admin123',
             companyName: 'MonEntreprise.fr',
             emailNotifications: true
         };
+
+        // Messages par défaut
+        let defaultMessages = {
+            'en-cours': 'Votre demande est maintenant en cours de traitement. Nous vous tiendrons informé de l\'avancement.',
+            'documents-requis': 'Merci d\'envoyer les documents complémentaires via votre espace client. Cliquez sur le lien pour accéder à votre espace et uploader vos documents.',
+            'termine': 'Félicitations ! Votre demande a été traitée avec succès. Tous les documents finalisés sont disponibles dans votre espace client.',
+            'refuse': 'Nous sommes désolés de vous informer que votre demande ne peut pas être traitée pour le moment.'
+        };
+
+        // === FONCTIONS COMMUNES ===
+        function generateDemandeId() {
+            return 'DEM-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5).toUpperCase();
+        }
+
+        function saveToStorage(key, data) {
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+                return true;
+            } catch (error) {
+                console.error('Erreur sauvegarde:', error);
+                return false;
+            }
+        }
+
+        function loadFromStorage(key) {
+            try {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : [];
+            } catch (error) {
+                console.error('Erreur chargement:', error);
+                return [];
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                year: 'numeric',
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
 
         // === GESTION DE SESSION ===
         function createSession() {
@@ -996,971 +1643,4 @@
         }
 
         function isSessionValid() {
-            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
-            
-            if (!sessionData) {
-                return false;
-            }
-            
-            try {
-                const session = JSON.parse(sessionData);
-                const now = Date.now();
-                
-                if (now > session.expiryTime) {
-                    destroySession();
-                    return false;
-                }
-                
-                return true;
-            } catch (error) {
-                console.error('Erreur de session:', error);
-                destroySession();
-                return false;
-            }
-        }
-
-        function destroySession() {
-            localStorage.removeItem(SESSION_CONFIG.sessionKey);
-            if (window.sessionTimer) {
-                clearInterval(window.sessionTimer);
-            }
-            if (window.warningTimer) {
-                clearTimeout(window.warningTimer);
-            }
-            if (autoSyncInterval) {
-                clearInterval(autoSyncInterval);
-            }
-            console.log('Session supprimée');
-        }
-
-        function extendSession() {
-            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
-            if (sessionData) {
-                try {
-                    const session = JSON.parse(sessionData);
-                    session.expiryTime = Date.now() + SESSION_CONFIG.sessionDuration;
-                    localStorage.setItem(SESSION_CONFIG.sessionKey, JSON.stringify(session));
-                    
-                    if (window.sessionTimer) {
-                        clearInterval(window.sessionTimer);
-                    }
-                    if (window.warningTimer) {
-                        clearTimeout(window.warningTimer);
-                    }
-                    startSessionTimer();
-                    
-                    showNotification('Session prolongée de 10 minutes');
-                    updateSessionDisplay();
-                } catch (error) {
-                    console.error('Erreur prolongation session:', error);
-                }
-            }
-        }
-
-        function updateSessionDisplay() {
-            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
-            if (!sessionData) return;
-            
-            try {
-                const session = JSON.parse(sessionData);
-                const now = Date.now();
-                const timeLeft = session.expiryTime - now;
-                
-                if (timeLeft > 0) {
-                    const minutes = Math.floor(timeLeft / (60 * 1000));
-                    const seconds = Math.floor((timeLeft % (60 * 1000)) / 1000);
-                    
-                    const sessionDisplay = document.getElementById('sessionTimer');
-                    if (sessionDisplay) {
-                        sessionDisplay.textContent = `Session: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-                        
-                        if (timeLeft <= SESSION_CONFIG.warningTime) {
-                            sessionDisplay.style.color = '#ff6b6b';
-                            sessionDisplay.style.borderColor = 'rgba(255, 107, 107, 0.3)';
-                        } else {
-                            sessionDisplay.style.color = '#667eea';
-                            sessionDisplay.style.borderColor = 'rgba(102, 126, 234, 0.2)';
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Erreur affichage session:', error);
-            }
-        }
-
-        function startSessionTimer() {
-            window.sessionTimer = setInterval(() => {
-                if (!isSessionValid()) {
-                    autoLogout();
-                    return;
-                }
-                updateSessionDisplay();
-            }, 1000);
-            
-            window.warningTimer = setTimeout(() => {
-                if (isSessionValid()) {
-                    const confirmed = confirm('Votre session expire dans 2 minutes.\nVoulez-vous la prolonger de 10 minutes ?');
-                    if (confirmed) {
-                        extendSession();
-                    }
-                }
-            }, SESSION_CONFIG.sessionDuration - SESSION_CONFIG.warningTime);
-
-            // Démarrer la synchronisation automatique
-            startAutoSync();
-        }
-
-        function autoLogout() {
-            destroySession();
-            if (document.getElementById('dashboard').style.display === 'block') {
-                document.getElementById('dashboard').style.display = 'none';
-                document.getElementById('loginContainer').style.display = 'flex';
-                showNotification('Session expirée. Veuillez vous reconnecter.', 'error');
-            }
-        }
-
-        function checkSessionOnLoad() {
-            if (isSessionValid()) {
-                document.getElementById('loginContainer').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                loadData();
-                showNotification('Reconnexion automatique réussie');
-                startSessionTimer();
-                updateSessionDisplay();
-                return true;
-            }
-            return false;
-        }
-
-        // === FONCTION DE CONNEXION ===
-        function handleLogin() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            console.log('Tentative de connexion:', username);
-            
-            if (username === 'admin' && password === 'admin123') {
-                console.log('Connexion réussie');
-                createSession();
-                document.getElementById('loginContainer').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                loadData();
-                showNotification('Connexion réussie ! Session de 10 minutes activée');
-                updateSessionDisplay();
-            } else {
-                console.log('Identifiants incorrects');
-                showNotification('Identifiants incorrects !', 'error');
-            }
-        }
-
-        // === GESTION DES DONNÉES ===
-        function loadData() {
-            const savedDemandes = localStorage.getItem('monentreprise_demandes');
-            const savedClients = localStorage.getItem('monentreprise_clients');
-            const savedDocuments = localStorage.getItem('monentreprise_documents');
-            const savedSettings = localStorage.getItem('monentreprise_settings');
-            const savedIntegration = localStorage.getItem('monentreprise_integration');
-            
-            if (savedDemandes) {
-                demandes = JSON.parse(savedDemandes);
-            }
-            if (savedClients) {
-                clients = JSON.parse(savedClients);
-            }
-            if (savedDocuments) {
-                documents = JSON.parse(savedDocuments);
-            }
-            if (savedSettings) {
-                settings = { ...settings, ...JSON.parse(savedSettings) };
-            }
-            if (savedIntegration) {
-                integrationConfig = JSON.parse(savedIntegration);
-            }
-            
-            updateStats();
-            loadDemandes();
-            loadDocuments();
-        }
-
-        function saveData() {
-            localStorage.setItem('monentreprise_demandes', JSON.stringify(demandes));
-            localStorage.setItem('monentreprise_clients', JSON.stringify(clients));
-            localStorage.setItem('monentreprise_documents', JSON.stringify(documents));
-            localStorage.setItem('monentreprise_settings', JSON.stringify(settings));
-            localStorage.setItem('monentreprise_integration', JSON.stringify(integrationConfig));
-        }
-
-        function updateStats() {
-            document.getElementById('totalDemandes').textContent = demandes.length;
-            document.getElementById('demandesEnCours').textContent = demandes.filter(d => d.statut === 'en-cours').length;
-            document.getElementById('documentsTotal').textContent = documents.length;
-            
-            const ca = demandes.filter(d => d.statut === 'termine').reduce((total, d) => {
-                const prix = parseInt(d.prix.replace('€', ''));
-                return total + prix;
-            }, 0);
-            document.getElementById('chiffreAffaires').textContent = ca + '€';
-            
-            // Mise à jour finances
-            const caMois = document.getElementById('ca-mois');
-            const caTotal = document.getElementById('ca-total');
-            const ticketMoyen = document.getElementById('ticket-moyen');
-            
-            if (caMois) caMois.textContent = ca + '€';
-            if (caTotal) caTotal.textContent = ca + '€';
-            if (ticketMoyen && demandes.length > 0) {
-                ticketMoyen.textContent = Math.round(ca / demandes.filter(d => d.statut === 'termine').length || 0) + '€';
-            }
-        }
-
-        // === GESTION DES DOCUMENTS ===
-        function loadDocuments() {
-            const documentsList = document.getElementById('documentsList');
-            const documentsEmpty = document.getElementById('documentsEmpty');
-            
-            if (documents.length === 0) {
-                documentsEmpty.style.display = 'block';
-                documentsList.innerHTML = '';
-                return;
-            }
-            
-            documentsEmpty.style.display = 'none';
-            
-            documentsList.innerHTML = documents.map(doc => `
-                <div class="document-card">
-                    <div class="document-icon">📄</div>
-                    <div class="document-info">
-                        <div class="document-name">${doc.name}</div>
-                        <div class="document-meta">
-                            Client: ${doc.clientName} • 
-                            ${formatFileSize(doc.size)} • 
-                            ${formatDate(doc.uploadDate)}
-                        </div>
-                    </div>
-                    <div class="document-actions">
-                        <button class="action-btn btn-view" onclick="viewDocument('${doc.id}')">Voir</button>
-                        <button class="action-btn btn-confirm" onclick="downloadDocument('${doc.id}')">Télécharger</button>
-                    </div>
-                </div>
-            `).join('');
-
-            // Mettre à jour le filtre clients
-            updateClientFilter();
-        }
-
-        function updateClientFilter() {
-            const clientFilter = document.getElementById('docClientFilter');
-            const uniqueClients = [...new Set(documents.map(doc => doc.clientName))];
-            
-            clientFilter.innerHTML = '<option value="">Tous les clients</option>' +
-                uniqueClients.map(client => `<option value="${client}">${client}</option>`).join('');
-        }
-
-        function filterDocuments() {
-            const searchTerm = document.getElementById('docSearchInput').value.toLowerCase();
-            const clientFilter = document.getElementById('docClientFilter').value;
-            const typeFilter = document.getElementById('docTypeFilter').value;
-            
-            const cards = document.querySelectorAll('.document-card');
-            
-            cards.forEach(card => {
-                const text = card.textContent.toLowerCase();
-                const clientName = card.querySelector('.document-meta').textContent;
-                
-                const matchesSearch = text.includes(searchTerm);
-                const matchesClient = !clientFilter || clientName.includes(clientFilter);
-                const matchesType = !typeFilter || card.dataset.type === typeFilter;
-                
-                if (matchesSearch && matchesClient && matchesType) {
-                    card.style.display = '';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
-
-        function viewDocument(docId) {
-            const doc = documents.find(d => d.id === docId);
-            if (!doc) return;
-            
-            showNotification(`Ouverture du document: ${doc.name}`);
-            // Ici vous pouvez implémenter la visualisation du document
-        }
-
-        function downloadDocument(docId) {
-            const doc = documents.find(d => d.id === docId);
-            if (!doc) return;
-            
-            showNotification(`Téléchargement de: ${doc.name}`);
-            // Ici vous pouvez implémenter le téléchargement
-        }
-
-        // === GESTION DE L'INTÉGRATION ===
-        function showIntegrationConfig() {
-            const type = document.getElementById('integrationType').value;
-            
-            // Masquer toutes les configs
-            document.querySelectorAll('[id$="Config"]').forEach(config => {
-                config.classList.add('hidden');
-            });
-            
-            // Afficher la config sélectionnée
-            if (type) {
-                const configDiv = document.getElementById(type.replace('_', '') + 'Config');
-                if (configDiv) {
-                    configDiv.classList.remove('hidden');
-                }
-                
-                updateIntegrationInstructions(type);
-            }
-        }
-
-        function updateIntegrationInstructions(type) {
-            const instructions = document.getElementById('integrationInstructions');
-            
-            const instructionTexts = {
-                'google_drive': `
-                    <h5>Configuration Google Drive</h5>
-                    <ol>
-                        <li>Créez un projet dans Google Cloud Console</li>
-                        <li>Activez l'API Google Drive</li>
-                        <li>Créez des identifiants OAuth 2.0</li>
-                        <li>Copiez le Client ID ici</li>
-                        <li>Créez un dossier dans Google Drive pour stocker les documents</li>
-                        <li>Copiez l'ID du dossier depuis l'URL</li>
-                    </ol>
-                `,
-                'dropbox': `
-                    <h5>Configuration Dropbox</h5>
-                    <ol>
-                        <li>Créez une application sur Dropbox App Console</li>
-                        <li>Générez un Access Token</li>
-                        <li>Configurez les permissions de lecture/écriture</li>
-                        <li>Spécifiez le dossier de destination</li>
-                    </ol>
-                `,
-                'webhook': `
-                    <h5>Configuration Webhook</h5>
-                    <ol>
-                        <li>Déployez un serveur capable de recevoir des webhooks</li>
-                        <li>Configurez l'URL de votre endpoint</li>
-                        <li>Définissez une clé secrète pour sécuriser les appels</li>
-                        <li>Implémentez la réception des fichiers et métadonnées</li>
-                    </ol>
-                `,
-                'email': `
-                    <h5>Configuration Email</h5>
-                    <ol>
-                        <li>Créez un email dédié pour recevoir les documents</li>
-                        <li>Activez l'accès IMAP</li>
-                        <li>Générez un mot de passe d'application</li>
-                        <li>Configurez les paramètres IMAP</li>
-                    </ol>
-                `
-            };
-            
-            instructions.innerHTML = instructionTexts[type] || 'Sélectionnez un type d\'intégration.';
-        }
-
-        function testGoogleDriveConnection() {
-            const clientId = document.getElementById('googleClientId').value;
-            const folderId = document.getElementById('googleFolderId').value;
-            
-            if (!clientId || !folderId) {
-                showConnectionStatus('Veuillez remplir tous les champs', 'error');
-                return;
-            }
-            
-            // Simulation du test
-            setTimeout(() => {
-                showConnectionStatus('Connexion Google Drive réussie !', 'success');
-                integrationConfig.type = 'google_drive';
-                integrationConfig.googleClientId = clientId;
-                integrationConfig.googleFolderId = folderId;
-                saveData();
-            }, 1500);
-        }
-
-        function testDropboxConnection() {
-            const token = document.getElementById('dropboxToken').value;
-            const folder = document.getElementById('dropboxFolder').value;
-            
-            if (!token) {
-                showConnectionStatus('Veuillez renseigner le token', 'error');
-                return;
-            }
-            
-            setTimeout(() => {
-                showConnectionStatus('Connexion Dropbox réussie !', 'success');
-                integrationConfig.type = 'dropbox';
-                integrationConfig.dropboxToken = token;
-                integrationConfig.dropboxFolder = folder;
-                saveData();
-            }, 1500);
-        }
-
-        function testWebhookConnection() {
-            const url = document.getElementById('webhookUrl').value;
-            const secret = document.getElementById('webhookSecret').value;
-            
-            if (!url) {
-                showConnectionStatus('Veuillez renseigner l\'URL', 'error');
-                return;
-            }
-            
-            setTimeout(() => {
-                showConnectionStatus('Webhook configuré avec succès !', 'success');
-                integrationConfig.type = 'webhook';
-                integrationConfig.webhookUrl = url;
-                integrationConfig.webhookSecret = secret;
-                saveData();
-            }, 1500);
-        }
-
-        function testEmailConnection() {
-            const email = document.getElementById('receptionEmail').value;
-            const imap = document.getElementById('imapServer').value;
-            const password = document.getElementById('emailPassword').value;
-            
-            if (!email || !imap || !password) {
-                showConnectionStatus('Veuillez remplir tous les champs', 'error');
-                return;
-            }
-            
-            setTimeout(() => {
-                showConnectionStatus('Configuration email réussie !', 'success');
-                integrationConfig.type = 'email';
-                integrationConfig.receptionEmail = email;
-                integrationConfig.imapServer = imap;
-                integrationConfig.emailPassword = password;
-                saveData();
-            }, 1500);
-        }
-
-        function showConnectionStatus(message, type) {
-            const statusDiv = document.getElementById('connectionStatus');
-            statusDiv.className = `connection-status ${type}`;
-            statusDiv.textContent = message;
-        }
-
-        // === SYNCHRONISATION ===
-        function syncWithExternalData() {
-            if (!integrationConfig.type) {
-                showNotification('Aucune intégration configurée', 'warning');
-                return;
-            }
-            
-            showNotification('Synchronisation en cours...', 'warning');
-            
-            // Simulation de synchronisation
-            setTimeout(() => {
-                // Ajouter des données de test
-                addTestData();
-                updateStats();
-                loadDemandes();
-                loadDocuments();
-                showNotification('Synchronisation terminée !');
-                
-                // Mettre à jour l'heure de dernière sync
-                const now = new Date().toISOString();
-                localStorage.setItem('lastDocSync', now);
-                document.getElementById('lastDocSync').textContent = formatDate(now);
-            }, 2000);
-        }
-
-        function syncDocuments() {
-            syncWithExternalData();
-        }
-
-        function startAutoSync() {
-            const autoSyncEnabled = document.getElementById('autoSyncDocs').checked;
-            
-            if (autoSyncInterval) {
-                clearInterval(autoSyncInterval);
-            }
-            
-            if (autoSyncEnabled && integrationConfig.type) {
-                autoSyncInterval = setInterval(() => {
-                    syncWithExternalData();
-                }, 5 * 60 * 1000); // 5 minutes
-            }
-        }
-
-        function simulateClientSubmission() {
-            showNotification('Simulation d\'une soumission client...', 'warning');
-            
-            setTimeout(() => {
-                addTestData();
-                updateStats();
-                loadDemandes();
-                loadDocuments();
-                showNotification('Nouvelle demande et documents simulés !');
-            }, 1500);
-        }
-
-        function addTestData() {
-            const now = new Date().toISOString();
-            const testId = 'TEST-' + Date.now();
-            
-            // Ajouter une demande de test
-            const testDemande = {
-                id: testId,
-                prenom: 'Jean',
-                nom: 'Dupont',
-                email: 'jean.dupont@example.com',
-                telephone: '06 12 34 56 78',
-                service: 'micro-entreprise',
-                prix: '149€',
-                statut: 'nouveau',
-                details: 'Demande de création de micro-entreprise pour activité de conseil',
-                dateComplete: now,
-                urgence: 'Normal'
-            };
-            
-            // Ajouter des documents de test
-            const testDocuments = [
-                {
-                    id: testId + '-doc1',
-                    name: 'piece_identite.pdf',
-                    clientName: 'Jean Dupont',
-                    demandeId: testId,
-                    type: 'identite',
-                    size: 1024 * 500, // 500KB
-                    uploadDate: now,
-                    url: '#'
-                },
-                {
-                    id: testId + '-doc2',
-                    name: 'justificatif_domicile.pdf',
-                    clientName: 'Jean Dupont',
-                    demandeId: testId,
-                    type: 'justificatif',
-                    size: 1024 * 300, // 300KB
-                    uploadDate: now,
-                    url: '#'
-                }
-            ];
-            
-            demandes.unshift(testDemande);
-            documents.unshift(...testDocuments);
-            
-            saveData();
-        }
-
-        // === GESTION DES DEMANDES (reste du code identique) ===
-        function loadDemandes() {
-            const tbody = document.getElementById('demandesTableBody');
-            tbody.innerHTML = '';
-            
-            if (demandes.length === 0) {
-                document.getElementById('demandesEmpty').style.display = 'block';
-                document.getElementById('demandesTable').style.display = 'none';
-                return;
-            }
-            
-            document.getElementById('demandesEmpty').style.display = 'none';
-            document.getElementById('demandesTable').style.display = 'table';
-            
-            demandes.forEach(demande => {
-                const row = document.createElement('tr');
-                const relatedDocs = documents.filter(doc => doc.demandeId === demande.id);
-                const documentsDisplay = relatedDocs.length > 0 ? 
-                    `<span style="color: #28a745; font-weight: 600;">${relatedDocs.length} doc(s)</span>` : 
-                    `<span style="color: #666;">Aucun</span>`;
-                
-                row.innerHTML = `
-                    <td>${demande.id}</td>
-                    <td>${demande.prenom} ${demande.nom}</td>
-                    <td>${getServiceName(demande.service)}</td>
-                    <td>${formatDate(demande.dateComplete)}</td>
-                    <td><span class="status ${demande.statut}">${getStatusName(demande.statut)}</span></td>
-                    <td>${documentsDisplay}</td>
-                    <td>${demande.prix}</td>
-                    <td>
-                        <button class="action-btn btn-view" onclick="viewDemande('${demande.id}')">Voir</button>
-                        <button class="action-btn btn-confirm" onclick="openStatusModal('${demande.id}', 'termine')">Confirmer</button>
-                        <button class="action-btn btn-refuse" onclick="openStatusModal('${demande.id}', 'refuse')">Refuser</button>
-                        <button class="action-btn btn-progress" onclick="openStatusModal('${demande.id}', 'en-cours')">En cours</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // === GESTION DES STATUTS ===
-        function openStatusModal(demandeId, suggestedStatus = null) {
-            currentDemandeId = demandeId;
-            const modal = document.getElementById('statusModal');
-            const statusSelect = document.getElementById('newStatus');
-            const commentField = document.getElementById('statusComment');
-            
-            if (suggestedStatus) {
-                statusSelect.value = suggestedStatus;
-            }
-            
-            commentField.value = '';
-            modal.style.display = 'block';
-        }
-
-        function closeStatusModal() {
-            document.getElementById('statusModal').style.display = 'none';
-            currentDemandeId = null;
-        }
-
-        function updateDemandeStatus() {
-            if (!currentDemandeId) return;
-            
-            const newStatus = document.getElementById('newStatus').value;
-            const comment = document.getElementById('statusComment').value;
-            
-            const demandeIndex = demandes.findIndex(d => d.id === currentDemandeId);
-            if (demandeIndex === -1) {
-                showNotification('Demande non trouvée', 'error');
-                return;
-            }
-            
-            const demande = demandes[demandeIndex];
-            const oldStatus = demande.statut;
-            
-            demandes[demandeIndex].statut = newStatus;
-            demandes[demandeIndex].lastUpdate = new Date().toISOString();
-            
-            if (!demandes[demandeIndex].statusHistory) {
-                demandes[demandeIndex].statusHistory = [];
-            }
-            
-            demandes[demandeIndex].statusHistory.push({
-                date: new Date().toISOString(),
-                oldStatus: oldStatus,
-                newStatus: newStatus,
-                comment: comment,
-                updatedBy: 'admin'
-            });
-            
-            saveData();
-            updateStats();
-            loadDemandes();
-            closeStatusModal();
-            
-            showNotification(`Statut mis à jour: ${getStatusName(newStatus)}`);
-        }
-
-        // === FONCTIONS D'AFFICHAGE ===
-        function viewDemande(demandeId) {
-            const demande = demandes.find(d => d.id === demandeId);
-            if (!demande) return;
-            
-            const relatedDocs = documents.filter(doc => doc.demandeId === demandeId);
-            const modal = document.getElementById('detailModal');
-            const content = document.getElementById('modalContent');
-            
-            const details = `
-                <div class="demande-details">
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <div class="detail-label">Numéro de demande</div>
-                            <div class="detail-value">${demande.id}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Client</div>
-                            <div class="detail-value">${demande.prenom} ${demande.nom}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Email</div>
-                            <div class="detail-value">${demande.email}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Téléphone</div>
-                            <div class="detail-value">${demande.telephone}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Service</div>
-                            <div class="detail-value">${getServiceName(demande.service)}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Prix</div>
-                            <div class="detail-value">${demande.prix}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Date de demande</div>
-                            <div class="detail-value">${formatDate(demande.dateComplete)}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Urgence</div>
-                            <div class="detail-value">${demande.urgence || 'Normal'}</div>
-                        </div>
-                    </div>
-                    
-                    ${demande.details && demande.details !== 'Aucun message' ? `
-                        <div style="margin-top: 1rem;">
-                            <div class="detail-label">Message du client</div>
-                            <div class="detail-value">${demande.details}</div>
-                        </div>
-                    ` : ''}
-                    
-                    ${relatedDocs.length > 0 ? `
-                        <div style="margin-top: 1rem;">
-                            <div class="detail-label">Documents reçus (${relatedDocs.length})</div>
-                            <div style="display: grid; gap: 0.5rem; margin-top: 0.5rem;">
-                                ${relatedDocs.map(doc => `
-                                    <div class="document-card">
-                                        <div class="document-icon">📄</div>
-                                        <div class="document-info">
-                                            <div class="document-name">${doc.name}</div>
-                                            <div class="document-meta">
-                                                ${formatFileSize(doc.size)} • Reçu le ${formatDate(doc.uploadDate)}
-                                            </div>
-                                        </div>
-                                        <div class="document-actions">
-                                            <button class="action-btn btn-view" onclick="viewDocument('${doc.id}')">Voir</button>
-                                            <button class="action-btn btn-confirm" onclick="downloadDocument('${doc.id}')">Télécharger</button>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    ` : `
-                        <div style="margin-top: 1rem;">
-                            <div class="detail-label">Documents reçus</div>
-                            <div style="padding: 1rem; background: #f8f9fa; border-radius: 8px; text-align: center; color: #666; font-style: italic;">
-                                Aucun document reçu pour cette demande
-                            </div>
-                        </div>
-                    `}
-                </div>
-                
-                ${demande.statusHistory && demande.statusHistory.length > 0 ? `
-                    <div style="margin-top: 1.5rem;">
-                        <h4>Historique des modifications</h4>
-                        <div class="activity-list">
-                            ${demande.statusHistory.map(history => `
-                                <li>
-                                    <div>
-                                        <strong>${formatDate(history.date)}</strong><br>
-                                        ${getStatusName(history.oldStatus)} → ${getStatusName(history.newStatus)}
-                                        ${history.comment ? `<br><em>${history.comment}</em>` : ''}
-                                    </div>
-                                </li>
-                            `).join('')}
-                        </div>
-                    </div>
-                ` : ''}
-                
-                <div style="margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <button class="btn" onclick="openStatusModal('${demande.id}')" style="width: auto;">Changer le statut</button>
-                    <button class="btn" onclick="closeModal()" style="width: auto; background: #6c757d;">Fermer</button>
-                </div>
-            `;
-            
-            content.innerHTML = details;
-            modal.style.display = 'block';
-        }
-
-        function closeModal() {
-            document.getElementById('detailModal').style.display = 'none';
-        }
-
-        // === FONCTIONS UTILITAIRES ===
-        function getServiceName(service) {
-            const services = {
-                'micro-entreprise': 'Création Micro-Entreprise',
-                'titre-sejour': 'Titre de séjour',
-                'prefecture': 'Rendez-vous préfecture',
-                'etat-civil': 'État civil',
-                'securite-sociale': 'Sécurité sociale',
-                'logement': 'Logement',
-                'emploi': 'Emploi',
-                'transport': 'Transport',
-                'fiscalite': 'Fiscalité',
-                'numerique': 'Services numériques',
-                'autre': 'Autre'
-            };
-            return services[service] || service;
-        }
-
-        function getStatusName(status) {
-            const statuses = {
-                'nouveau': 'Nouveau',
-                'en-cours': 'En cours',
-                'termine': 'Terminé',
-                'refuse': 'Refusé'
-            };
-            return statuses[status] || status;
-        }
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('fr-FR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        function filterDemandes() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const statusFilter = document.getElementById('statusFilter').value;
-            const serviceFilter = document.getElementById('serviceFilter').value;
-            
-            const rows = document.querySelectorAll('#demandesTableBody tr');
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                const statusCell = row.querySelector('.status');
-                const serviceCell = row.cells[2];
-                
-                const matchesSearch = text.includes(searchTerm);
-                const matchesStatus = !statusFilter || statusCell.classList.contains(statusFilter);
-                const matchesService = !serviceFilter || serviceCell.textContent.toLowerCase().includes(serviceFilter);
-                
-                if (matchesSearch && matchesStatus && matchesService) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
-
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = `notification ${type}`;
-            notification.classList.add('show');
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 4000);
-        }
-
-        function exportData() {
-            const data = {
-                demandes: demandes,
-                clients: clients,
-                documents: documents,
-                integrationConfig: integrationConfig,
-                exportDate: new Date().toISOString()
-            };
-            
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `monentreprise-export-${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            
-            showNotification('Données exportées avec succès');
-        }
-
-        function saveSettings() {
-            settings.adminEmail = document.getElementById('adminEmail').value;
-            settings.companyName = document.getElementById('companyName').value;
-            settings.emailNotifications = document.getElementById('emailNotifications').checked;
-            
-            const newPassword = document.getElementById('newPassword').value;
-            if (newPassword) {
-                settings.adminPassword = newPassword;
-            }
-            
-            localStorage.setItem('monentreprise_settings', JSON.stringify(settings));
-            showNotification('Paramètres sauvegardés');
-        }
-
-        function logout() {
-            destroySession();
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('loginContainer').style.display = 'flex';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            showNotification('Déconnexion réussie');
-        }
-
-        // === NAVIGATION ===
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Panel Admin MonEntreprise.fr chargé');
-            
-            // Vérifier la session au chargement
-            if (!checkSessionOnLoad()) {
-                console.log('Aucune session valide, affichage du formulaire de connexion');
-            }
-            
-            // Navigation entre sections
-            document.querySelectorAll('.sidebar a[data-section]').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    const section = this.getAttribute('data-section');
-                    
-                    // Mettre à jour les liens actifs
-                    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Masquer toutes les sections
-                    document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
-                    
-                    // Afficher la section sélectionnée
-                    const targetSection = document.getElementById(section);
-                    if (targetSection) {
-                        targetSection.classList.remove('hidden');
-                    }
-                    
-                    // Mettre à jour le titre
-                    const titles = {
-                        'overview': '📊 Vue d\'ensemble',
-                        'demandes': '📋 Gestion des demandes',
-                        'documents': '📄 Gestion des documents',
-                        'clients': '👥 Gestion des clients',
-                        'finances': '💰 Gestion financière',
-                        'integration': '🔗 Configuration de l\'intégration',
-                        'parametres': '⚙️ Paramètres'
-                    };
-                    
-                    document.getElementById('pageTitle').textContent = titles[section] || section;
-                });
-            });
-            
-            // Gestion des modals
-            window.addEventListener('click', function(event) {
-                const detailModal = document.getElementById('detailModal');
-                const statusModal = document.getElementById('statusModal');
-                
-                if (event.target === detailModal) {
-                    closeModal();
-                }
-                if (event.target === statusModal) {
-                    closeStatusModal();
-                }
-            });
-            
-            // Gestion de la touche Entrée pour la connexion
-            document.getElementById('password').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    handleLogin();
-                }
-            });
-
-            // Événement pour l'auto-sync
-            document.getElementById('autoSyncDocs').addEventListener('change', startAutoSync);
-            
-            // Charger la dernière sync
-            const lastSync = localStorage.getItem('lastDocSync');
-            if (lastSync) {
-                document.getElementById('lastDocSync').textContent = formatDate(lastSync);
-            }
-        });
-
-        // Log pour le débogage
-        console.log('Panel Admin MonEntreprise.fr avec intégration initialisé');
-    </script>
-</body>
-</html>
+            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey
