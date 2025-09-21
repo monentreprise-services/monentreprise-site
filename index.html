@@ -950,12 +950,13 @@
     <a href="#" class="floating-btn chat-btn" onclick="openChat()">💬</a>
     <a href="https://wa.me/33766306016" class="floating-btn whatsapp-btn" target="_blank">📱</a>
 
-    <!-- JavaScript avec corrections mobile -->
+    <!-- JavaScript avec système de double envoi d'emails -->
     <script>
-        // Configuration EmailJS avec vos vraies clés
+        // Configuration EmailJS avec double envoi d'emails
         const EMAIL_CONFIG = {
             serviceId: 'service_2te46oj',
-            templateId: 'template_m3ewwas',
+            templateId: 'template_m3ewwas',        // Template pour admin
+            clientTemplateId: 'template_9jpudgc',  // Template pour client
             adminEmail: 'mohamed.oudiai@icloud.com'
         };
 
@@ -1024,7 +1025,7 @@
                 return;
             }
 
-            debugLog('EmailJS disponible, démarrage envoi');
+            debugLog('EmailJS disponible, démarrage envoi double email');
             
             // Désactiver le bouton et afficher le loading
             const submitBtn = document.getElementById('submitBtn');
@@ -1043,10 +1044,10 @@
             const requestId = generateRequestId();
             debugLog('ID de demande généré', requestId);
 
-            // Tentative d'envoi EmailJS
-            sendDemandeEmail(formData, requestId)
+            // Tentative d'envoi double EmailJS (admin + client)
+            sendDoubleEmail(formData, requestId)
                 .then((response) => {
-                    debugLog('EmailJS SUCCESS', response);
+                    debugLog('Double envoi EMAIL SUCCESS', response);
                     
                     // Sauvegarder dans le panel admin
                     try {
@@ -1056,13 +1057,17 @@
                         debugLog('Erreur sauvegarde admin panel', error);
                     }
                     
-                    // Message de succès
+                    // Message de succès avec double confirmation
                     showNotification(`✅ Votre demande a été envoyée avec succès !
 
-📧 Vous recevrez une confirmation par email dans les prochaines minutes.
+📧 Vous allez recevoir 2 emails de confirmation :
+   • Une confirmation immédiate sur votre boîte email
+   • Une notification à notre équipe pour traitement
+
 🆔 Numéro de demande: ${requestId}
 ⏰ Nous vous contacterons sous 24h maximum.
 
+Vérifiez aussi vos spams si vous ne recevez pas l'email.
 Merci de votre confiance !`);
                     
                     // Reset du formulaire
@@ -1073,14 +1078,29 @@ Merci de votre confiance !`);
                     debugLog('Formulaire réinitialisé avec succès');
                 })
                 .catch((error) => {
-                    debugLog('EmailJS ERROR', error);
+                    debugLog('Double envoi EMAIL ERROR', error);
+                    
+                    // Message d'erreur plus détaillé
+                    let errorMessage = 'Erreur lors de l\'envoi';
+                    if (error && error.details) {
+                        errorMessage = error.details;
+                    } else if (error && error.fullError) {
+                        errorMessage = `Détails: ${error.fullError}`;
+                    }
+                    
                     showNotification(`❌ Erreur lors de l'envoi de votre demande.
 
-Veuillez réessayer dans quelques instants ou nous contacter directement:
-📞 01 23 45 67 89
-📧 contact@monentreprise.fr
+Code d'erreur: ${errorMessage}
 
-Code d'erreur: ${error.text || error.message || 'EMAIL_ERROR'}`, 'error');
+Solutions possibles:
+• Vérifiez votre connexion internet
+• Réessayez dans quelques instants
+• Contactez-nous directement si le problème persiste
+
+📞 +33 766 306 016
+📧 mohamed.oudiai@icloud.com
+
+⚠️ Activez les logs de debug pour plus d'infos (F12 > Console)`, 'error');
                 })
                 .finally(() => {
                     // Restaurer le bouton
@@ -1090,7 +1110,88 @@ Code d'erreur: ${error.text || error.message || 'EMAIL_ERROR'}`, 'error');
                 });
         }
 
-        // Fonction d'envoi EmailJS améliorée
+        // Fonction d'envoi double email (admin + client)
+        function sendDoubleEmail(formData, requestId) {
+            debugLog('Préparation des paramètres pour envoi double');
+            
+            const baseParams = {
+                client_name: formData.get('prenom') + ' ' + formData.get('nom'),
+                client_email: formData.get('email'),
+                client_phone: formData.get('telephone') || 'Non renseigné',
+                service_type: getServiceDisplayName(formData.get('service')),
+                urgence_level: formData.get('urgence') || 'Normal',
+                client_message: formData.get('message') || 'Aucun message spécifique',
+                request_date: new Date().toLocaleDateString('fr-FR') + ' à ' + new Date().toLocaleTimeString('fr-FR'),
+                request_id: requestId,
+                estimated_price: getServicePrice(formData.get('service'))
+            };
+
+            // Paramètres pour l'admin
+            const adminParams = {
+                ...baseParams,
+                admin_email: EMAIL_CONFIG.adminEmail
+            };
+
+            // Paramètres pour le client
+            const clientParams = {
+                ...baseParams,
+                to_email: formData.get('email') // Email du client pour le template de confirmation
+            };
+
+            debugLog('Paramètres admin préparés', adminParams);
+            debugLog('Paramètres client préparés', clientParams);
+
+            return new Promise((resolve, reject) => {
+                try {
+                    // Envoi simultané des deux emails
+                    Promise.all([
+                        // Email à l'admin
+                        emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.templateId, adminParams),
+                        // Email de confirmation au client
+                        emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.clientTemplateId, clientParams)
+                    ])
+                    .then((responses) => {
+                        debugLog('Tous les emails envoyés avec succès', responses);
+                        debugLog('Email admin envoyé:', responses[0]);
+                        debugLog('Email client envoyé:', responses[1]);
+                        resolve({
+                            admin: responses[0],
+                            client: responses[1],
+                            success: true,
+                            message: 'Double envoi réussi'
+                        });
+                    })
+                    .catch((error) => {
+                        debugLog('Erreur lors de l\'envoi des emails', error);
+                        
+                        // Essayer de déterminer quel email a échoué
+                        let errorDetails = 'Erreur inconnue';
+                        if (error && error.text) {
+                            errorDetails = error.text;
+                        } else if (error && error.message) {
+                            errorDetails = error.message;
+                        } else if (typeof error === 'string') {
+                            errorDetails = error;
+                        }
+                        
+                        reject({
+                            message: 'Erreur envoi email',
+                            error: error,
+                            details: errorDetails,
+                            fullError: JSON.stringify(error)
+                        });
+                    });
+                } catch (error) {
+                    debugLog('Erreur dans l\'envoi double email', error);
+                    reject({
+                        message: 'Erreur critique',
+                        error: error
+                    });
+                }
+            });
+        }
+
+        // Fonction d'envoi EmailJS améliorée (gardée en backup)
         function sendDemandeEmail(formData, requestId) {
             debugLog('Préparation des paramètres EmailJS');
             
@@ -1184,7 +1285,8 @@ Code d'erreur: ${error.text || error.message || 'EMAIL_ERROR'}`, 'error');
                     prix: getServicePrice(formData.get('service')),
                     details: formData.get('message') || 'Aucun message spécifique',
                     urgence: formData.get('urgence') || 'Normal',
-                    dateComplete: new Date().toLocaleString('fr-FR')
+                    dateComplete: new Date().toLocaleString('fr-FR'),
+                    emailSent: 'double' // Marquer que les deux emails ont été envoyés
                 };
                 
                 demandes.unshift(newDemande);
@@ -1270,12 +1372,12 @@ Code d'erreur: ${error.text || error.message || 'EMAIL_ERROR'}`, 'error');
 
         // Initialisation et événements
         document.addEventListener('DOMContentLoaded', function() {
-            debugLog('DOM chargé - Initialisation');
+            debugLog('DOM chargé - Initialisation avec système double email');
             
             // Vérifier EmailJS
             setTimeout(() => {
                 if (typeof emailjs !== 'undefined') {
-                    debugLog('EmailJS chargé et disponible');
+                    debugLog('EmailJS chargé et disponible pour double envoi');
                 } else {
                     debugLog('ATTENTION: EmailJS non disponible');
                 }
@@ -1384,12 +1486,81 @@ Code d'erreur: ${error.text || error.message || 'EMAIL_ERROR'}`, 'error');
                 });
             }
 
-            debugLog('Initialisation terminée');
+            debugLog('Initialisation terminée avec système double email');
+            
+            // Ajouter bouton de test en mode debug
+            if (debugMode) {
+                const testBtn = document.createElement('button');
+                testBtn.textContent = 'TEST EMAIL';
+                testBtn.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    right: 20px;
+                    background: #ff6b6b;
+                    color: white;
+                    border: none;
+                    padding: 10px;
+                    border-radius: 5px;
+                    z-index: 9999;
+                    cursor: pointer;
+                `;
+                testBtn.onclick = testEmailSystem;
+                document.body.appendChild(testBtn);
+            }
         });
+
+        // Fonction de test pour diagnostiquer les erreurs
+        function testEmailSystem() {
+            debugLog('=== TEST EMAIL SYSTEM ===');
+            
+            // Test 1: Vérifier EmailJS
+            if (typeof emailjs === 'undefined') {
+                debugLog('ECHEC: EmailJS non chargé');
+                alert('EmailJS non chargé !');
+                return;
+            }
+            debugLog('OK: EmailJS disponible');
+            
+            // Test 2: Configuration
+            debugLog('Configuration EMAIL_CONFIG:', EMAIL_CONFIG);
+            
+            // Test 3: Envoi simple admin
+            const testParams = {
+                client_name: 'Test User',
+                client_email: 'test@example.com',
+                service_type: 'Test',
+                request_id: 'TEST-123',
+                admin_email: EMAIL_CONFIG.adminEmail
+            };
+            
+            debugLog('Test envoi admin avec params:', testParams);
+            
+            emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.templateId, testParams)
+                .then((response) => {
+                    debugLog('Test admin REUSSI:', response);
+                    alert('Test admin réussi ! Status: ' + response.status);
+                    
+                    // Test envoi client
+                    const clientParams = {
+                        ...testParams,
+                        to_email: 'test@example.com'
+                    };
+                    
+                    return emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.clientTemplateId, clientParams);
+                })
+                .then((response) => {
+                    debugLog('Test client REUSSI:', response);
+                    alert('Test client réussi ! Status: ' + response.status);
+                })
+                .catch((error) => {
+                    debugLog('Test ECHEC:', error);
+                    alert('Test échoué: ' + JSON.stringify(error));
+                });
+        }
 
         // Chat simulation
         function openChat() {
-            alert('💬 Chat en direct\n\nNotre équipe est disponible du lundi au vendredi de 9h à 18h.\n\nPour une assistance immédiate :\n📞 01 23 45 67 89\n📧 contact@monentreprise.fr');
+            alert('💬 Chat en direct\n\nNotre équipe est disponible du lundi au vendredi de 9h à 18h.\n\nPour une assistance immédiate :\n📞 +33 766 306 016\n📧 mohamed.oudiai@icloud.com');
         }
 
         // Test mobile spécifique
@@ -1404,7 +1575,8 @@ Code d'erreur: ${error.text || error.message || 'EMAIL_ERROR'}`, 'error');
                 userAgent: navigator.userAgent,
                 screen: `${screen.width}x${screen.height}`,
                 viewport: `${window.innerWidth}x${window.innerHeight}`,
-                emailjsAvailable: typeof emailjs !== 'undefined'
+                emailjsAvailable: typeof emailjs !== 'undefined',
+                doubleEmailSystem: 'ACTIVATED'
             });
         });
     </script>
