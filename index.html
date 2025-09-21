@@ -819,7 +819,7 @@
                 <div class="step">
                     <div class="step-number">3</div>
                     <h3>Confirmations automatiques</h3>
-                    <p>Recevez instantanément un email ET un SMS de confirmation</p>
+                    <p>Recevez instantanément vos confirmations et votre numéro de suivi</p>
                 </div>
                 <div class="step">
                     <div class="step-number">4</div>
@@ -842,7 +842,6 @@
                     <ul class="service-list">
                         <li>1 démarche administrative</li>
                         <li>Support par email</li>
-                        <li>Confirmation SMS incluse</li>
                         <li>Traitement sous 48h</li>
                         <li>Suivi en ligne</li>
                     </ul>
@@ -856,7 +855,6 @@
                     <ul class="service-list">
                         <li>Création micro-entreprise complète</li>
                         <li>Support téléphonique</li>
-                        <li>SMS de suivi personnalisés</li>
                         <li>Traitement prioritaire 24h</li>
                         <li>Conseils personnalisés</li>
                         <li>Kit de démarrage inclus</li>
@@ -871,7 +869,6 @@
                     <ul class="service-list">
                         <li>Jusqu'à 5 démarches</li>
                         <li>Support dédié 7j/7</li>
-                        <li>Notifications SMS en temps réel</li>
                         <li>Traitement express</li>
                         <li>Rendez-vous visio</li>
                         <li>Garantie résultat</li>
@@ -887,12 +884,6 @@
         <div class="container">
             <h2 class="section-title">Commencez maintenant</h2>
             <div class="form-container">
-                <!-- SMS Notice -->
-                <div class="sms-notice">
-                    <strong>📱 SMS Twilio confirmé</strong>
-                    Vous recevrez un SMS de confirmation automatique sur votre numéro
-                </div>
-
                 <form id="mainForm" novalidate>
                     <div class="form-group">
                         <label for="service">Type de service souhaité *</label>
@@ -928,9 +919,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="telephone">Téléphone * (pour SMS Twilio)</label>
-                        <input type="tel" id="telephone" name="telephone" required placeholder="+33 7 66 30 60 16">
-                        <small style="color: #666; font-size: 0.9rem;">SMS envoyé automatiquement via Twilio</small>
+                        <label for="telephone">Téléphone *</label>
+                        <input type="tel" id="telephone" name="telephone" required placeholder="+33 6 XX XX XX XX">
+                        <small style="color: #666; font-size: 0.9rem;">Format international recommandé</small>
                     </div>
 
                     <div class="form-group">
@@ -1003,10 +994,9 @@
         const TWILIO_CONFIG = {
             accountSid: 'ACa20e7f6fb21edb0e40410cd9ed9a8607',
             authToken: '1b91ce9939a0fa1a6723bbeb7e9940c7',
-            phoneNumber: '+33757595384',
-            recoveryCode: 'UV498WX78Z3TTR6X7YX7U91Y',
+            phoneNumber: '+33766306016', // Votre vrai numéro
             serviceName: 'MonEntreprise.fr',
-            testMode: true
+            testMode: false
         };
 
         // Configuration EmailJS
@@ -1239,19 +1229,13 @@ MonEntreprise.fr
                         debugLog('Erreur sauvegarde admin panel', error);
                     }
                     
-                    // Message de succès avec confirmation Twilio
-                    const twilioInfo = response.sms.real ? ' (SMS Twilio réel envoyé)' : ' (SMS simulé)';
+                    // Message de succès discret
                     showNotification(`✅ Votre demande a été envoyée avec succès !
 
-📧 Email de confirmation: ${formData.get('email')}
-📱 SMS Twilio envoyé au: ${formData.get('telephone')}${twilioInfo}
-🆔 SID Twilio: ${response.sms.sid || 'N/A'}
-🔔 Notre équipe notifiée instantanément
-
+📧 Confirmation envoyée à: ${formData.get('email')}
 🆔 Numéro de demande: ${requestId}
 ⏰ Nous vous contacterons sous 24h maximum.
 
-Coût SMS estimé: ~0.06€
 Merci de votre confiance !`);
                     
                     // Reset du formulaire
@@ -1273,7 +1257,7 @@ Merci de votre confiance !`);
                     
                     showNotification(`❌ Erreur lors de l'envoi de votre demande.
 
-${errorMessage}
+Une erreur technique s'est produite.
 
 Solutions possibles:
 • Vérifiez votre connexion internet
@@ -1283,9 +1267,7 @@ Solutions possibles:
 
 📞 +33 766 306 016
 📧 mohamed.oudiai@icloud.com
-💬 WhatsApp disponible
-
-⚠️ Vérifiez la console (F12) pour plus d'infos`, 'error');
+💬 WhatsApp disponible`, 'error');
                 })
                 .finally(() => {
                     submitBtn.disabled = false;
@@ -1644,7 +1626,7 @@ Solutions possibles:
                     
                     switch(selectedService) {
                         case 'micro-entreprise':
-                            recommendedPrice = 'Pack Premium (79€) recommandé - SMS Twilio inclus';
+                            recommendedPrice = 'Pack Premium (79€) recommandé';
                             break;
                         case 'titre-sejour':
                         case 'prefecture':
@@ -1655,7 +1637,7 @@ Solutions possibles:
                         case 'transport':
                         case 'fiscalite':
                         case 'numerique':
-                            recommendedPrice = 'Pack Essentiel (29€) recommandé - SMS Twilio inclus';
+                            recommendedPrice = 'Pack Essentiel (29€) recommandé';
                             break;
                         default:
                             recommendedPrice = '';
@@ -1744,7 +1726,7 @@ Solutions possibles:
 
         // Chat simulation
         function openChat() {
-            alert('💬 Chat en direct\n\nNotre équipe est disponible du lundi au vendredi de 9h à 18h.\n\nPour une assistance immédiate :\n📞 +33 766 306 016\n📧 mohamed.oudiai@icloud.com\n📱 SMS Twilio disponible 24h/24');
+            alert('💬 Chat en direct\n\nNotre équipe est disponible du lundi au vendredi de 9h à 18h.\n\nPour une assistance immédiate :\n📞 +33 766 306 016\n📧 mohamed.oudiai@icloud.com');
         }
 
         // Log des informations device avec Twilio
