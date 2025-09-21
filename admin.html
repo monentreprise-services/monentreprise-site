@@ -761,11 +761,11 @@
     <div id="notification" class="notification"></div>
 
     <script>
-        // Configuration
-        const emailjsConfig = {
-            serviceId: 'service_2te46oj',
-            templateId: 'template_9jpudgc',
-            publicKey: 'ntZTBB2BSKb64uZk8'
+        // Configuration de session persistante
+        const SESSION_CONFIG = {
+            sessionKey: 'monentreprise_admin_session',
+            sessionDuration: 10 * 60 * 1000, // 10 minutes
+            warningTime: 2 * 60 * 1000 // Avertissement à 2 minutes
         };
 
         // Variables globales
@@ -775,6 +775,7 @@
         let currentDemandeId = null;
         let emailsSentCount = 0;
         let sessionTimer = null;
+        let warningTimer = null;
         let settings = {
             adminEmail: 'mohamed.oudiai@icloud.com',
             adminPassword: 'admin123',
@@ -794,41 +795,162 @@
             emailjs.init(emailjsConfig.publicKey);
         }
 
-        // Session management
-        function startSession() {
-            const sessionDuration = 10 * 60 * 1000; // 10 minutes
-            sessionTimer = setInterval(updateSessionDisplay, 1000);
+        // === GESTION DE SESSION PERSISTANTE ===
+        function createSession() {
+            const sessionData = {
+                isLoggedIn: true,
+                loginTime: Date.now(),
+                expiryTime: Date.now() + SESSION_CONFIG.sessionDuration
+            };
             
-            setTimeout(() => {
-                if (confirm('Votre session expire dans 2 minutes. Voulez-vous la prolonger ?')) {
-                    extendSession();
+            localStorage.setItem(SESSION_CONFIG.sessionKey, JSON.stringify(sessionData));
+            console.log('Session créée pour 10 minutes');
+            startSessionTimer();
+        }
+
+        function isSessionValid() {
+            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
+            
+            if (!sessionData) {
+                return false;
+            }
+            
+            try {
+                const session = JSON.parse(sessionData);
+                const now = Date.now();
+                
+                if (now > session.expiryTime) {
+                    destroySession();
+                    return false;
                 }
-            }, sessionDuration - 2 * 60 * 1000);
+                
+                return true;
+            } catch (error) {
+                console.error('Erreur de session:', error);
+                destroySession();
+                return false;
+            }
+        }
+
+        function destroySession() {
+            localStorage.removeItem(SESSION_CONFIG.sessionKey);
+            if (sessionTimer) {
+                clearInterval(sessionTimer);
+            }
+            if (warningTimer) {
+                clearTimeout(warningTimer);
+            }
+            console.log('Session supprimée');
+        }
+
+        function checkSessionOnLoad() {
+            if (isSessionValid()) {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                loadData();
+                showNotification('Reconnexion automatique réussie');
+                startSessionTimer();
+                updateSessionDisplay();
+                return true;
+            }
+            return false;
+        }
+
+        function startSessionTimer() {
+            sessionTimer = setInterval(() => {
+                if (!isSessionValid()) {
+                    autoLogout();
+                    return;
+                }
+                updateSessionDisplay();
+            }, 1000);
+            
+            warningTimer = setTimeout(() => {
+                if (isSessionValid()) {
+                    const confirmed = confirm('Votre session expire dans 2 minutes.\nVoulez-vous la prolonger de 10 minutes ?');
+                    if (confirmed) {
+                        extendSession();
+                    }
+                }
+            }, SESSION_CONFIG.sessionDuration - SESSION_CONFIG.warningTime);
         }
 
         function updateSessionDisplay() {
-            const now = new Date();
-            const minutes = Math.floor(Math.random() * 10) + 5; // Simulation
-            const seconds = Math.floor(Math.random() * 60);
-            document.getElementById('sessionTimer').textContent = 
-                `Session: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
+            if (!sessionData) return;
+            
+            try {
+                const session = JSON.parse(sessionData);
+                const now = Date.now();
+                const timeLeft = session.expiryTime - now;
+                
+                if (timeLeft > 0) {
+                    const minutes = Math.floor(timeLeft / (60 * 1000));
+                    const seconds = Math.floor((timeLeft % (60 * 1000)) / 1000);
+                    
+                    const sessionDisplay = document.getElementById('sessionTimer');
+                    if (sessionDisplay) {
+                        sessionDisplay.textContent = `Session: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                        
+                        if (timeLeft <= SESSION_CONFIG.warningTime) {
+                            sessionDisplay.style.color = '#ff6b6b';
+                            sessionDisplay.style.borderColor = 'rgba(255, 107, 107, 0.3)';
+                        } else {
+                            sessionDisplay.style.color = '#667eea';
+                            sessionDisplay.style.borderColor = 'rgba(102, 126, 234, 0.2)';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur affichage session:', error);
+            }
         }
 
         function extendSession() {
-            showNotification('Session prolongée de 10 minutes');
+            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
+            if (sessionData) {
+                try {
+                    const session = JSON.parse(sessionData);
+                    session.expiryTime = Date.now() + SESSION_CONFIG.sessionDuration;
+                    localStorage.setItem(SESSION_CONFIG.sessionKey, JSON.stringify(session));
+                    
+                    if (sessionTimer) {
+                        clearInterval(sessionTimer);
+                    }
+                    if (warningTimer) {
+                        clearTimeout(warningTimer);
+                    }
+                    startSessionTimer();
+                    
+                    showNotification('Session prolongée de 10 minutes');
+                    updateSessionDisplay();
+                } catch (error) {
+                    console.error('Erreur prolongation session:', error);
+                }
+            }
         }
 
-        // Login
+        function autoLogout() {
+            destroySession();
+            if (document.getElementById('dashboard').style.display === 'block') {
+                document.getElementById('dashboard').style.display = 'none';
+                document.getElementById('loginContainer').style.display = 'flex';
+                showNotification('Session expirée. Veuillez vous reconnecter.', 'error');
+            }
+        }
+
+        // Login avec session persistante
         function handleLogin() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
             if (username === 'admin' && password === 'admin123') {
+                createSession(); // Créer une session persistante
                 document.getElementById('loginContainer').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'block';
                 loadData();
-                startSession();
-                showNotification('Connexion réussie ! Système de notifications activé');
+                showNotification('Connexion réussie ! Session de 10 minutes activée');
+                updateSessionDisplay();
             } else {
                 showNotification('Identifiants incorrects !', 'error');
             }
