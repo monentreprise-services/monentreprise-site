@@ -24,6 +24,7 @@
             align-items: center;
             min-height: 100vh;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem;
         }
 
         .login-form {
@@ -93,17 +94,34 @@
             min-height: 100vh;
         }
 
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 2000;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
         .sidebar {
             position: fixed;
             left: 0;
             top: 0;
             height: 100vh;
-            width: 250px;
+            width: 280px;
             background: #2c3e50;
             color: white;
             padding: 2rem 0;
-            z-index: 1000;
+            z-index: 1500;
             overflow-y: auto;
+            transition: transform 0.3s ease;
         }
 
         .sidebar h2 {
@@ -111,6 +129,7 @@
             margin-bottom: 2rem;
             color: #667eea;
             padding: 0 1rem;
+            font-size: 1.5rem;
         }
 
         .sidebar ul {
@@ -127,6 +146,7 @@
             display: block;
             padding: 1rem 1.5rem;
             transition: background 0.3s ease;
+            font-size: 1rem;
         }
 
         .sidebar a:hover,
@@ -136,8 +156,9 @@
         }
 
         .main-content {
-            margin-left: 250px;
+            margin-left: 280px;
             padding: 2rem;
+            min-height: 100vh;
         }
 
         .header {
@@ -191,10 +212,15 @@
             margin-bottom: 2rem;
         }
 
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
         .table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 1rem;
+            min-width: 800px;
         }
 
         .table th,
@@ -202,12 +228,15 @@
             padding: 1rem;
             text-align: left;
             border-bottom: 1px solid #e0e0e0;
+            white-space: nowrap;
         }
 
         .table th {
             background: #f8f9fa;
             font-weight: 600;
             color: #333;
+            position: sticky;
+            top: 0;
         }
 
         .status {
@@ -250,6 +279,7 @@
             font-size: 0.8rem;
             margin: 0 0.2rem;
             font-weight: 600;
+            white-space: nowrap;
         }
 
         .btn-view {
@@ -280,22 +310,23 @@
         .modal {
             display: none;
             position: fixed;
-            z-index: 2000;
+            z-index: 3000;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
             background-color: rgba(0,0,0,0.5);
+            padding: 1rem;
         }
 
         .modal-content {
             background-color: white;
-            margin: 5% auto;
+            margin: 2% auto;
             padding: 2rem;
             border-radius: 15px;
-            width: 90%;
+            width: 95%;
             max-width: 600px;
-            max-height: 80vh;
+            max-height: 90vh;
             overflow-y: auto;
         }
 
@@ -320,9 +351,11 @@
             color: white;
             border-radius: 10px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            z-index: 3000;
+            z-index: 4000;
             transform: translateX(400px);
             transition: transform 0.3s ease;
+            max-width: 300px;
+            word-wrap: break-word;
         }
 
         .notification.show {
@@ -338,7 +371,7 @@
             color: #333;
         }
 
-        .export-btn {
+        .export-btn, .extend-btn, .test-email-btn {
             background: #28a745;
             color: white;
             padding: 0.7rem 1.5rem;
@@ -347,17 +380,16 @@
             cursor: pointer;
             font-weight: 600;
             margin: 0.5rem;
+            font-size: 0.9rem;
         }
 
         .extend-btn {
             background: #ffc107;
             color: #333;
-            padding: 0.7rem 1rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            margin: 0.5rem;
+        }
+
+        .test-email-btn {
+            background: #17a2b8;
         }
 
         .search-filter {
@@ -373,6 +405,7 @@
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 0.9rem;
+            min-width: 200px;
         }
 
         .hidden {
@@ -419,6 +452,8 @@
             font-weight: 600;
             font-size: 0.9rem;
             border: 2px solid rgba(102, 126, 234, 0.2);
+            min-width: 120px;
+            text-align: center;
         }
 
         .email-config {
@@ -434,21 +469,38 @@
             margin-bottom: 1rem;
         }
 
-        .test-email-btn {
-            background: #17a2b8;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border: none;
+        .document-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
             border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            margin: 0.5rem;
+            border: 1px solid #e0e0e0;
+            margin: 0.5rem 0;
+            flex-wrap: wrap;
         }
 
+        .document-info {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .document-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* MOBILE RESPONSIVE */
         @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
             .sidebar {
                 transform: translateX(-100%);
-                transition: transform 0.3s ease;
+                width: 280px;
             }
 
             .sidebar.active {
@@ -457,14 +509,28 @@
 
             .main-content {
                 margin-left: 0;
+                padding: 1rem;
+                padding-top: 5rem;
+            }
+
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .header-right {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 0.5rem;
             }
 
             .stats-grid {
                 grid-template-columns: 1fr;
-            }
-
-            .header {
-                flex-direction: column;
                 gap: 1rem;
             }
 
@@ -472,8 +538,108 @@
                 flex-direction: column;
             }
 
-            .header-right {
+            .search-filter input,
+            .search-filter select {
+                min-width: auto;
+                width: 100%;
+            }
+
+            .table-container {
+                margin: 1rem -2rem;
+                padding: 0 2rem;
+            }
+
+            .table th,
+            .table td {
+                padding: 0.5rem;
+                font-size: 0.9rem;
+            }
+
+            .action-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.7rem;
+                margin: 0.1rem;
+            }
+
+            .modal-content {
+                margin: 5% auto;
+                padding: 1.5rem;
+                width: 100%;
+                max-width: 95%;
+            }
+
+            .login-form {
+                padding: 2rem 1.5rem;
+                margin: 1rem;
+            }
+
+            #sessionTimer {
+                font-size: 0.8rem;
+                padding: 4px 8px;
+            }
+
+            .document-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .document-actions {
                 justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 0.5rem;
+                padding-top: 4.5rem;
+            }
+
+            .content-section {
+                padding: 1rem;
+            }
+
+            .header {
+                padding: 0.5rem;
+            }
+
+            .stat-card {
+                padding: 1.5rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .login-form {
+                padding: 1.5rem 1rem;
+            }
+
+            .login-form h1 {
+                font-size: 1.5rem;
+            }
+
+            .notification {
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+        }
+
+        /* Overlay pour mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1400;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-overlay.active {
+                display: block;
             }
         }
     </style>
@@ -500,7 +666,13 @@
 
     <!-- Dashboard -->
     <div id="dashboard" class="dashboard">
-        <nav class="sidebar">
+        <!-- Mobile Menu Toggle -->
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+        <nav class="sidebar" id="sidebar">
             <h2>MonEntreprise</h2>
             <ul>
                 <li><a href="#" data-section="overview" class="active">Vue d'ensemble</a></li>
@@ -589,22 +761,24 @@
                     <button class="btn" onclick="simulateNewDemande()" style="width: auto;">Simuler une demande</button>
                 </div>
 
-                <table class="table" id="demandesTable" style="display: none;">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Client</th>
-                            <th>Service</th>
-                            <th>Date</th>
-                            <th>Statut</th>
-                            <th>Documents</th>
-                            <th>Prix</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="demandesTableBody">
-                    </tbody>
-                </table>
+                <div class="table-container">
+                    <table class="table" id="demandesTable" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Client</th>
+                                <th>Service</th>
+                                <th>Date</th>
+                                <th>Statut</th>
+                                <th>Documents</th>
+                                <th>Prix</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="demandesTableBody">
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Configuration des notifications -->
@@ -740,7 +914,7 @@
                         Envoyer une notification email au client
                     </label>
                 </div>
-                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
                     <button class="btn" onclick="updateDemandeStatus()" style="width: auto;">Confirmer et envoyer</button>
                     <button class="btn" onclick="closeStatusModal()" style="width: auto; background: #6c757d;">Annuler</button>
                 </div>
@@ -768,7 +942,7 @@
             warningTime: 2 * 60 * 1000 // Avertissement à 2 minutes
         };
 
-        // Configuration EmailJS - AJOUT MANQUANT
+        // Configuration EmailJS
         let emailjsConfig = {
             serviceId: 'service_2te46oj',
             templateId: 'template_9jpudgc',
@@ -802,7 +976,24 @@
             emailjs.init(emailjsConfig.publicKey);
         }
 
-        // === GESTION DE SESSION PERSISTANTE CORRIGÉE ===
+        // === GESTION MOBILE ===
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        // === GESTION DE SESSION PERSISTANTE ===
         function createSession() {
             const sessionData = {
                 isLoggedIn: true,
@@ -883,7 +1074,6 @@
         }
 
         function startSessionTimer() {
-            // Nettoyer les timers existants
             if (sessionTimer) {
                 clearInterval(sessionTimer);
             }
@@ -926,7 +1116,7 @@
                     
                     const sessionDisplay = document.getElementById('sessionTimer');
                     if (sessionDisplay) {
-                        sessionDisplay.textContent = `Session: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                        sessionDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
                         
                         if (timeLeft <= SESSION_CONFIG.warningTime) {
                             sessionDisplay.style.color = '#ff6b6b';
@@ -950,7 +1140,6 @@
                     session.expiryTime = Date.now() + SESSION_CONFIG.sessionDuration;
                     localStorage.setItem(SESSION_CONFIG.sessionKey, JSON.stringify(session));
                     
-                    // Redémarrer les timers
                     startSessionTimer();
                     
                     showNotification('Session prolongée de 10 minutes');
@@ -969,6 +1158,7 @@
                 document.getElementById('dashboard').style.display = 'none';
                 document.getElementById('loginContainer').style.display = 'flex';
                 showNotification('Session expirée. Veuillez vous reconnecter.', 'error');
+                closeSidebar();
             }
         }
 
@@ -990,12 +1180,15 @@
             }
         }
 
-        // Chargement des données
+        // === CHARGEMENT ET SAUVEGARDE DES DONNÉES ===
         function loadData() {
             demandes = JSON.parse(localStorage.getItem('monentreprise_demandes') || '[]');
             clients = JSON.parse(localStorage.getItem('monentreprise_clients') || '[]');
             documents = JSON.parse(localStorage.getItem('monentreprise_documents') || '[]');
             emailsSentCount = parseInt(localStorage.getItem('monentreprise_emails_sent') || '0');
+            
+            // Créer les clients manquants pour les demandes existantes
+            createMissingClients();
             
             updateStats();
             loadDemandes();
@@ -1010,10 +1203,30 @@
             localStorage.setItem('monentreprise_emails_sent', emailsSentCount.toString());
         }
 
+        function createMissingClients() {
+            demandes.forEach(demande => {
+                if (!clients.find(c => c.email === demande.email)) {
+                    const newClient = {
+                        id: 'CLIENT-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+                        nom: `${demande.prenom} ${demande.nom}`,
+                        email: demande.email,
+                        telephone: demande.telephone || 'Non fourni',
+                        password: 'client123', // Mot de passe par défaut
+                        demandes: [demande.id],
+                        statutCompte: 'Actif',
+                        dateCreation: demande.dateComplete || new Date().toISOString()
+                    };
+                    clients.push(newClient);
+                    console.log('Client créé automatiquement:', newClient);
+                }
+            });
+            saveData();
+        }
+
         function updateStats() {
             document.getElementById('totalDemandes').textContent = demandes.length;
             document.getElementById('demandesEnCours').textContent = demandes.filter(d => 
-                d.statut === 'en-cours' || d.statut === 'documents-requis').length;
+                d.statut === 'en-cours' || d.statut === 'documents-requis' || d.statut === 'nouveau').length;
             document.getElementById('emailsSent').textContent = emailsSentCount;
             
             const ca = demandes.filter(d => d.statut === 'termine').reduce((total, d) => {
@@ -1035,7 +1248,7 @@
             }
         }
 
-        // Gestion des demandes
+        // === GESTION DES DEMANDES ===
         function loadDemandes() {
             const tbody = document.getElementById('demandesTableBody');
             tbody.innerHTML = '';
@@ -1067,7 +1280,7 @@
                     <td>
                         <button class="action-btn btn-view" onclick="viewDemande('${demande.id}')">Voir</button>
                         <button class="action-btn btn-progress" onclick="openStatusModal('${demande.id}', 'en-cours')">En cours</button>
-                        <button class="action-btn btn-docs" onclick="openStatusModal('${demande.id}', 'documents-requis')">Docs requis</button>
+                        <button class="action-btn btn-docs" onclick="openStatusModal('${demande.id}', 'documents-requis')">Docs</button>
                         <button class="action-btn btn-confirm" onclick="openStatusModal('${demande.id}', 'termine')">Terminer</button>
                     </td>
                 `;
@@ -1094,15 +1307,30 @@
             };
             
             demandes.unshift(testDemande);
+            
+            // Créer le client correspondant
+            const newClient = {
+                id: 'CLIENT-' + Date.now(),
+                nom: `${testDemande.prenom} ${testDemande.nom}`,
+                email: testDemande.email,
+                telephone: testDemande.telephone,
+                password: 'client123',
+                demandes: [testDemande.id],
+                statutCompte: 'Actif',
+                dateCreation: now
+            };
+            clients.push(newClient);
+            
             saveData();
             updateStats();
             loadDemandes();
+            loadClients();
             
             addActivity(`Nouvelle demande reçue de ${testDemande.prenom} ${testDemande.nom}`);
             showNotification('Nouvelle demande simulée avec succès !');
         }
 
-        // Gestion des statuts
+        // === GESTION DES STATUTS ===
         function openStatusModal(demandeId, suggestedStatus = null) {
             currentDemandeId = demandeId;
             const modal = document.getElementById('statusModal');
@@ -1168,7 +1396,7 @@
             addActivity(`Demande ${currentDemandeId} passée de "${getStatusName(oldStatus)}" à "${getStatusName(newStatus)}"`);
         }
 
-        // Email notifications
+        // === EMAIL NOTIFICATIONS ===
         function sendEmailNotification(demande, oldStatus, newStatus, customMessage = '') {
             if (!settings.emailNotifications || !emailjsConfig.serviceId) {
                 console.log('Notifications email désactivées ou non configurées');
@@ -1207,7 +1435,7 @@
             }
         }
 
-        // Configuration email
+        // === CONFIGURATION EMAIL ===
         function saveEmailConfiguration() {
             emailjsConfig.serviceId = document.getElementById('emailjsServiceId').value;
             emailjsConfig.templateId = document.getElementById('emailjsTemplateId').value;
@@ -1267,7 +1495,7 @@
             showNotification('Messages par défaut sauvegardés');
         }
 
-        // Gestion des documents
+        // === GESTION DES DOCUMENTS ===
         function loadDocuments() {
             const documentsList = document.getElementById('documentsList');
             const documentsEmpty = document.getElementById('documentsEmpty');
@@ -1281,15 +1509,16 @@
             documentsEmpty.style.display = 'none';
             
             documentsList.innerHTML = documents.map(doc => `
-                <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0; margin: 0.5rem 0;">
+                <div class="document-item">
                     <div style="font-size: 1.5rem;">📄</div>
-                    <div style="flex: 1;">
+                    <div class="document-info">
                         <div style="font-weight: 600;">${doc.name}</div>
                         <div style="font-size: 0.8rem; color: #666;">
-                            Client: ${doc.clientName} • ${formatFileSize(doc.size)} • ${formatDate(doc.uploadDate)}
+                            Client: ${doc.clientName} • Demande: ${doc.demandeId}<br>
+                            ${formatFileSize(doc.size)} • ${formatDate(doc.uploadDate)}
                         </div>
                     </div>
-                    <div>
+                    <div class="document-actions">
                         <button class="action-btn btn-view" onclick="viewDocument('${doc.id}')">Voir</button>
                         <button class="action-btn btn-confirm" onclick="downloadDocument('${doc.id}')">Télécharger</button>
                     </div>
@@ -1311,15 +1540,16 @@
             
             if (clientsList) {
                 clientsList.innerHTML = clients.map(client => `
-                    <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0; margin: 0.5rem 0;">
+                    <div class="document-item">
                         <div style="font-size: 1.5rem;">👤</div>
-                        <div style="flex: 1;">
+                        <div class="document-info">
                             <div style="font-weight: 600;">${client.nom}</div>
                             <div style="font-size: 0.8rem; color: #666;">
-                                ${client.email} • ${client.telephone} • ${client.demandes ? client.demandes.length : 0} demande(s)
+                                ${client.email} • ${client.telephone}<br>
+                                ${client.demandes ? client.demandes.length : 0} demande(s) • ${client.statutCompte || 'Actif'}
                             </div>
                         </div>
-                        <div>
+                        <div class="document-actions">
                             <span style="padding: 0.25rem 0.75rem; background: #d4edda; color: #155724; border-radius: 15px; font-size: 0.8rem;">
                                 ${client.statutCompte || 'Actif'}
                             </span>
@@ -1329,7 +1559,7 @@
             }
         }
 
-        // Affichage des détails
+        // === AFFICHAGE DES DÉTAILS ===
         function viewDemande(demandeId) {
             const demande = demandes.find(d => d.id === demandeId);
             if (!demande) return;
@@ -1364,8 +1594,8 @@
                     ` : ''}
                 </div>
                 
-                <div style="margin-top: 1rem;">
-                    <button class="btn" onclick="openStatusModal('${demande.id}')" style="width: auto; margin-right: 1rem;">Changer le statut</button>
+                <div style="margin-top: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <button class="btn" onclick="openStatusModal('${demande.id}')" style="width: auto;">Changer le statut</button>
                     <button class="btn" onclick="closeModal()" style="width: auto; background: #6c757d;">Fermer</button>
                 </div>
             `;
@@ -1378,7 +1608,7 @@
             document.getElementById('detailModal').style.display = 'none';
         }
 
-        // Fonctions utilitaires
+        // === FONCTIONS UTILITAIRES ===
         function getServiceName(service) {
             const services = {
                 'micro-entreprise': 'Création Micro-Entreprise',
@@ -1411,7 +1641,7 @@
             const date = new Date(dateString);
             return date.toLocaleDateString('fr-FR', {
                 year: 'numeric',
-                month: 'long',
+                month: 'short',
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit'
@@ -1523,19 +1753,20 @@
         }
 
         function logout() {
-            destroySession(); // CORRECTION: Appeler destroySession au lieu de vider manuellement
+            destroySession();
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('loginContainer').style.display = 'flex';
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
+            closeSidebar();
             showNotification('Déconnexion réussie');
         }
 
-        // Navigation - CORRECTION: Ajouter l'appel à checkSessionOnLoad
+        // === INITIALISATION ===
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Panel Admin MonEntreprise.fr chargé');
             
-            // AJOUT CRITIQUE: Vérification de session au chargement
+            // Vérification de session au chargement
             checkSessionOnLoad();
             
             // Navigation entre sections
@@ -1544,6 +1775,11 @@
                     e.preventDefault();
                     
                     const section = this.getAttribute('data-section');
+                    
+                    // Fermer la sidebar sur mobile après sélection
+                    if (window.innerWidth <= 768) {
+                        closeSidebar();
+                    }
                     
                     document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
                     this.classList.add('active');
@@ -1620,18 +1856,17 @@
                     console.error('Erreur chargement messages:', error);
                 }
             }
+
+            // Ajuster la sidebar sur redimensionnement de fenêtre
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    closeSidebar();
+                }
+            });
         });
 
-        console.log('Panel Admin MonEntreprise.fr initialisé avec session corrigée');
-    </script>
-
-    <!-- Script additionnel pour la gestion complète -->
-    <script>
-        // Fonctions additionnelles pour la compatibilité complète
-        
         // Gestion des événements de fermeture de page
         window.addEventListener('beforeunload', function(event) {
-            // Sauvegarder l'état avant fermeture
             if (sessionTimer) {
                 const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
                 if (sessionData) {
@@ -1646,99 +1881,7 @@
             }
         });
 
-        // Gestion de la visibilité de la page
-        document.addEventListener('visibilitychange', function() {
-            if (document.visibilityState === 'visible' && isSessionValid()) {
-                // Vérifier la session quand l'utilisateur revient sur la page
-                updateSessionDisplay();
-            }
-        });
-
-        // Fonction de test pour vérifier le système de session
-        function testSessionSystem() {
-            console.log('=== TEST SYSTÈME SESSION ===');
-            console.log('1. Session valide:', isSessionValid());
-            
-            const sessionData = localStorage.getItem(SESSION_CONFIG.sessionKey);
-            if (sessionData) {
-                try {
-                    const session = JSON.parse(sessionData);
-                    console.log('2. Données session:', session);
-                    console.log('3. Temps restant:', Math.floor((session.expiryTime - Date.now()) / 1000), 'secondes');
-                } catch (error) {
-                    console.log('2. Erreur lecture session:', error);
-                }
-            } else {
-                console.log('2. Aucune session trouvée');
-            }
-            
-            console.log('4. Timer actif:', sessionTimer !== null);
-            console.log('5. Warning timer actif:', warningTimer !== null);
-            console.log('=== FIN TEST ===');
-        }
-
-        // Fonction de diagnostic complet
-        function diagnosticComplet() {
-            const rapport = {
-                session: {
-                    existe: !!localStorage.getItem(SESSION_CONFIG.sessionKey),
-                    valide: isSessionValid(),
-                    timer: sessionTimer !== null,
-                    warning: warningTimer !== null
-                },
-                donnees: {
-                    demandes: demandes.length,
-                    clients: clients.length,
-                    documents: documents.length,
-                    emails: emailsSentCount
-                },
-                configuration: {
-                    emailjs: !!emailjsConfig.serviceId,
-                    notifications: settings.emailNotifications
-                }
-            };
-            
-            console.log('=== DIAGNOSTIC COMPLET ===');
-            console.log(JSON.stringify(rapport, null, 2));
-            return rapport;
-        }
-
-        // Fonction de réparation d'urgence
-        function reparationUrgence() {
-            console.log('🚨 RÉPARATION D\'URGENCE 🚨');
-            
-            // 1. Nettoyer complètement la session
-            destroySession();
-            
-            // 2. Vérifier le localStorage
-            try {
-                localStorage.setItem('test', 'test');
-                localStorage.removeItem('test');
-                console.log('✅ localStorage fonctionnel');
-            } catch (error) {
-                console.error('❌ Problème localStorage:', error);
-                alert('Erreur : Le stockage local du navigateur ne fonctionne pas.');
-                return;
-            }
-            
-            // 3. Réinitialiser les données si nécessaire
-            if (!demandes) demandes = [];
-            if (!clients) clients = [];
-            if (!documents) documents = [];
-            if (!emailsSentCount) emailsSentCount = 0;
-            
-            // 4. Forcer une reconnexion propre
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('loginContainer').style.display = 'flex';
-            
-            showNotification('Réparation d\'urgence effectuée. Reconnectez-vous.', 'warning');
-            console.log('✅ Réparation terminée');
-        }
-
-        // Ajouter les fonctions au scope global pour debug
-        window.testSessionSystem = testSessionSystem;
-        window.diagnosticComplet = diagnosticComplet;
-        window.reparationUrgence = reparationUrgence;
+        console.log('Panel Admin MonEntreprise.fr initialisé avec améliorations mobile');
     </script>
 </body>
 </html>
