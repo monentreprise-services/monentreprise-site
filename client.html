@@ -10,6 +10,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- EmailJS pour récupération de mot de passe -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script>
+        // Initialisation EmailJS
+        (function(){
+            try {
+                emailjs.init("ntZTBB2BSKb64uZk8");
+                console.log('EmailJS initialisé pour espace client');
+            } catch (error) {
+                console.error('Erreur initialisation EmailJS:', error);
+            }
+        })();
+    </script>
+    
     <style>
         :root {
             --primary-color: #667eea;
@@ -71,8 +85,8 @@
             gap: 1rem;
         }
 
-        .logout-btn {
-            background: var(--error-color);
+        .header-btn {
+            background: var(--primary-color);
             color: var(--white);
             border: none;
             padding: 0.5rem 1rem;
@@ -80,9 +94,18 @@
             cursor: pointer;
             font-weight: 500;
             transition: var(--transition);
+            font-size: 0.9rem;
         }
 
-        .logout-btn:hover {
+        .header-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        .header-btn.danger {
+            background: var(--error-color);
+        }
+
+        .header-btn.danger:hover {
             background: #d32f2f;
         }
 
@@ -130,7 +153,7 @@
             color: var(--text-dark);
         }
 
-        .form-group input {
+        .form-group input, .form-group textarea {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e0e0e0;
@@ -140,7 +163,7 @@
             font-family: inherit;
         }
 
-        .form-group input:focus {
+        .form-group input:focus, .form-group textarea:focus {
             outline: none;
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -166,6 +189,30 @@
         .btn:disabled {
             background: #ccc;
             cursor: not-allowed;
+        }
+
+        .btn.danger {
+            background: var(--error-color);
+        }
+
+        .btn.danger:hover {
+            background: #d32f2f;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .forgot-password a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
         }
 
         /* Dashboard */
@@ -223,6 +270,7 @@
             padding: 2rem;
             border-radius: 15px;
             box-shadow: var(--shadow);
+            margin-bottom: 2rem;
         }
 
         .section-header {
@@ -230,6 +278,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .section-title {
@@ -255,6 +305,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
 
         .demande-id {
@@ -280,12 +332,17 @@
             color: #f57c00;
         }
 
-        .status.termine {
+        .status-documents-requis {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .status-termine {
             background: #e8f5e8;
             color: #388e3c;
         }
 
-        .status.refuse {
+        .status-refuse {
             background: #ffebee;
             color: #c62828;
         }
@@ -340,6 +397,140 @@
             background: rgba(102, 126, 234, 0.1);
         }
 
+        .file-input {
+            display: none;
+        }
+
+        .uploaded-files {
+            margin-top: 1rem;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            background: var(--white);
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .file-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 5px;
+            object-fit: cover;
+        }
+
+        .remove-file {
+            background: var(--error-color);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+
+        /* Settings Section */
+        .settings-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 95%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            z-index: 4000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+        }
+
+        .confirm-content {
+            background: white;
+            margin: 15% auto;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-confirm-yes {
+            background: var(--error-color);
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-confirm-no {
+            background: #6c757d;
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
         /* Notifications */
         .notification {
             position: fixed;
@@ -352,6 +543,8 @@
             z-index: 10000;
             transform: translateX(400px);
             transition: transform 0.3s ease;
+            max-width: 350px;
+            word-wrap: break-word;
         }
 
         .notification.show {
@@ -370,50 +563,6 @@
             background: var(--warning-color);
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-
-            .login-form {
-                padding: 2rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .demande-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.5rem;
-            }
-
-            .demande-details {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Loading Animation */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: var(--white);
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
         /* Progress Tracker */
         .progress-tracker {
             background: #f8f9fa;
@@ -427,6 +576,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .progress-step {
@@ -435,6 +586,7 @@
             align-items: center;
             flex: 1;
             position: relative;
+            min-width: 80px;
         }
 
         .progress-step:not(:last-child)::after {
@@ -572,6 +724,113 @@
             color: var(--text-dark);
             font-style: italic;
         }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header-content {
+                padding: 0 1rem;
+            }
+
+            .user-info {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: flex-end;
+            }
+
+            .login-form {
+                padding: 2rem 1.5rem;
+                margin: 0 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .demande-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .demande-details {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+
+            .progress-steps {
+                flex-direction: column;
+                gap: 2rem;
+            }
+
+            .progress-step::after {
+                display: none;
+            }
+
+            .modal-content {
+                margin: 10% auto;
+                padding: 1.5rem;
+                width: 95%;
+            }
+
+            .notification {
+                left: 10px;
+                right: 10px;
+                max-width: none;
+                transform: translateY(-100px);
+            }
+
+            .notification.show {
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-form h1 {
+                font-size: 1.5rem;
+            }
+
+            .stat-number {
+                font-size: 1.5rem;
+            }
+
+            .header-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .confirm-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: var(--white);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -581,7 +840,8 @@
             <div class="logo">MonEntreprise.fr</div>
             <div class="user-info hidden" id="userInfo">
                 <span id="userName">Utilisateur</span>
-                <button class="logout-btn" onclick="logout()">Déconnexion</button>
+                <button class="header-btn" onclick="openSettings()">Paramètres</button>
+                <button class="header-btn danger" onclick="logout()">Déconnexion</button>
             </div>
         </div>
     </header>
@@ -607,6 +867,10 @@
             <button type="submit" class="btn" id="loginBtn">
                 Se connecter
             </button>
+            
+            <div class="forgot-password">
+                <a onclick="openForgotPassword()">Mot de passe oublié ?</a>
+            </div>
             
             <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-light);">
                 Vous n'avez pas reçu vos identifiants ? 
@@ -638,6 +902,10 @@
                     <div class="stat-number" id="demandesTerminees">0</div>
                     <div class="stat-label">Terminées</div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="documentsUploades">0</div>
+                    <div class="stat-label">Documents uploadés</div>
+                </div>
             </div>
 
             <!-- Demandes Section -->
@@ -656,20 +924,93 @@
         </div>
     </div>
 
+    <!-- Modal Mot de passe oublié -->
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeForgotPassword()">&times;</span>
+            <h2>Récupération du mot de passe</h2>
+            <p style="margin-bottom: 1rem; color: var(--text-light);">
+                Entrez votre adresse email pour recevoir un nouveau mot de passe
+            </p>
+            <div class="form-group">
+                <label for="forgotEmail">Adresse email</label>
+                <input type="email" id="forgotEmail" placeholder="votre@email.com" required>
+            </div>
+            <button class="btn" onclick="sendPasswordReset()" id="forgotBtn" style="width: 100%;">
+                Envoyer un nouveau mot de passe
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Paramètres -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeSettings()">&times;</span>
+            <h2>Paramètres du compte</h2>
+            
+            <div class="form-group">
+                <label for="newPassword">Nouveau mot de passe (optionnel)</label>
+                <input type="password" id="newPassword" placeholder="Laissez vide pour ne pas modifier">
+            </div>
+            
+            <div class="form-group">
+                <label for="newPhone">Téléphone</label>
+                <input type="tel" id="newPhone" placeholder="+33 6 XX XX XX XX">
+            </div>
+            
+            <button class="btn" onclick="updateAccount()" style="width: 100%; margin-bottom: 1rem;">
+                Sauvegarder les modifications
+            </button>
+            
+            <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;">
+            
+            <h3 style="color: var(--error-color); margin-bottom: 1rem;">Zone de danger</h3>
+            <p style="margin-bottom: 1rem; color: var(--text-light);">
+                La suppression de votre compte est irréversible. Toutes vos données seront perdues.
+            </p>
+            <button class="btn danger" onclick="confirmDeleteAccount()" style="width: 100%;">
+                Supprimer mon compte définitivement
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Confirmation suppression compte -->
+    <div id="confirmDeleteModal" class="confirm-modal">
+        <div class="confirm-content">
+            <h3>Supprimer votre compte ?</h3>
+            <p style="margin: 1rem 0; color: var(--error-color);">
+                ⚠️ Cette action est <strong>irréversible</strong> !
+            </p>
+            <p>Toutes vos demandes et documents seront définitivement supprimés.</p>
+            <div class="confirm-buttons">
+                <button class="btn-confirm-yes" onclick="deleteAccount()">Oui, supprimer</button>
+                <button class="btn-confirm-no" onclick="cancelDeleteAccount()">Annuler</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Configuration
         const STORAGE_KEYS = {
             clients: 'monentreprise_clients',
             demandes: 'monentreprise_demandes',
+            clientDocuments: 'monentreprise_client_documents',
             currentUser: 'monentreprise_current_user'
+        };
+
+        const EMAIL_CONFIG = {
+            serviceId: 'service_2te46oj',
+            templateId: 'template_password_reset', // Template spécial pour reset password
+            publicKey: 'ntZTBB2BSKb64uZk8'
         };
 
         // État de l'application
         let currentUser = null;
+        let uploadedDocuments = [];
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Espace client MonEntreprise.fr chargé');
+            console.log('Espace client MonEntreprise.fr chargé avec nouvelles fonctionnalités');
             
             // Vérifier si l'utilisateur est déjà connecté
             const savedUser = localStorage.getItem(STORAGE_KEYS.currentUser);
@@ -685,9 +1026,30 @@
 
             // Gestionnaire de connexion
             document.getElementById('loginForm').addEventListener('submit', handleLogin);
+
+            // Gestion des modals
+            setupModalHandlers();
         });
 
-        // Gestion de la connexion
+        function setupModalHandlers() {
+            window.addEventListener('click', function(event) {
+                const forgotModal = document.getElementById('forgotPasswordModal');
+                const settingsModal = document.getElementById('settingsModal');
+                const confirmModal = document.getElementById('confirmDeleteModal');
+                
+                if (event.target === forgotModal) {
+                    closeForgotPassword();
+                }
+                if (event.target === settingsModal) {
+                    closeSettings();
+                }
+                if (event.target === confirmModal) {
+                    cancelDeleteAccount();
+                }
+            });
+        }
+
+        // === AUTHENTIFICATION ===
         function handleLogin(event) {
             event.preventDefault();
             
@@ -704,7 +1066,6 @@
             loginBtn.disabled = true;
             loginBtn.innerHTML = '<span class="loading"></span> Connexion...';
 
-            // Simuler un délai de connexion
             setTimeout(() => {
                 const clients = getClients();
                 const client = clients.find(c => c.email === email && c.password === password);
@@ -723,7 +1084,6 @@
             }, 1000);
         }
 
-        // Afficher le tableau de bord
         function showDashboard() {
             document.getElementById('loginContainer').style.display = 'none';
             document.getElementById('dashboard').classList.add('active');
@@ -732,151 +1092,13 @@
             
             loadDemandes();
             updateStats();
+            loadUserDocuments();
         }
 
-        // Charger les demandes de l'utilisateur
-        function loadDemandes() {
-            const demandes = getDemandes();
-            const userDemandes = demandes.filter(d => currentUser.demandes.includes(d.id));
-            
-            const demandesList = document.getElementById('demandesList');
-            
-            if (userDemandes.length === 0) {
-                demandesList.innerHTML = `
-                    <div style="text-align: center; padding: 3rem; color: var(--text-light);">
-                        <h3>Aucune demande trouvée</h3>
-                        <p>Vos demandes apparaîtront ici une fois créées</p>
-                    </div>
-                `;
-                return;
-            }
-
-            demandesList.innerHTML = userDemandes.map(demande => `
-                <div class="demande-card">
-                    <div class="demande-header">
-                        <div class="demande-id">${demande.id}</div>
-                        <div class="status-badge status-${demande.statut.replace(' ', '-')}">${getStatusDisplayName(demande.statut)}</div>
-                    </div>
-                    
-                    <div class="demande-details">
-                        <div class="detail-item">
-                            <div class="detail-label">Service</div>
-                            <div class="detail-value">${getServiceDisplayName(demande.service)}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Date de demande</div>
-                            <div class="detail-value">${formatDate(demande.dateComplete)}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Tarif</div>
-                            <div class="detail-value">${demande.prix}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Urgence</div>
-                            <div class="detail-value">${demande.urgence || 'Normal'}</div>
-                        </div>
-                    </div>
-                    
-                    ${demande.details && demande.details !== 'Aucun message' ? `
-                        <div style="margin-top: 1rem; padding: 1rem; background: var(--bg-light); border-radius: 8px;">
-                            <div class="detail-label">Message</div>
-                            <div class="detail-value">${demande.details}</div>
-                        </div>
-                    ` : ''}
-                    
-                    ${createProgressTracker(demande.statut)}
-                    
-                    ${demande.statusHistory && demande.statusHistory.length > 0 ? `
-                        <div class="status-history">
-                            <h4 style="margin-bottom: 1rem; color: var(--text-dark);">Historique des modifications</h4>
-                            ${demande.statusHistory.slice().reverse().map(history => `
-                                <div class="history-item">
-                                    <div class="history-icon ${history.newStatus}">
-                                        ${getStatusIcon(history.newStatus)}
-                                    </div>
-                                    <div class="history-content">
-                                        <div class="history-title">
-                                            ${getStatusDisplayName(history.oldStatus)} → ${getStatusDisplayName(history.newStatus)}
-                                        </div>
-                                        <div class="history-date">${formatDate(history.date)}</div>
-                                        ${history.comment ? `<div class="history-comment">"${history.comment}"</div>` : ''}
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : ''}
-                    
-                    <div class="upload-section">
-                        <h4 style="margin-bottom: 1rem; color: var(--text-dark);">Documents requis</h4>
-                        <div class="upload-area" onclick="handleFileUpload('${demande.id}')">
-                            <p>📁 Cliquez pour uploader vos documents</p>
-                            <p style="font-size: 0.9rem; color: var(--text-light); margin-top: 0.5rem;">
-                                Formats acceptés: PDF, JPG, PNG (max 10MB)
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Mettre à jour les statistiques
-        function updateStats() {
-            const demandes = getDemandes();
-            const userDemandes = demandes.filter(d => currentUser.demandes.includes(d.id));
-            
-            const total = userDemandes.length;
-            const enCours = userDemandes.filter(d => d.statut === 'nouveau' || d.statut === 'en-cours').length;
-            const terminees = userDemandes.filter(d => d.statut === 'termine').length;
-            
-            document.getElementById('totalDemandes').textContent = total;
-            document.getElementById('demandesEnCours').textContent = enCours;
-            document.getElementById('demandesTerminees').textContent = terminees;
-        }
-
-        // Actualiser les demandes
-        function refreshDemandes() {
-            showNotification('Actualisation des données...', 'success');
-            loadDemandes();
-            updateStats();
-        }
-
-        // Gestion de l'upload de fichiers
-        function handleFileUpload(demandeId) {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.multiple = true;
-            input.accept = '.pdf,.jpg,.jpeg,.png';
-            
-            input.onchange = function(event) {
-                const files = Array.from(event.target.files);
-                
-                if (files.length === 0) return;
-                
-                // Vérifier la taille des fichiers
-                const maxSize = 10 * 1024 * 1024; // 10MB
-                const oversizedFiles = files.filter(file => file.size > maxSize);
-                
-                if (oversizedFiles.length > 0) {
-                    showNotification(`Fichiers trop volumineux: ${oversizedFiles.map(f => f.name).join(', ')}`, 'error');
-                    return;
-                }
-                
-                // Simuler l'upload
-                showNotification(`Upload de ${files.length} fichier(s) en cours...`, 'warning');
-                
-                setTimeout(() => {
-                    showNotification(`${files.length} fichier(s) uploadé(s) avec succès !`, 'success');
-                    console.log('Fichiers uploadés pour la demande', demandeId, ':', files.map(f => f.name));
-                }, 2000);
-            };
-            
-            input.click();
-        }
-
-        // Déconnexion
         function logout() {
             localStorage.removeItem(STORAGE_KEYS.currentUser);
             currentUser = null;
+            uploadedDocuments = [];
             
             document.getElementById('dashboard').classList.remove('active');
             document.getElementById('loginContainer').style.display = 'flex';
@@ -888,13 +1110,402 @@
             showNotification('Déconnexion réussie', 'success');
         }
 
-        // Fonctions utilitaires
+        // === RÉCUPÉRATION MOT DE PASSE ===
+        function openForgotPassword() {
+            document.getElementById('forgotPasswordModal').style.display = 'block';
+        }
+
+        function closeForgotPassword() {
+            document.getElementById('forgotPasswordModal').style.display = 'none';
+            document.getElementById('forgotEmail').value = '';
+        }
+
+        function sendPasswordReset() {
+            const email = document.getElementById('forgotEmail').value.trim();
+            
+            if (!email) {
+                showNotification('Veuillez saisir votre adresse email', 'error');
+                return;
+            }
+
+            const clients = getClients();
+            const client = clients.find(c => c.email === email);
+            
+            if (!client) {
+                showNotification('Aucun compte trouvé avec cette adresse email', 'error');
+                return;
+            }
+
+            const forgotBtn = document.getElementById('forgotBtn');
+            const originalText = forgotBtn.textContent;
+            forgotBtn.disabled = true;
+            forgotBtn.innerHTML = '<span class="loading"></span> Envoi en cours...';
+
+            // Générer nouveau mot de passe
+            const newPassword = generatePassword();
+            
+            // Mettre à jour dans le stockage
+            client.password = newPassword;
+            const clientIndex = clients.findIndex(c => c.email === email);
+            if (clientIndex !== -1) {
+                clients[clientIndex] = client;
+                localStorage.setItem(STORAGE_KEYS.clients, JSON.stringify(clients));
+            }
+
+            // Envoyer l'email avec le nouveau mot de passe
+            const emailParams = {
+                to_email: email,
+                client_name: client.nom,
+                new_password: newPassword,
+                login_link: window.location.origin + '/client.html'
+            };
+
+            if (typeof emailjs !== 'undefined') {
+                emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.templateId, emailParams)
+                    .then(() => {
+                        showNotification('Nouveau mot de passe envoyé par email !', 'success');
+                        closeForgotPassword();
+                    })
+                    .catch((error) => {
+                        console.error('Erreur envoi email:', error);
+                        showNotification('Erreur lors de l\'envoi. Contactez-nous directement.', 'error');
+                    });
+            } else {
+                showNotification('Service email indisponible. Contactez-nous directement.', 'error');
+            }
+
+            forgotBtn.disabled = false;
+            forgotBtn.textContent = originalText;
+        }
+
+        function generatePassword() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+            let password = '';
+            for (let i = 0; i < 8; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return password;
+        }
+
+        // === PARAMÈTRES UTILISATEUR ===
+        function openSettings() {
+            document.getElementById('newPhone').value = currentUser.telephone || '';
+            document.getElementById('settingsModal').style.display = 'block';
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').style.display = 'none';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('newPhone').value = '';
+        }
+
+        function updateAccount() {
+            const newPassword = document.getElementById('newPassword').value.trim();
+            const newPhone = document.getElementById('newPhone').value.trim();
+            
+            const clients = getClients();
+            const clientIndex = clients.findIndex(c => c.email === currentUser.email);
+            
+            if (clientIndex === -1) {
+                showNotification('Erreur: compte non trouvé', 'error');
+                return;
+            }
+
+            let updated = false;
+
+            if (newPassword) {
+                clients[clientIndex].password = newPassword;
+                currentUser.password = newPassword;
+                updated = true;
+            }
+
+            if (newPhone) {
+                clients[clientIndex].telephone = newPhone;
+                currentUser.telephone = newPhone;
+                updated = true;
+            }
+
+            if (updated) {
+                localStorage.setItem(STORAGE_KEYS.clients, JSON.stringify(clients));
+                localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(currentUser));
+                showNotification('Paramètres mis à jour avec succès', 'success');
+                closeSettings();
+            } else {
+                showNotification('Aucune modification effectuée', 'warning');
+            }
+        }
+
+        // === SUPPRESSION COMPTE ===
+        function confirmDeleteAccount() {
+            document.getElementById('confirmDeleteModal').style.display = 'block';
+        }
+
+        function cancelDeleteAccount() {
+            document.getElementById('confirmDeleteModal').style.display = 'none';
+        }
+
+        function deleteAccount() {
+            if (!currentUser) return;
+
+            // Supprimer les données client
+            const clients = getClients();
+            const demandes = getDemandes();
+            const clientDocuments = getClientDocuments();
+
+            // Supprimer toutes les demandes du client
+            const userDemandes = demandes.filter(d => currentUser.demandes && currentUser.demandes.includes(d.id));
+            const remainingDemandes = demandes.filter(d => !currentUser.demandes || !currentUser.demandes.includes(d.id));
+
+            // Supprimer tous les documents du client
+            const remainingDocuments = clientDocuments.filter(doc => doc.clientEmail !== currentUser.email);
+
+            // Supprimer le client
+            const remainingClients = clients.filter(c => c.email !== currentUser.email);
+
+            // Sauvegarder les données mises à jour
+            localStorage.setItem(STORAGE_KEYS.clients, JSON.stringify(remainingClients));
+            localStorage.setItem(STORAGE_KEYS.demandes, JSON.stringify(remainingDemandes));
+            localStorage.setItem(STORAGE_KEYS.clientDocuments, JSON.stringify(remainingDocuments));
+            localStorage.removeItem(STORAGE_KEYS.currentUser);
+
+            showNotification('Votre compte a été supprimé définitivement', 'success');
+
+            // Rediriger vers la page de connexion après un délai
+            setTimeout(() => {
+                logout();
+            }, 2000);
+        }
+
+        // === GESTION DES DEMANDES ===
+        function loadDemandes() {
+            const demandes = getDemandes();
+            const userDemandes = demandes.filter(d => currentUser.demandes && currentUser.demandes.includes(d.id));
+            
+            const demandesList = document.getElementById('demandesList');
+            
+            if (userDemandes.length === 0) {
+                demandesList.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: var(--text-light);">
+                        <h3>Aucune demande trouvée</h3>
+                        <p>Vos demandes apparaîtront ici une fois créées</p>
+                        <a href="/index.html" class="btn" style="width: auto; margin-top: 1rem; text-decoration: none;">
+                            Faire une nouvelle demande
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            demandesList.innerHTML = userDemandes.map(demande => {
+                const userDocs = uploadedDocuments.filter(doc => doc.demandeId === demande.id);
+                return `
+                    <div class="demande-card">
+                        <div class="demande-header">
+                            <div class="demande-id">${demande.id}</div>
+                            <div class="status-badge status-${demande.statut.replace(' ', '-')}">${getStatusDisplayName(demande.statut)}</div>
+                        </div>
+                        
+                        <div class="demande-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Service</div>
+                                <div class="detail-value">${getServiceDisplayName(demande.service)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Date de demande</div>
+                                <div class="detail-value">${formatDate(demande.dateComplete)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Tarif</div>
+                                <div class="detail-value">${demande.prix}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Urgence</div>
+                                <div class="detail-value">${demande.urgence || 'Normal'}</div>
+                            </div>
+                        </div>
+                        
+                        ${demande.details && demande.details !== 'Aucun message' ? `
+                            <div style="margin-top: 1rem; padding: 1rem; background: var(--bg-light); border-radius: 8px;">
+                                <div class="detail-label">Message</div>
+                                <div class="detail-value">${demande.details}</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${createProgressTracker(demande.statut)}
+                        
+                        ${demande.statusHistory && demande.statusHistory.length > 0 ? `
+                            <div class="status-history">
+                                <h4 style="margin-bottom: 1rem; color: var(--text-dark);">Historique des modifications</h4>
+                                ${demande.statusHistory.slice().reverse().map(history => `
+                                    <div class="history-item">
+                                        <div class="history-icon ${history.newStatus}">
+                                            ${getStatusIcon(history.newStatus)}
+                                        </div>
+                                        <div class="history-content">
+                                            <div class="history-title">
+                                                ${getStatusDisplayName(history.oldStatus)} → ${getStatusDisplayName(history.newStatus)}
+                                            </div>
+                                            <div class="history-date">${formatDate(history.date)}</div>
+                                            ${history.comment ? `<div class="history-comment">"${history.comment}"</div>` : ''}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        
+                        <div class="upload-section">
+                            <h4 style="margin-bottom: 1rem; color: var(--text-dark);">
+                                Documents requis ${userDocs.length > 0 ? `(${userDocs.length} uploadé(s))` : ''}
+                            </h4>
+                            
+                            <div class="upload-area" onclick="handleFileUpload('${demande.id}')">
+                                <p>📁 Cliquez pour uploader vos documents</p>
+                                <p style="font-size: 0.9rem; color: var(--text-light); margin-top: 0.5rem;">
+                                    Formats acceptés: PDF, JPG, PNG (max 10MB)
+                                </p>
+                            </div>
+                            
+                            ${userDocs.length > 0 ? `
+                                <div class="uploaded-files">
+                                    ${userDocs.map(doc => `
+                                        <div class="file-item">
+                                            <div class="file-info">
+                                                ${doc.preview ? `<img src="${doc.preview}" alt="Aperçu" class="file-preview">` : 
+                                                  `<div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: #f0f0f0; border-radius: 5px;">📄</div>`}
+                                                <div>
+                                                    <div style="font-weight: 600; font-size: 0.9rem;">${doc.name}</div>
+                                                    <div style="font-size: 0.8rem; color: #666;">${formatFileSize(doc.size)} • ${formatDate(doc.uploadDate)}</div>
+                                                </div>
+                                            </div>
+                                            <button class="remove-file" onclick="removeDocument('${doc.id}', event)">Supprimer</button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            
+                            <input type="file" id="fileInput-${demande.id}" multiple accept=".pdf,.jpg,.jpeg,.png" class="file-input">
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // === GESTION DES DOCUMENTS RÉELLE ===
+        function handleFileUpload(demandeId) {
+            const input = document.getElementById(`fileInput-${demandeId}`);
+            if (input) {
+                input.onchange = function(event) {
+                    processFiles(event.target.files, demandeId);
+                };
+                input.click();
+            }
+        }
+
+        function processFiles(files, demandeId) {
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+            
+            Array.from(files).forEach(file => {
+                if (file.size > maxSize) {
+                    showNotification(`Fichier trop volumineux: ${file.name}`, 'error');
+                    return;
+                }
+                
+                if (!allowedTypes.includes(file.type)) {
+                    showNotification(`Type de fichier non supporté: ${file.name}`, 'error');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const docId = 'DOC-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+                    
+                    const document = {
+                        id: docId,
+                        name: file.name,
+                        type: file.type.startsWith('image/') ? 'image' : 'document',
+                        size: file.size,
+                        dataUrl: e.target.result,
+                        preview: file.type.startsWith('image/') ? e.target.result : null,
+                        demandeId: demandeId,
+                        clientEmail: currentUser.email,
+                        clientName: currentUser.nom,
+                        uploadDate: new Date().toISOString()
+                    };
+                    
+                    // Ajouter à la liste locale
+                    uploadedDocuments.push(document);
+                    
+                    // Sauvegarder dans le localStorage pour que l'admin puisse y accéder
+                    const existingDocuments = getClientDocuments();
+                    existingDocuments.push(document);
+                    localStorage.setItem(STORAGE_KEYS.clientDocuments, JSON.stringify(existingDocuments));
+                    
+                    showNotification(`Document "${file.name}" uploadé avec succès`, 'success');
+                    loadDemandes();
+                    updateStats();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function removeDocument(docId, event) {
+            event.stopPropagation();
+            
+            if (confirm('Supprimer ce document ?')) {
+                // Supprimer de la liste locale
+                uploadedDocuments = uploadedDocuments.filter(doc => doc.id !== docId);
+                
+                // Supprimer du localStorage
+                const existingDocuments = getClientDocuments();
+                const filteredDocuments = existingDocuments.filter(doc => doc.id !== docId);
+                localStorage.setItem(STORAGE_KEYS.clientDocuments, JSON.stringify(filteredDocuments));
+                
+                showNotification('Document supprimé', 'success');
+                loadDemandes();
+                updateStats();
+            }
+        }
+
+        function loadUserDocuments() {
+            const allDocuments = getClientDocuments();
+            uploadedDocuments = allDocuments.filter(doc => doc.clientEmail === currentUser.email);
+        }
+
+        // === STATISTIQUES ===
+        function updateStats() {
+            const demandes = getDemandes();
+            const userDemandes = demandes.filter(d => currentUser.demandes && currentUser.demandes.includes(d.id));
+            
+            const total = userDemandes.length;
+            const enCours = userDemandes.filter(d => d.statut === 'nouveau' || d.statut === 'en-cours' || d.statut === 'documents-requis').length;
+            const terminees = userDemandes.filter(d => d.statut === 'termine').length;
+            const documentsCount = uploadedDocuments.length;
+            
+            document.getElementById('totalDemandes').textContent = total;
+            document.getElementById('demandesEnCours').textContent = enCours;
+            document.getElementById('demandesTerminees').textContent = terminees;
+            document.getElementById('documentsUploades').textContent = documentsCount;
+        }
+
+        function refreshDemandes() {
+            showNotification('Actualisation des données...', 'success');
+            loadUserDocuments(); // Recharger les documents
+            loadDemandes();
+            updateStats();
+        }
+
+        // === FONCTIONS UTILITAIRES ===
         function getClients() {
             return JSON.parse(localStorage.getItem(STORAGE_KEYS.clients) || '[]');
         }
 
         function getDemandes() {
             return JSON.parse(localStorage.getItem(STORAGE_KEYS.demandes) || '[]');
+        }
+
+        function getClientDocuments() {
+            return JSON.parse(localStorage.getItem(STORAGE_KEYS.clientDocuments) || '[]');
         }
 
         function getServiceDisplayName(service) {
@@ -918,6 +1529,7 @@
             const statuses = {
                 'nouveau': 'Nouveau',
                 'en-cours': 'En cours',
+                'documents-requis': 'Documents requis',
                 'termine': 'Terminé',
                 'refuse': 'Refusé'
             };
@@ -928,6 +1540,7 @@
             const icons = {
                 'nouveau': '📋',
                 'en-cours': '⏳',
+                'documents-requis': '📄',
                 'termine': '✅',
                 'refuse': '❌'
             };
@@ -951,12 +1564,13 @@
             }
 
             const steps = [
-                { id: 'nouveau', label: 'Reçue', number: 1, icon: '📋' },
-                { id: 'en-cours', label: 'En cours', number: 2, icon: '⏳' },
-                { id: 'termine', label: 'Terminée', number: 3, icon: '✅' }
+                { id: 'nouveau', label: 'Reçue', number: 1 },
+                { id: 'en-cours', label: 'En cours', number: 2 },
+                { id: 'documents-requis', label: 'Documents', number: 3 },
+                { id: 'termine', label: 'Terminée', number: 4 }
             ];
             
-            const statusOrder = ['nouveau', 'en-cours', 'termine'];
+            const statusOrder = ['nouveau', 'en-cours', 'documents-requis', 'termine'];
             const currentIndex = statusOrder.indexOf(currentStatus);
             
             let stepsHtml = '';
@@ -1000,6 +1614,14 @@
             });
         }
 
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
         function showNotification(message, type = 'success') {
             // Supprimer les notifications existantes
             const existingNotifications = document.querySelectorAll('.notification');
@@ -1033,9 +1655,7 @@
             showNotification('Une erreur inattendue s\'est produite', 'error');
         });
 
-        // Log pour le débogage
-        console.log('Espace client MonEntreprise.fr initialisé');
+        console.log('Espace client MonEntreprise.fr initialisé avec toutes les nouvelles fonctionnalités');
     </script>
 </body>
 </html>
-
