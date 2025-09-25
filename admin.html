@@ -94,7 +94,7 @@
             min-height: 100vh;
         }
 
-        /* Mobile Menu Toggle */
+        /* Menu Mobile Toggle - AMÉLIORÉ */
         .menu-toggle {
             display: none;
             position: fixed;
@@ -108,6 +108,7 @@
             border-radius: 8px;
             cursor: pointer;
             font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .sidebar {
@@ -159,6 +160,7 @@
             margin-left: 280px;
             padding: 2rem;
             min-height: 100vh;
+            transition: margin-left 0.3s ease;
         }
 
         .header {
@@ -304,6 +306,11 @@
 
         .btn-docs {
             background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #6c757d;
             color: white;
         }
 
@@ -492,10 +499,10 @@
             flex-wrap: wrap;
         }
 
-        /* MOBILE RESPONSIVE */
+        /* RESPONSIVE MOBILE - AMÉLIORÉ */
         @media (max-width: 768px) {
             .menu-toggle {
-                display: block;
+                display: block !important;
             }
 
             .sidebar {
@@ -508,7 +515,7 @@
             }
 
             .main-content {
-                margin-left: 0;
+                margin-left: 0 !important;
                 padding: 1rem;
                 padding-top: 5rem;
             }
@@ -545,8 +552,8 @@
             }
 
             .table-container {
-                margin: 1rem -2rem;
-                padding: 0 2rem;
+                margin: 1rem -1rem;
+                padding: 0 1rem;
             }
 
             .table th,
@@ -585,6 +592,15 @@
 
             .document-actions {
                 justify-content: center;
+            }
+
+            .sidebar h2 {
+                font-size: 1.2rem;
+                padding: 0 0.5rem;
+            }
+
+            .content-section {
+                padding: 1rem;
             }
         }
 
@@ -641,6 +657,61 @@
             .sidebar-overlay.active {
                 display: block;
             }
+        }
+
+        /* Confirmation Modal */
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            z-index: 4000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+        }
+
+        .confirm-content {
+            background: white;
+            margin: 15% auto;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn-confirm-yes {
+            background: #dc3545;
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-confirm-no {
+            background: #6c757d;
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* File preview */
+        .file-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            margin: 0.5rem 0;
         }
     </style>
 </head>
@@ -821,7 +892,7 @@
 
             <!-- Documents -->
             <div id="documents" class="content-section hidden">
-                <h3>Documents reçus</h3>
+                <h3>Documents reçus des clients</h3>
                 <div id="documentsEmpty" class="empty-state">
                     <h3>Aucun document</h3>
                     <p>Les documents uploadés par vos clients apparaîtront ici.</p>
@@ -931,6 +1002,18 @@
         </div>
     </div>
 
+    <!-- Modal de confirmation pour suppression -->
+    <div id="confirmModal" class="confirm-modal">
+        <div class="confirm-content">
+            <h3>Confirmer la suppression</h3>
+            <p id="confirmMessage">Êtes-vous sûr de vouloir supprimer cette demande ? Cette action est irréversible.</p>
+            <div class="confirm-buttons">
+                <button class="btn-confirm-yes" onclick="confirmDelete()">Oui, supprimer</button>
+                <button class="btn-confirm-no" onclick="cancelDelete()">Annuler</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Notification -->
     <div id="notification" class="notification"></div>
 
@@ -953,7 +1036,9 @@
         let demandes = [];
         let clients = [];
         let documents = [];
+        let clientDocuments = []; // NOUVEAU: Documents uploadés par les clients
         let currentDemandeId = null;
+        let deleteDemandeId = null; // Pour la confirmation de suppression
         let emailsSentCount = 0;
         let sessionTimer = null;
         let warningTimer = null;
@@ -976,7 +1061,7 @@
             emailjs.init(emailjsConfig.publicKey);
         }
 
-        // === GESTION MOBILE ===
+        // === GESTION MOBILE AMÉLIORÉE ===
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.querySelector('.sidebar-overlay');
@@ -1185,6 +1270,7 @@
             demandes = JSON.parse(localStorage.getItem('monentreprise_demandes') || '[]');
             clients = JSON.parse(localStorage.getItem('monentreprise_clients') || '[]');
             documents = JSON.parse(localStorage.getItem('monentreprise_documents') || '[]');
+            clientDocuments = JSON.parse(localStorage.getItem('monentreprise_client_documents') || '[]'); // NOUVEAU
             emailsSentCount = parseInt(localStorage.getItem('monentreprise_emails_sent') || '0');
             
             // Créer les clients manquants pour les demandes existantes
@@ -1200,6 +1286,7 @@
             localStorage.setItem('monentreprise_demandes', JSON.stringify(demandes));
             localStorage.setItem('monentreprise_clients', JSON.stringify(clients));
             localStorage.setItem('monentreprise_documents', JSON.stringify(documents));
+            localStorage.setItem('monentreprise_client_documents', JSON.stringify(clientDocuments)); // NOUVEAU
             localStorage.setItem('monentreprise_emails_sent', emailsSentCount.toString());
         }
 
@@ -1264,7 +1351,7 @@
             
             demandes.forEach(demande => {
                 const row = document.createElement('tr');
-                const relatedDocs = documents.filter(doc => doc.demandeId === demande.id);
+                const relatedDocs = clientDocuments.filter(doc => doc.demandeId === demande.id); // MODIFIÉ: utilise clientDocuments
                 const documentsDisplay = relatedDocs.length > 0 ? 
                     `<span style="color: #28a745; font-weight: 600;">${relatedDocs.length} doc(s)</span>` : 
                     `<span style="color: #666;">Aucun</span>`;
@@ -1282,10 +1369,66 @@
                         <button class="action-btn btn-progress" onclick="openStatusModal('${demande.id}', 'en-cours')">En cours</button>
                         <button class="action-btn btn-docs" onclick="openStatusModal('${demande.id}', 'documents-requis')">Docs</button>
                         <button class="action-btn btn-confirm" onclick="openStatusModal('${demande.id}', 'termine')">Terminer</button>
+                        <button class="action-btn btn-delete" onclick="confirmDeleteDemande('${demande.id}')">Supprimer</button>
                     </td>
                 `;
                 tbody.appendChild(row);
             });
+        }
+
+        // NOUVEAU: Fonctions pour suppression des demandes
+        function confirmDeleteDemande(demandeId) {
+            deleteDemandeId = demandeId;
+            const demande = demandes.find(d => d.id === demandeId);
+            
+            document.getElementById('confirmMessage').textContent = 
+                `Êtes-vous sûr de vouloir supprimer la demande ${demandeId} de ${demande.prenom} ${demande.nom} ? Cette action est irréversible.`;
+            
+            document.getElementById('confirmModal').style.display = 'block';
+        }
+
+        function confirmDelete() {
+            if (!deleteDemandeId) return;
+            
+            // Supprimer la demande
+            const demandeIndex = demandes.findIndex(d => d.id === deleteDemandeId);
+            if (demandeIndex !== -1) {
+                const demande = demandes[demandeIndex];
+                demandes.splice(demandeIndex, 1);
+                
+                // Supprimer les documents associés
+                clientDocuments = clientDocuments.filter(doc => doc.demandeId !== deleteDemandeId);
+                
+                // Mettre à jour le client
+                const client = clients.find(c => c.email === demande.email);
+                if (client && client.demandes) {
+                    client.demandes = client.demandes.filter(id => id !== deleteDemandeId);
+                    
+                    // Supprimer le client s'il n'a plus de demandes
+                    if (client.demandes.length === 0) {
+                        const clientIndex = clients.findIndex(c => c.email === demande.email);
+                        if (clientIndex !== -1) {
+                            clients.splice(clientIndex, 1);
+                        }
+                    }
+                }
+                
+                saveData();
+                updateStats();
+                loadDemandes();
+                loadDocuments();
+                loadClients();
+                
+                showNotification(`Demande ${deleteDemandeId} supprimée avec succès`);
+                addActivity(`Demande ${deleteDemandeId} supprimée par l'admin`);
+            }
+            
+            cancelDelete();
+        }
+
+        function cancelDelete() {
+            deleteDemandeId = null;
+            document.getElementById('confirmModal').style.display = 'none';
         }
 
         function simulateNewDemande() {
@@ -1495,12 +1638,12 @@
             showNotification('Messages par défaut sauvegardés');
         }
 
-        // === GESTION DES DOCUMENTS ===
+        // === GESTION DES DOCUMENTS AMÉLIORÉE ===
         function loadDocuments() {
             const documentsList = document.getElementById('documentsList');
             const documentsEmpty = document.getElementById('documentsEmpty');
             
-            if (documents.length === 0) {
+            if (clientDocuments.length === 0) {
                 documentsEmpty.style.display = 'block';
                 documentsList.innerHTML = '';
                 return;
@@ -1508,22 +1651,115 @@
             
             documentsEmpty.style.display = 'none';
             
-            documentsList.innerHTML = documents.map(doc => `
-                <div class="document-item">
-                    <div style="font-size: 1.5rem;">📄</div>
-                    <div class="document-info">
-                        <div style="font-weight: 600;">${doc.name}</div>
-                        <div style="font-size: 0.8rem; color: #666;">
-                            Client: ${doc.clientName} • Demande: ${doc.demandeId}<br>
-                            ${formatFileSize(doc.size)} • ${formatDate(doc.uploadDate)}
-                        </div>
+            // Grouper les documents par demande
+            const documentsByDemande = {};
+            clientDocuments.forEach(doc => {
+                if (!documentsByDemande[doc.demandeId]) {
+                    documentsByDemande[doc.demandeId] = [];
+                }
+                documentsByDemande[doc.demandeId].push(doc);
+            });
+            
+            let documentsHtml = '';
+            
+            Object.keys(documentsByDemande).forEach(demandeId => {
+                const demande = demandes.find(d => d.id === demandeId);
+                const documents = documentsByDemande[demandeId];
+                
+                documentsHtml += `
+                    <div style="margin-bottom: 2rem; padding: 1.5rem; border: 1px solid #e0e0e0; border-radius: 10px;">
+                        <h4 style="color: #667eea; margin-bottom: 1rem;">
+                            ${demande ? `${demande.prenom} ${demande.nom} (${demandeId})` : demandeId}
+                        </h4>
+                        ${documents.map(doc => `
+                            <div class="document-item" style="margin-bottom: 0.5rem;">
+                                <div style="font-size: 1.5rem;">
+                                    ${doc.type === 'image' ? '🖼️' : '📄'}
+                                </div>
+                                <div class="document-info">
+                                    <div style="font-weight: 600;">${doc.name}</div>
+                                    <div style="font-size: 0.8rem; color: #666;">
+                                        Uploadé le: ${formatDate(doc.uploadDate)}<br>
+                                        Taille: ${formatFileSize(doc.size)}
+                                        ${doc.type === 'image' ? ` • ${doc.dimensions || 'Dimensions inconnues'}` : ''}
+                                    </div>
+                                </div>
+                                <div class="document-actions">
+                                    <button class="action-btn btn-view" onclick="viewClientDocument('${doc.id}')">Voir</button>
+                                    <button class="action-btn btn-confirm" onclick="downloadClientDocument('${doc.id}')">Télécharger</button>
+                                </div>
+                                ${doc.preview ? `
+                                    <div style="margin-top: 1rem;">
+                                        <img src="${doc.preview}" alt="Aperçu" class="file-preview" style="max-width: 150px; border-radius: 5px;">
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
                     </div>
-                    <div class="document-actions">
-                        <button class="action-btn btn-view" onclick="viewDocument('${doc.id}')">Voir</button>
-                        <button class="action-btn btn-confirm" onclick="downloadDocument('${doc.id}')">Télécharger</button>
-                    </div>
+                `;
+            });
+            
+            documentsList.innerHTML = documentsHtml;
+        }
+
+        function viewClientDocument(docId) {
+            const doc = clientDocuments.find(d => d.id === docId);
+            if (!doc) {
+                showNotification('Document non trouvé', 'error');
+                return;
+            }
+            
+            const modal = document.getElementById('detailModal');
+            const content = document.getElementById('modalContent');
+            
+            content.innerHTML = `
+                <h3>${doc.name}</h3>
+                <div style="margin: 1rem 0;">
+                    <strong>Demande:</strong> ${doc.demandeId}<br>
+                    <strong>Client:</strong> ${doc.clientName}<br>
+                    <strong>Date d'upload:</strong> ${formatDate(doc.uploadDate)}<br>
+                    <strong>Taille:</strong> ${formatFileSize(doc.size)}<br>
+                    <strong>Type:</strong> ${doc.type}
                 </div>
-            `).join('');
+                ${doc.preview ? `
+                    <div style="text-align: center; margin: 1rem 0;">
+                        <img src="${doc.preview}" alt="Aperçu du document" style="max-width: 100%; max-height: 400px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                    </div>
+                ` : `
+                    <div style="text-align: center; padding: 2rem; background: #f8f9fa; border-radius: 10px; margin: 1rem 0;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📄</div>
+                        <p>Aperçu non disponible pour ce type de fichier</p>
+                    </div>
+                `}
+                <div style="margin-top: 2rem;">
+                    <button class="btn" onclick="downloadClientDocument('${doc.id}')" style="width: auto; margin-right: 1rem;">Télécharger</button>
+                    <button class="btn" onclick="closeModal()" style="width: auto; background: #6c757d;">Fermer</button>
+                </div>
+            `;
+            
+            modal.style.display = 'block';
+        }
+
+        function downloadClientDocument(docId) {
+            const doc = clientDocuments.find(d => d.id === docId);
+            if (!doc) {
+                showNotification('Document non trouvé', 'error');
+                return;
+            }
+            
+            if (doc.dataUrl) {
+                // Créer un lien de téléchargement
+                const link = document.createElement('a');
+                link.href = doc.dataUrl;
+                link.download = doc.name;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showNotification(`Document "${doc.name}" téléchargé`);
+            } else {
+                showNotification('Données du document non disponibles', 'error');
+            }
         }
 
         function loadClients() {
@@ -1539,24 +1775,73 @@
             if (clientsEmpty) clientsEmpty.style.display = 'none';
             
             if (clientsList) {
-                clientsList.innerHTML = clients.map(client => `
-                    <div class="document-item">
-                        <div style="font-size: 1.5rem;">👤</div>
-                        <div class="document-info">
-                            <div style="font-weight: 600;">${client.nom}</div>
-                            <div style="font-size: 0.8rem; color: #666;">
-                                ${client.email} • ${client.telephone}<br>
-                                ${client.demandes ? client.demandes.length : 0} demande(s) • ${client.statutCompte || 'Actif'}
+                clientsList.innerHTML = clients.map(client => {
+                    const clientDocs = clientDocuments.filter(doc => doc.clientEmail === client.email);
+                    return `
+                        <div class="document-item">
+                            <div style="font-size: 1.5rem;">👤</div>
+                            <div class="document-info">
+                                <div style="font-weight: 600;">${client.nom}</div>
+                                <div style="font-size: 0.8rem; color: #666;">
+                                    ${client.email} • ${client.telephone}<br>
+                                    ${client.demandes ? client.demandes.length : 0} demande(s) • ${clientDocs.length} document(s)<br>
+                                    ${client.statutCompte || 'Actif'} • Créé le ${formatDate(client.dateCreation)}
+                                </div>
+                            </div>
+                            <div class="document-actions">
+                                <span style="padding: 0.25rem 0.75rem; background: #d4edda; color: #155724; border-radius: 15px; font-size: 0.8rem;">
+                                    ${client.statutCompte || 'Actif'}
+                                </span>
+                                ${clientDocs.length > 0 ? `
+                                    <button class="action-btn btn-view" onclick="viewClientDocuments('${client.email}')">Documents</button>
+                                ` : ''}
                             </div>
                         </div>
-                        <div class="document-actions">
-                            <span style="padding: 0.25rem 0.75rem; background: #d4edda; color: #155724; border-radius: 15px; font-size: 0.8rem;">
-                                ${client.statutCompte || 'Actif'}
-                            </span>
-                        </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }
+        }
+
+        function viewClientDocuments(clientEmail) {
+            const client = clients.find(c => c.email === clientEmail);
+            const docs = clientDocuments.filter(doc => doc.clientEmail === clientEmail);
+            
+            const modal = document.getElementById('detailModal');
+            const content = document.getElementById('modalContent');
+            
+            content.innerHTML = `
+                <h3>Documents de ${client.nom}</h3>
+                <p style="margin-bottom: 1rem; color: #666;">${client.email} • ${docs.length} document(s)</p>
+                
+                ${docs.length > 0 ? docs.map(doc => `
+                    <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 1rem; margin: 0.5rem 0;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div style="font-size: 1.5rem;">${doc.type === 'image' ? '🖼️' : '📄'}</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">${doc.name}</div>
+                                <div style="font-size: 0.8rem; color: #666;">
+                                    Demande: ${doc.demandeId}<br>
+                                    ${formatDate(doc.uploadDate)} • ${formatFileSize(doc.size)}
+                                </div>
+                            </div>
+                            <div>
+                                <button class="action-btn btn-view" onclick="viewClientDocument('${doc.id}')">Voir</button>
+                            </div>
+                        </div>
+                        ${doc.preview ? `
+                            <div style="margin-top: 1rem; text-align: center;">
+                                <img src="${doc.preview}" alt="Aperçu" style="max-width: 150px; border-radius: 5px;">
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('') : '<p style="text-align: center; color: #666; padding: 2rem;">Aucun document uploadé</p>'}
+                
+                <div style="margin-top: 2rem;">
+                    <button class="btn" onclick="closeModal()" style="width: auto; background: #6c757d;">Fermer</button>
+                </div>
+            `;
+            
+            modal.style.display = 'block';
         }
 
         // === AFFICHAGE DES DÉTAILS ===
@@ -1564,7 +1849,7 @@
             const demande = demandes.find(d => d.id === demandeId);
             if (!demande) return;
             
-            const relatedDocs = documents.filter(doc => doc.demandeId === demandeId);
+            const relatedDocs = clientDocuments.filter(doc => doc.demandeId === demandeId);
             const modal = document.getElementById('detailModal');
             const content = document.getElementById('modalContent');
             
@@ -1589,13 +1874,21 @@
                     ${relatedDocs.length > 0 ? `
                         <div style="margin-top: 1rem;">
                             <strong>Documents reçus (${relatedDocs.length}):</strong><br>
-                            ${relatedDocs.map(doc => `• ${doc.name}`).join('<br>')}
+                            <div style="margin-top: 0.5rem;">
+                                ${relatedDocs.map(doc => `
+                                    <div style="display: inline-block; margin: 0.25rem; padding: 0.5rem; background: white; border-radius: 5px; border: 1px solid #ddd;">
+                                        ${doc.type === 'image' ? '🖼️' : '📄'} ${doc.name}
+                                        <button onclick="viewClientDocument('${doc.id}')" style="margin-left: 0.5rem; padding: 0.2rem 0.5rem; font-size: 0.7rem; background: #17a2b8; color: white; border: none; border-radius: 3px; cursor: pointer;">Voir</button>
+                                    </div>
+                                `).join('')}
+                            </div>
                         </div>
                     ` : ''}
                 </div>
                 
                 <div style="margin-top: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
                     <button class="btn" onclick="openStatusModal('${demande.id}')" style="width: auto;">Changer le statut</button>
+                    <button class="btn" onclick="confirmDeleteDemande('${demande.id}')" style="width: auto; background: #dc3545;">Supprimer</button>
                     <button class="btn" onclick="closeModal()" style="width: auto; background: #6c757d;">Fermer</button>
                 </div>
             `;
@@ -1698,14 +1991,6 @@
             }
         }
 
-        function viewDocument(docId) {
-            showNotification(`Ouverture du document: ${docId}`);
-        }
-
-        function downloadDocument(docId) {
-            showNotification(`Téléchargement du document: ${docId}`);
-        }
-
         function showNotification(message, type = 'success') {
             const notification = document.getElementById('notification');
             notification.textContent = message;
@@ -1722,6 +2007,7 @@
                 demandes: demandes,
                 clients: clients,
                 documents: documents,
+                clientDocuments: clientDocuments,
                 emailConfig: emailjsConfig,
                 emailsSent: emailsSentCount,
                 exportDate: new Date().toISOString()
@@ -1809,12 +2095,16 @@
             window.addEventListener('click', function(event) {
                 const detailModal = document.getElementById('detailModal');
                 const statusModal = document.getElementById('statusModal');
+                const confirmModal = document.getElementById('confirmModal');
                 
                 if (event.target === detailModal) {
                     closeModal();
                 }
                 if (event.target === statusModal) {
                     closeStatusModal();
+                }
+                if (event.target === confirmModal) {
+                    cancelDelete();
                 }
             });
             
@@ -1863,6 +2153,13 @@
                     closeSidebar();
                 }
             });
+
+            // Écouter les documents uploadés par les clients
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'monentreprise_client_documents') {
+                    loadData(); // Recharger toutes les données quand des documents sont uploadés
+                }
+            });
         });
 
         // Gestion des événements de fermeture de page
@@ -1881,7 +2178,7 @@
             }
         });
 
-        console.log('Panel Admin MonEntreprise.fr initialisé avec améliorations mobile');
+        console.log('Panel Admin MonEntreprise.fr initialisé avec améliorations complètes');
     </script>
 </body>
 </html>
