@@ -3,33 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Création de micro-entreprise et services administratifs en ligne. Démarches simplifiées, titre de séjour, préfecture, état civil.">
-    <title>MonEntreprise.fr - Création Micro-Entreprise & Services Administratifs</title>
+    <title>Espace Client - MonEntreprise.fr</title>
     
-    <!-- SEO et Performance -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- EmailJS Configuration -->
+    <!-- EmailJS pour récupération de mot de passe -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
-        // Initialisation EmailJS avec gestion d'erreur
+        // Initialisation EmailJS
         (function(){
             try {
                 emailjs.init("ntZTBB2BSKb64uZk8");
-                console.log('EmailJS initialisé avec succès');
-                window.emailjsLoaded = true;
+                console.log('EmailJS initialisé pour espace client');
             } catch (error) {
                 console.error('Erreur initialisation EmailJS:', error);
-                window.emailjsLoaded = false;
             }
         })();
-        
-        // Vérification du chargement
-        window.addEventListener('load', function() {
-            console.log('Page chargée. EmailJS disponible:', typeof emailjs !== 'undefined');
-        });
     </script>
     
     <style>
@@ -37,6 +29,9 @@
             --primary-color: #667eea;
             --secondary-color: #764ba2;
             --accent-color: #ff6b6b;
+            --success-color: #4CAF50;
+            --warning-color: #ff9800;
+            --error-color: #f44336;
             --text-dark: #2c3e50;
             --text-light: #666;
             --bg-light: #f8f9fa;
@@ -55,365 +50,124 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             line-height: 1.6;
             color: var(--text-dark);
-            overflow-x: hidden;
+            background: var(--bg-light);
+            min-height: 100vh;
         }
 
-        /* Header - MOBILE OPTIMISÉ */
-        .header {
-            position: fixed;
+        /* Header Client */
+        .client-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--white);
+            padding: 1rem 0;
+            position: sticky;
             top: 0;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
             z-index: 1000;
             box-shadow: var(--shadow);
-            padding: 0.75rem 0;
         }
 
-        .nav {
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 1rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .logo {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-
-        .nav-menu {
-            display: flex;
-            list-style: none;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .nav-menu a {
-            text-decoration: none;
-            color: var(--text-dark);
-            font-weight: 500;
-            transition: var(--transition);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-        }
-
-        .nav-menu a:hover {
-            color: var(--primary-color);
-            background: rgba(102, 126, 234, 0.1);
-        }
-
-        .hamburger {
-            display: none;
-            flex-direction: column;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 5px;
-            background: transparent;
-            border: none;
-        }
-
-        .hamburger span {
-            width: 25px;
-            height: 3px;
-            background: var(--text-dark);
-            margin: 3px 0;
-            transition: var(--transition);
-            border-radius: 2px;
-        }
-
-        .hamburger.active span:nth-child(1) {
-            transform: rotate(-45deg) translate(-5px, 6px);
-        }
-
-        .hamburger.active span:nth-child(2) {
-            opacity: 0;
-        }
-
-        .hamburger.active span:nth-child(3) {
-            transform: rotate(45deg) translate(-5px, -6px);
-        }
-
-        /* Hero Section - MOBILE OPTIMISÉ */
-        .hero {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            color: var(--white);
-            padding: 120px 1rem 60px;
-            text-align: center;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .hero-content {
-            max-width: 800px;
-            width: 100%;
-        }
-
-        .hero h1 {
-            font-size: clamp(1.8rem, 5vw, 3.5rem);
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            line-height: 1.2;
-        }
-
-        .hero p {
-            font-size: clamp(1rem, 3vw, 1.2rem);
-            margin-bottom: 2rem;
-            opacity: 0.9;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .cta-buttons {
-            display: flex;
+            flex-wrap: wrap;
             gap: 1rem;
-            justify-content: center;
+        }
+
+        .client-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .client-logo::before {
+            content: "👤 ";
+            margin-right: 0.5rem;
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
             flex-wrap: wrap;
         }
 
-        .btn {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 600;
+        .header-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
             cursor: pointer;
+            font-weight: 500;
             transition: var(--transition);
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 200px;
-            text-align: center;
+            font-size: 0.9rem;
+            white-space: nowrap;
         }
 
-        .btn-primary {
-            background: var(--accent-color);
-            color: var(--white);
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
         }
 
-        .btn-secondary {
-            background: transparent;
-            color: var(--white);
-            border: 2px solid var(--white);
+        .header-btn.danger {
+            background: rgba(244, 67, 54, 0.8);
+            border-color: rgba(244, 67, 54, 1);
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        .header-btn.danger:hover {
+            background: rgba(244, 67, 54, 1);
         }
 
-        .btn:active {
-            transform: translateY(0);
+        .user-name {
+            font-weight: 600;
+            opacity: 0.9;
         }
 
         /* Container */
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 1rem;
+            padding: 2rem 1rem;
         }
 
-        /* Sections */
-        .section {
-            padding: 60px 0;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: clamp(1.8rem, 4vw, 2.5rem);
-            font-weight: 700;
-            margin-bottom: 3rem;
-            color: var(--text-dark);
-        }
-
-        /* Services Grid - MOBILE OPTIMISÉ */
-        .services {
-            background: var(--white);
-        }
-
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .service-card {
-            background: var(--white);
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            border-left: 4px solid var(--primary-color);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .service-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            opacity: 0;
-            transition: var(--transition);
-            z-index: -1;
-        }
-
-        .service-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-        }
-
-        .service-card:hover::before {
-            opacity: 0.03;
-        }
-
-        .service-card h3 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-            font-size: 1.3rem;
-            font-weight: 600;
-        }
-
-        .service-list {
-            list-style: none;
-            margin-top: 1rem;
-        }
-
-        .service-list li {
-            padding: 0.5rem 0;
-            color: var(--text-light);
-            position: relative;
-            padding-left: 25px;
-            font-size: 0.9rem;
-        }
-
-        .service-list li::before {
-            content: "✓";
-            color: #4CAF50;
-            position: absolute;
-            left: 0;
-            font-weight: 600;
-        }
-
-        /* Process Steps - MOBILE OPTIMISÉ */
-        .process {
-            background: var(--bg-light);
-        }
-
-        .process-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-
-        .step {
-            text-align: center;
-            padding: 2rem;
-            background: var(--white);
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-        }
-
-        .step:hover {
-            transform: translateY(-5px);
-        }
-
-        .step-number {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: var(--white);
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
+        /* Login Section */
+        .login-section {
             display: flex;
-            align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 0 auto 1.5rem;
+            align-items: center;
+            min-height: 80vh;
+            padding: 2rem 1rem;
         }
 
-        /* Pricing - MOBILE OPTIMISÉ */
-        .pricing {
+        .login-card {
             background: var(--white);
-        }
-
-        .pricing-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-
-        .pricing-card {
-            background: var(--white);
+            padding: 3rem;
             border-radius: 20px;
-            padding: 2.5rem 2rem;
             box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 450px;
             text-align: center;
-            position: relative;
-            transition: var(--transition);
-            border: 2px solid transparent;
         }
 
-        .pricing-card:hover {
-            transform: scale(1.02);
-            border-color: var(--primary-color);
-        }
-
-        .pricing-card.featured {
-            border-color: var(--primary-color);
-            transform: scale(1.05);
-        }
-
-        .pricing-card.featured::before {
-            content: "POPULAIRE";
-            position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--primary-color);
-            color: var(--white);
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .price {
-            font-size: clamp(2rem, 5vw, 3rem);
+        .login-title {
             color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
             font-weight: 700;
-            margin: 1rem 0;
         }
 
-        /* Contact Form - MOBILE OPTIMISÉ */
-        .contact {
-            background: var(--bg-light);
-        }
-
-        .form-container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: var(--white);
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: var(--shadow);
+        .login-subtitle {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-size: 1rem;
         }
 
         .form-group {
             margin-bottom: 1.5rem;
+            text-align: left;
         }
 
         .form-group label {
@@ -423,313 +177,750 @@
             color: var(--text-dark);
         }
 
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
+        .form-group input, .form-group textarea, .form-group select {
             width: 100%;
-            padding: 12px 15px;
+            padding: 15px;
             border: 2px solid #e0e0e0;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 1rem;
             transition: var(--transition);
             font-family: inherit;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
         }
 
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
             outline: none;
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        /* Footer - MOBILE OPTIMISÉ */
-        .footer {
-            background: var(--text-dark);
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary-color);
             color: var(--white);
-            padding: 3rem 0 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
         }
 
-        .footer-content {
+        .btn:hover:not(:disabled) {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn.danger {
+            background: var(--error-color);
+        }
+
+        .btn.danger:hover:not(:disabled) {
+            background: #d32f2f;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .forgot-password a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+        .contact-info {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .contact-info a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+
+        /* Dashboard Client */
+        .client-dashboard {
+            display: none;
+        }
+
+        .client-dashboard.active {
+            display: block;
+        }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--white);
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" patternUnits="userSpaceOnUse" width="100" height="100"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.1;
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .welcome-message {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Stats Cards */
+        .stats-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
-        .footer-section h3 {
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-            font-weight: 600;
+        .stat-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-color);
         }
 
-        .footer-section a {
-            color: #bdc3c7;
-            text-decoration: none;
-            display: block;
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-weight: 500;
+            font-size: 1rem;
+        }
+
+        /* Demandes Section */
+        .section-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .refresh-btn {
+            background: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .refresh-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        /* Demande Card */
+        .demande-item {
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demande-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-color);
+        }
+
+        .demande-item:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow);
+        }
+
+        .demande-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .demande-id {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-nouveau {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status-en-cours {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .status-documents-requis {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .status-termine {
+            background: #e8f5e8;
+            color: #388e3c;
+        }
+
+        .status-refuse {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        /* Demande Details Grid */
+        .demande-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-item {
+            background: var(--bg-light);
+            padding: 1rem;
+            border-radius: 10px;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 1rem;
+        }
+
+        /* Progress Tracker */
+        .progress-section {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 1.5rem 0;
+        }
+
+        .progress-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e0e0e0;
+            z-index: 1;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            background: var(--bg-light);
+            padding: 0 1rem;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
             margin-bottom: 0.5rem;
             transition: var(--transition);
         }
 
-        .footer-section a:hover {
-            color: var(--white);
+        .step-circle.completed {
+            background: #28a745;
         }
 
-        .footer-bottom {
+        .step-circle.current {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .step-circle.refused {
+            background: #dc3545;
+        }
+
+        .step-label {
+            font-size: 0.8rem;
             text-align: center;
-            padding-top: 2rem;
-            border-top: 1px solid #34495e;
-            color: #95a5a6;
+            color: #666;
+            font-weight: 500;
         }
 
-        /* Floating Buttons - MOBILE OPTIMISÉ */
-        .floating-btn {
+        .step-label.completed {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .step-label.current {
+            color: #ffc107;
+            font-weight: 600;
+        }
+
+        .step-label.refused {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-top: 1.5rem;
+        }
+
+        .upload-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .upload-area {
+            border: 3px dashed #ccc;
+            border-radius: 15px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--white);
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary-color);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-hint {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Uploaded Files */
+        .uploaded-files {
+            margin-top: 2rem;
+        }
+
+        .files-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: var(--white);
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            border: 1px solid #e0e0e0;
+            transition: var(--transition);
+        }
+
+        .file-item:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .file-preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid #e0e0e0;
+        }
+
+        .file-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--bg-light);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .file-details {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .file-meta {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .remove-file {
+            background: var(--error-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .remove-file:hover {
+            background: #d32f2f;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-light);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .empty-message {
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .empty-action {
+            display: inline-block;
+            background: var(--primary-color);
+            color: var(--white);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .empty-action:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
             position: fixed;
-            width: 55px;
-            height: 55px;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 20px;
+            width: 95%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            text-decoration: none;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            z-index: 1000;
             transition: var(--transition);
         }
 
-        .floating-btn:hover {
-            transform: scale(1.1);
+        .modal-close:hover {
+            background: var(--bg-light);
+            color: var(--text-dark);
         }
 
-        .chat-btn {
-            bottom: 20px;
-            right: 20px;
-            background: var(--primary-color);
-            color: var(--white);
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
         }
 
-        .whatsapp-btn {
-            bottom: 85px;
-            right: 20px;
-            background: #25D366;
-            color: var(--white);
-        }
-
-        /* Admin et Client Access - MOBILE OPTIMISÉ */
-        .access-buttons {
+        /* Confirm Modal */
+        .confirm-modal {
+            display: none;
             position: fixed;
-            bottom: 150px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            z-index: 1000;
+            z-index: 4000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
         }
 
-        .access-btn {
-            background: rgba(108, 117, 125, 0.9);
-            color: var(--white);
-            padding: 0.4rem 0.8rem;
+        .confirm-content {
+            background: var(--white);
+            margin: 15% auto;
+            padding: 2rem;
             border-radius: 20px;
-            text-decoration: none;
-            font-size: 0.75rem;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        .confirm-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .confirm-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--error-color);
+        }
+
+        .confirm-message {
+            font-size: 1rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-confirm {
+            background: var(--error-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
             font-weight: 600;
             transition: var(--transition);
-            backdrop-filter: blur(10px);
-            white-space: nowrap;
         }
 
-        .access-btn.client {
-            background: rgba(23, 162, 184, 0.9);
+        .btn-confirm:hover {
+            background: #d32f2f;
         }
 
-        .access-btn:hover {
-            transform: scale(1.05);
-            opacity: 1;
+        .btn-cancel {
+            background: var(--text-light);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
         }
 
-        /* RESPONSIVE DESIGN COMPLET */
-        @media (max-width: 768px) {
-            .header {
-                padding: 0.5rem 0;
-            }
-
-            .nav {
-                padding: 0 1rem;
-            }
-
-            .nav-menu {
-                position: fixed;
-                left: -100%;
-                top: 60px;
-                flex-direction: column;
-                background-color: rgba(255, 255, 255, 0.98);
-                backdrop-filter: blur(10px);
-                width: 100%;
-                text-align: center;
-                transition: 0.3s;
-                box-shadow: var(--shadow);
-                padding: 2rem 0;
-                gap: 1rem;
-            }
-
-            .nav-menu.active {
-                left: 0;
-            }
-
-            .nav-menu a {
-                padding: 1rem 2rem;
-                display: block;
-                border-radius: 10px;
-                margin: 0 1rem;
-            }
-
-            .hamburger {
-                display: flex;
-            }
-
-            .hero {
-                padding: 100px 1rem 50px;
-                min-height: 90vh;
-            }
-
-            .services-grid,
-            .pricing-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            .process-grid {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 1rem;
-            }
-
-            .cta-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .btn {
-                min-width: 250px;
-            }
-
-            .form-container {
-                padding: 1.5rem;
-                margin: 0 1rem;
-            }
-
-            .section {
-                padding: 40px 0;
-            }
-
-            .floating-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 18px;
-            }
-
-            .chat-btn {
-                bottom: 15px;
-                right: 15px;
-            }
-
-            .whatsapp-btn {
-                bottom: 75px;
-                right: 15px;
-            }
-
-            .access-buttons {
-                bottom: 135px;
-                right: 15px;
-            }
-
-            .access-btn {
-                font-size: 0.7rem;
-                padding: 0.3rem 0.6rem;
-            }
-
-            .logo {
-                font-size: 1.1rem;
-            }
+        .btn-cancel:hover {
+            background: #555;
         }
 
-        @media (max-width: 480px) {
-            .hero {
-                padding: 90px 0.5rem 40px;
-            }
-
-            .hero h1 {
-                font-size: 1.5rem;
-                margin-bottom: 1rem;
-            }
-
-            .hero p {
-                font-size: 0.9rem;
-                margin-bottom: 1.5rem;
-            }
-
-            .btn {
-                min-width: 200px;
-                padding: 10px 20px;
-                font-size: 0.9rem;
-            }
-
-            .service-card,
-            .step,
-            .pricing-card {
-                padding: 1.5rem;
-            }
-
-            .form-container {
-                padding: 1rem;
-            }
-
-            .container {
-                padding: 0 0.5rem;
-            }
-
-            .section-title {
-                font-size: 1.5rem;
-                margin-bottom: 2rem;
-            }
-
-            .floating-btn {
-                width: 45px;
-                height: 45px;
-                font-size: 16px;
-            }
-
-            .access-btn {
-                font-size: 0.65rem;
-                padding: 0.2rem 0.5rem;
-            }
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            color: var(--white);
+            font-weight: 600;
+            z-index: 10000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .notification.show {
+            transform: translateX(0);
         }
 
-        .animate-on-scroll {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
+        .notification.success {
+            background: var(--success-color);
         }
 
-        .animate-on-scroll.visible {
-            opacity: 1;
-            transform: translateY(0);
+        .notification.error {
+            background: var(--error-color);
+        }
+
+        .notification.warning {
+            background: var(--warning-color);
         }
 
         /* Loading Animation */
@@ -747,66 +938,87 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Touch optimizations */
-        @media (hover: none) and (pointer: coarse) {
-            .btn:hover,
-            .service-card:hover,
-            .step:hover,
-            .pricing-card:hover,
-            .floating-btn:hover,
-            .access-btn:hover {
-                transform: none;
-            }
-
-            .btn:active {
-                transform: scale(0.95);
-            }
-
-            .service-card:active,
-            .step:active,
-            .pricing-card:active {
-                transform: scale(0.98);
-            }
-
-            .floating-btn:active,
-            .access-btn:active {
-                transform: scale(0.9);
-            }
+        /* Hidden Class */
+        .hidden {
+            display: none !important;
         }
 
-        /* Notification améliorée */
-        .notification {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-100px);
-            padding: 1rem 2rem;
-            background: #4CAF50;
-            color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            z-index: 10000;
-            transition: transform 0.3s ease;
-            max-width: 90vw;
-            text-align: center;
-            font-weight: 500;
-            white-space: pre-line;
-        }
-
-        .notification.show {
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .notification.error {
-            background: #dc3545;
-        }
-
-        .notification.warning {
-            background: #ffc107;
-            color: #333;
-        }
-
+        /* Responsive Design */
         @media (max-width: 768px) {
+            .container {
+                padding: 1rem 0.5rem;
+            }
+
+            .login-card {
+                padding: 2rem 1.5rem;
+                margin: 1rem;
+            }
+
+            .login-title {
+                font-size: 1.5rem;
+            }
+
+            .welcome-banner {
+                padding: 2rem 1rem;
+            }
+
+            .welcome-title {
+                font-size: 2rem;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+                gap: 0.5rem;
+            }
+
+            .demande-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .demande-details {
+                grid-template-columns: 1fr;
+            }
+
+            .progress-steps {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1rem;
+            }
+
+            .progress-steps::before {
+                display: none;
+            }
+
+            .upload-area {
+                padding: 2rem 1rem;
+            }
+
+            .file-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .file-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .modal-content {
+                margin: 10% auto;
+                padding: 1.5rem;
+                width: 95%;
+            }
+
             .notification {
                 left: 10px;
                 right: 10px;
@@ -817,559 +1029,416 @@
             .notification.show {
                 transform: translateY(0);
             }
+
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.5rem;
+            }
+
+            .user-actions {
+                justify-content: center;
+                gap: 0.5rem;
+            }
+
+            .header-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 1.5rem 1rem;
+            }
+
+            .section-card {
+                padding: 1rem;
+            }
+
+            .demande-item {
+                padding: 1rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .welcome-title {
+                font-size: 1.5rem;
+            }
+
+            .section-title {
+                font-size: 1.3rem;
+            }
+
+            .confirm-actions {
+                flex-direction: column;
+            }
+
+            .upload-area {
+                padding: 1.5rem 0.5rem;
+            }
+
+            .upload-icon {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <nav class="nav">
-            <div class="logo">MonEntreprise.fr</div>
-            <ul class="nav-menu">
-                <li><a href="#accueil">Accueil</a></li>
-                <li><a href="#services">Services</a></li>
-                <li><a href="#processus">Comment ça marche</a></li>
-                <li><a href="#tarifs">Tarifs</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-            <button class="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </nav>
+    <!-- Header (caché par défaut, visible après connexion) -->
+    <header class="client-header hidden" id="clientHeader">
+        <div class="header-content">
+            <div class="client-logo">Espace Client MonEntreprise.fr</div>
+            <div class="user-actions">
+                <span class="user-name" id="userName">Utilisateur</span>
+                <button class="header-btn" onclick="openSettings()">⚙️ Paramètres</button>
+                <button class="header-btn danger" onclick="logout()">🚪 Déconnexion</button>
+            </div>
+        </div>
     </header>
 
-    <!-- Hero Section -->
-    <section id="accueil" class="hero">
-        <div class="hero-content">
-            <h1>Créez votre Micro-Entreprise en 24h</h1>
-            <p>Tous vos services administratifs et démarches en ligne simplifiés</p>
-            <div class="cta-buttons">
-                <a href="#contact" class="btn btn-primary">Créer ma Micro-Entreprise</a>
-                <a href="#services" class="btn btn-secondary">Découvrir nos Services</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Services Section -->
-    <section id="services" class="section services">
-        <div class="container">
-            <h2 class="section-title">Nos Services Complets</h2>
+    <!-- Section de Connexion -->
+    <div class="login-section" id="loginSection">
+        <div class="login-card">
+            <h1 class="login-title">🏢 Espace Client</h1>
+            <p class="login-subtitle">Connectez-vous avec vos identifiants reçus par email</p>
             
-            <div class="services-grid">
-                <div class="service-card animate-on-scroll">
-                    <h3>🏢 Création Micro-Entreprise</h3>
-                    <p>Créez votre micro-entreprise rapidement et facilement</p>
-                    <ul class="service-list">
-                        <li>Déclaration de début d'activité</li>
-                        <li>Immatriculation SIRENE</li>
-                        <li>Choix du régime fiscal</li>
-                        <li>Demande ACCRE/ACRE</li>
-                        <li>Ouverture compte bancaire dédié</li>
-                        <li>Assurance responsabilité civile</li>
-                    </ul>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">📧 Adresse email</label>
+                    <input type="email" id="email" name="email" required placeholder="votre@email.com">
                 </div>
-
-                <div class="service-card animate-on-scroll">
-                    <h3>📋 Démarches Administratives</h3>
-                    <p>Toutes vos démarches administratives du quotidien</p>
-                    <ul class="service-list">
-                        <li>Demande/Renouvellement titre de séjour</li>
-                        <li>Rendez-vous préfecture</li>
-                        <li>Demande de naturalisation</li>
-                        <li>Changement d'adresse officiel</li>
-                        <li>Demande d'extrait de casier judiciaire</li>
-                        <li>Apostille de documents</li>
-                    </ul>
+                
+                <div class="form-group">
+                    <label for="password">🔒 Mot de passe</label>
+                    <input type="password" id="password" name="password" required placeholder="Mot de passe reçu par email">
                 </div>
-
-                <div class="service-card animate-on-scroll">
-                    <h3>👥 État Civil & Famille</h3>
-                    <p>Services liés à l'état civil et aux démarches familiales</p>
-                    <ul class="service-list">
-                        <li>Demande d'acte de naissance</li>
-                        <li>Demande d'acte de mariage</li>
-                        <li>Demande d'acte de décès</li>
-                        <li>PACS - Déclaration/Dissolution</li>
-                        <li>Reconnaissance de paternité</li>
-                        <li>Changement de nom/prénom</li>
-                    </ul>
-                </div>
-
-                <div class="service-card animate-on-scroll">
-                    <h3>🏥 Sécurité Sociale & Santé</h3>
-                    <p>Démarches santé et protection sociale</p>
-                    <ul class="service-list">
-                        <li>Ouverture de droits CPAM</li>
-                        <li>Demande de carte Vitale</li>
-                        <li>Demande CMU-C/CSS</li>
-                        <li>Déclaration médecin traitant</li>
-                        <li>Remboursement frais médicaux</li>
-                        <li>Arrêt maladie en ligne</li>
-                    </ul>
-                </div>
-
-                <div class="service-card animate-on-scroll">
-                    <h3>🏠 Logement & Habitat</h3>
-                    <p>Toutes les démarches liées au logement</p>
-                    <ul class="service-list">
-                        <li>Demande de logement social</li>
-                        <li>Demande APL/ALS</li>
-                        <li>Dossier locataire complet</li>
-                        <li>Attestation d'assurance habitation</li>
-                        <li>Résiliation contrats (EDF, GDF, Internet)</li>
-                        <li>Changement d'adresse multi-services</li>
-                    </ul>
-                </div>
-
-                <div class="service-card animate-on-scroll">
-                    <h3>💼 Emploi & Formation</h3>
-                    <p>Services emploi, formation et carrière</p>
-                    <ul class="service-list">
-                        <li>Inscription Pôle Emploi</li>
-                        <li>Demande ARE/RSA</li>
-                        <li>Création compte CPF</li>
-                        <li>Demande de formation</li>
-                        <li>Validation des acquis (VAE)</li>
-                        <li>Bilan de compétences</li>
-                    </ul>
-                </div>
-
-                <div class="service-card animate-on-scroll">
-                    <h3>🚗 Transport & Mobilité</h3>
-                    <p>Démarches liées aux transports</p>
-                    <ul class="service-list">
-                        <li>Demande/Renouvellement permis</li>
-                        <li>Échange permis étranger</li>
-                        <li>Immatriculation véhicule</li>
-                        <li>Changement de propriétaire</li>
-                        <li>Carte de transport</li>
-                        <li>Contestation PV</li>
-                    </ul>
-                </div>
-
-                <div class="service-card animate-on-scroll">
-                    <h3>💰 Fiscalité & Impôts</h3>
-                    <p>Gestion fiscale et déclarations</p>
-                    <ul class="service-list">
-                        <li>Déclaration revenus micro-BNC/BIC</li>
-                        <li>Télédéclaration TVA</li>
-                        <li>Demande d'avis de non-imposition</li>
-                        <li>Échéancier de paiement</li>
-                        <li>Réclamation fiscale</li>
-                        <li>Optimisation fiscale légale</li>
-                    </ul>
-                </div>
-
-                <div class="service-card animate-on-scroll">
-                    <h3>💻 Services Numériques</h3>
-                    <p>Aide aux démarches numériques</p>
-                    <ul class="service-list">
-                        <li>Création compte France Connect</li>
-                        <li>Activation signature électronique</li>
-                        <li>Coffre-fort numérique</li>
-                        <li>Dématérialisation documents</li>
-                        <li>Aide utilisation services publics</li>
-                        <li>Sécurisation identité numérique</li>
-                    </ul>
-                </div>
+                
+                <button type="submit" class="btn" id="loginBtn">
+                    Se connecter
+                </button>
+            </form>
+            
+            <div class="forgot-password">
+                <a onclick="openForgotPassword()">🔄 Mot de passe oublié ?</a>
+            </div>
+            
+            <div class="contact-info">
+                <p>Besoin d'aide ?</p>
+                <p>📞 <a href="tel:+33766306016">+33 766 306 016</a></p>
+                <p>📧 <a href="mailto:mohamed.oudiai@icloud.com">mohamed.oudiai@icloud.com</a></p>
             </div>
         </div>
-    </section>
-
-    <!-- Process Section -->
-    <section id="processus" class="section process">
-        <div class="container">
-            <h2 class="section-title">Comment ça marche ?</h2>
-            <div class="process-grid">
-                <div class="step animate-on-scroll">
-                    <div class="step-number">1</div>
-                    <h3>Choisissez votre service</h3>
-                    <p>Sélectionnez le service dont vous avez besoin parmi notre large gamme</p>
-                </div>
-                <div class="step animate-on-scroll">
-                    <div class="step-number">2</div>
-                    <h3>Remplissez le formulaire</h3>
-                    <p>Complétez notre formulaire simplifié avec vos informations</p>
-                </div>
-                <div class="step animate-on-scroll">
-                    <div class="step-number">3</div>
-                    <h3>Confirmations automatiques</h3>
-                    <p>Recevez instantanément vos confirmations et votre numéro de suivi</p>
-                </div>
-                <div class="step animate-on-scroll">
-                    <div class="step-number">4</div>
-                    <h3>Traitement rapide</h3>
-                    <p>Nos experts traitent votre demande et vous tiennent informé</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Pricing Section -->
-    <section id="tarifs" class="section pricing">
-        <div class="container">
-            <h2 class="section-title">Nos Tarifs Transparents</h2>
-            <div class="pricing-grid">
-                <div class="pricing-card animate-on-scroll">
-                    <h3>Essentiel</h3>
-                    <div class="price">29€</div>
-                    <p>Pour les démarches simples</p>
-                    <ul class="service-list">
-                        <li>1 démarche administrative</li>
-                        <li>Support par email</li>
-                        <li>Traitement sous 48h</li>
-                        <li>Suivi en ligne</li>
-                    </ul>
-                    <a href="#contact" class="btn btn-primary">Commander</a>
-                </div>
-
-                <div class="pricing-card featured animate-on-scroll">
-                    <h3>Premium</h3>
-                    <div class="price">79€</div>
-                    <p>Pour les créateurs d'entreprise</p>
-                    <ul class="service-list">
-                        <li>Création micro-entreprise complète</li>
-                        <li>Support téléphonique</li>
-                        <li>Traitement prioritaire 24h</li>
-                        <li>Conseils personnalisés</li>
-                        <li>Kit de démarrage inclus</li>
-                    </ul>
-                    <a href="#contact" class="btn btn-primary">Commander</a>
-                </div>
-
-                <div class="pricing-card animate-on-scroll">
-                    <h3>Pro</h3>
-                    <div class="price">149€</div>
-                    <p>Accompagnement complet</p>
-                    <ul class="service-list">
-                        <li>Jusqu'à 5 démarches</li>
-                        <li>Support dédié 7j/7</li>
-                        <li>Traitement express</li>
-                        <li>Rendez-vous visio</li>
-                        <li>Garantie résultat</li>
-                    </ul>
-                    <a href="#contact" class="btn btn-primary">Commander</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Form -->
-    <section id="contact" class="section contact">
-        <div class="container">
-            <h2 class="section-title">Commencez maintenant</h2>
-            <div class="form-container">
-                <form id="mainForm" novalidate>
-                    <div class="form-group">
-                        <label for="service">Type de service souhaité *</label>
-                        <select id="service" name="service" required>
-                            <option value="">Sélectionnez un service</option>
-                            <option value="micro-entreprise">Création micro-entreprise</option>
-                            <option value="titre-sejour">Titre de séjour</option>
-                            <option value="prefecture">Rendez-vous préfecture</option>
-                            <option value="etat-civil">État civil</option>
-                            <option value="securite-sociale">Sécurité sociale</option>
-                            <option value="logement">Démarches logement</option>
-                            <option value="emploi">Emploi et formation</option>
-                            <option value="transport">Transport</option>
-                            <option value="fiscalite">Fiscalité</option>
-                            <option value="numerique">Services numériques</option>
-                            <option value="autre">Autre</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="prenom">Prénom *</label>
-                        <input type="text" id="prenom" name="prenom" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="nom">Nom *</label>
-                        <input type="text" id="nom" name="nom" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="email">Email *</label>
-                        <input type="email" id="email" name="email" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="telephone">Téléphone *</label>
-                        <input type="tel" id="telephone" name="telephone" required placeholder="+33 6 XX XX XX XX">
-                        <small style="color: #666; font-size: 0.9rem;">Format international recommandé</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="message">Décrivez votre demande</label>
-                        <textarea id="message" name="message" rows="4" placeholder="Détaillez votre besoin..."></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="urgence">Niveau d'urgence</label>
-                        <select id="urgence" name="urgence">
-                            <option value="normal">Normal (72h)</option>
-                            <option value="rapide">Rapide (48h)</option>
-                            <option value="express">Express (24h)</option>
-                        </select>
-                    </div>
-
-                    <button type="button" class="btn btn-primary" id="submitBtn" style="width: 100%;" onclick="handleFormSubmit()">Envoyer ma demande</button>
-                </form>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Services</h3>
-                    <a href="#services">Micro-entreprise</a>
-                    <a href="#services">Démarches administratives</a>
-                    <a href="#services">État civil</a>
-                    <a href="#services">Fiscalité</a>
-                </div>
-                <div class="footer-section">
-                    <h3>Support</h3>
-                    <a href="#contact">Aide en ligne</a>
-                    <a href="#contact">FAQ</a>
-                    <a href="#contact">Contact</a>
-                    <a href="#processus">Tutoriels</a>
-                </div>
-                <div class="footer-section">
-                    <h3>Légal</h3>
-                    <a href="#">Mentions légales</a>
-                    <a href="#">CGV</a>
-                    <a href="#">Confidentialité</a>
-                    <a href="#">Cookies</a>
-                </div>
-                <div class="footer-section">
-                    <h3>Contact</h3>
-                    <p>📧 mohamed.oudiai@icloud.com</p>
-                    <p>📞 +33 766 306 016</p>
-                    <p>📍 234 avenue de maréchal joffre<br>95100 Argenteuil, France</p>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 MonEntreprise.fr - Tous droits réservés</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Floating Buttons -->
-    <a href="#" class="floating-btn chat-btn" onclick="openChat()">💬</a>
-    <a href="https://wa.me/33766306016" class="floating-btn whatsapp-btn" target="_blank">📱</a>
-    
-    <!-- Access Buttons -->
-    <div class="access-buttons">
-        <a href="client.html" class="access-btn client">Espace Client</a>
-        <a href="admin.html" class="access-btn">Panel Admin</a>
     </div>
 
-    <!-- JavaScript avec intégration complète améliorée -->
+    <!-- Dashboard Client -->
+    <div class="client-dashboard" id="clientDashboard">
+        <div class="container">
+            <!-- Banner de Bienvenue -->
+            <div class="welcome-banner">
+                <h1 class="welcome-title">🎉 Bienvenue dans votre espace !</h1>
+                <p class="welcome-message">Gérez vos demandes et documents en toute simplicité</p>
+            </div>
+
+            <!-- Statistiques -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalDemandes">0</div>
+                    <div class="stat-label">📋 Demandes totales</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="demandesEnCours">0</div>
+                    <div class="stat-label">⏳ En cours</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="demandesTerminees">0</div>
+                    <div class="stat-label">✅ Terminées</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="documentsUploades">0</div>
+                    <div class="stat-label">📎 Documents uploadés</div>
+                </div>
+            </div>
+
+            <!-- Section des Demandes -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2 class="section-title">📋 Mes Demandes</h2>
+                    <button class="refresh-btn" onclick="refreshData()">🔄 Actualiser</button>
+                </div>
+                
+                <div id="demandesList">
+                    <!-- Les demandes seront chargées ici -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Mot de passe oublié -->
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeForgotPassword()">&times;</button>
+            <h2 class="modal-title">🔄 Récupération du mot de passe</h2>
+            <p style="margin-bottom: 1.5rem; color: var(--text-light);">
+                Entrez votre adresse email pour recevoir un nouveau mot de passe
+            </p>
+            <div class="form-group">
+                <label for="forgotEmail">📧 Adresse email</label>
+                <input type="email" id="forgotEmail" placeholder="votre@email.com" required>
+            </div>
+            <button class="btn" onclick="sendPasswordReset()" id="forgotBtn">
+                📤 Envoyer un nouveau mot de passe
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Paramètres -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeSettings()">&times;</button>
+            <h2 class="modal-title">⚙️ Paramètres du compte</h2>
+            
+            <div class="form-group">
+                <label for="newPassword">🔒 Nouveau mot de passe (optionnel)</label>
+                <input type="password" id="newPassword" placeholder="Laissez vide pour ne pas modifier">
+            </div>
+            
+            <div class="form-group">
+                <label for="newPhone">📞 Téléphone</label>
+                <input type="tel" id="newPhone" placeholder="+33 6 XX XX XX XX">
+            </div>
+            
+            <button class="btn" onclick="updateAccount()" style="margin-bottom: 2rem;">
+                💾 Sauvegarder les modifications
+            </button>
+            
+            <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;">
+            
+            <div style="background: #ffebee; padding: 1.5rem; border-radius: 10px; text-align: center;">
+                <h3 style="color: var(--error-color); margin-bottom: 1rem;">⚠️ Zone de danger</h3>
+                <p style="margin-bottom: 1.5rem; color: var(--text-light);">
+                    La suppression de votre compte est <strong>irréversible</strong>. Toutes vos données seront perdues.
+                </p>
+                <button class="btn danger" onclick="confirmDeleteAccount()">
+                    🗑️ Supprimer mon compte définitivement
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Confirmation suppression compte -->
+    <div id="confirmDeleteModal" class="confirm-modal">
+        <div class="confirm-content">
+            <div class="confirm-icon">⚠️</div>
+            <h3 class="confirm-title">Supprimer votre compte ?</h3>
+            <p class="confirm-message">
+                Cette action est <strong>irréversible</strong> !<br>
+                Toutes vos demandes et documents seront définitivement supprimés.
+            </p>
+            <div class="confirm-actions">
+                <button class="btn-confirm" onclick="deleteAccount()">🗑️ Oui, supprimer</button>
+                <button class="btn-cancel" onclick="cancelDeleteAccount()">❌ Annuler</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Configuration EmailJS
-        const EMAIL_CONFIG = {
-            serviceId: 'service_2te46oj',
-            templateId: 'template_m3ewwas',
-            clientTemplateId: 'template_9jpudgc',
-            adminEmail: 'mohamed.oudiai@icloud.com'
+        // Configuration des clés de stockage
+        const STORAGE_KEYS = {
+            clients: 'monentreprise_clients',
+            demandes: 'monentreprise_demandes',
+            clientDocuments: 'monentreprise_client_documents',
+            currentUser: 'monentreprise_current_user'
         };
 
-        // Variables de debug
-        let debugMode = false;
-        let submitAttempts = 0;
+        const EMAIL_CONFIG = {
+            serviceId: 'service_2te46oj',
+            templateId: 'template_password_reset',
+            publicKey: 'ntZTBB2BSKb64uZk8'
+        };
 
-        // === INTÉGRATION SYSTÈME MONENTREPRISE COMPLÈTE ===
-        
-        // Gestionnaire de données centralisé amélioré
-        class DataManager {
-            constructor() {
-                this.storageKey = 'monentreprise_demandes';
-                this.clientsKey = 'monentreprise_clients';
-                this.documentsKey = 'monentreprise_client_documents';
-            }
-            
-            addDemande(formData) {
-                const demandes = this.getDemandes();
-                const clients = this.getClients();
-                
-                const newDemande = {
-                    id: this.generateId(),
-                    client: formData.get('prenom') + ' ' + formData.get('nom'),
-                    email: formData.get('email'),
-                    telephone: formData.get('telephone') || 'Non renseigné',
-                    service: formData.get('service'),
-                    statut: 'nouveau',
-                    date: new Date().toISOString().split('T')[0],
-                    prix: this.getServicePrice(formData.get('service')),
-                    details: formData.get('message') || 'Aucun message',
-                    urgence: formData.get('urgence') || 'Normal',
-                    dateComplete: new Date().toISOString(),
-                    prenom: formData.get('prenom'),
-                    nom: formData.get('nom')
-                };
-                
-                demandes.unshift(newDemande);
-                this.saveDemandes(demandes);
-                
-                console.log('[MonEntreprise] Nouvelle demande ajoutée:', newDemande.id);
-                return newDemande;
-            }
-            
-            getDemandes() {
-                return JSON.parse(localStorage.getItem(this.storageKey) || '[]');
-            }
-            
-            getClients() {
-                return JSON.parse(localStorage.getItem(this.clientsKey) || '[]');
-            }
-            
-            saveDemandes(demandes) {
-                localStorage.setItem(this.storageKey, JSON.stringify(demandes));
-            }
-            
-            saveClients(clients) {
-                localStorage.setItem(this.clientsKey, JSON.stringify(clients));
-            }
-            
-            generateId() {
-                const timestamp = Date.now().toString(36).toUpperCase();
-                const random = Math.random().toString(36).substr(2, 4).toUpperCase();
-                return 'ME-' + timestamp + '-' + random;
-            }
-            
-            getServicePrice(service) {
-                const prices = {
-                    'micro-entreprise': '79€',
-                    'titre-sejour': '29€',
-                    'prefecture': '29€',
-                    'etat-civil': '29€',
-                    'securite-sociale': '29€',
-                    'logement': '29€',
-                    'emploi': '29€',
-                    'transport': '29€',
-                    'fiscalite': '29€',
-                    'numerique': '29€',
-                    'autre': '29€'
-                };
-                return prices[service] || '29€';
-            }
-        }
+        // Variables globales
+        let currentUser = null;
+        let uploadedDocuments = [];
 
-        // Initialiser le gestionnaire de données
-        const dataManager = new DataManager();
-
-        // === FONCTION PRINCIPALE DE SOUMISSION AMÉLIORÉE ===
-        function handleFormSubmit() {
-            console.log('=== DÉBUT SOUMISSION FORMULAIRE MOBILE-OPTIMISÉ ===');
-            submitAttempts++;
+        // === INITIALISATION ===
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🏢 Espace Client MonEntreprise.fr chargé');
             
-            const form = document.getElementById('mainForm');
-            if (!form) {
-                showNotification('Erreur: formulaire non accessible', 'error');
-                return;
-            }
-
-            const formData = new FormData(form);
+            // Vérifier si l'utilisateur est déjà connecté
+            checkExistingSession();
             
-            // Validation améliorée
-            const errors = validateFormWithPhone(formData);
-            if (errors.length > 0) {
-                showNotification('Erreurs dans le formulaire:\n' + errors.join('\n'), 'error');
-                return;
-            }
+            // Gestionnaires d'événements
+            setupEventHandlers();
+        });
 
-            // Vérifier EmailJS
-            if (typeof emailjs === 'undefined') {
-                showNotification('Service email non disponible.\nVeuillez rafraîchir la page.', 'error');
-                return;
-            }
-
-            console.log('EmailJS disponible, démarrage création compte client + envoi');
-            
-            // Désactiver le bouton et afficher le loading
-            const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.textContent;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="loading"></span> Envoi en cours...';
-
-            // Créer la demande et le compte client automatiquement
-            const demande = dataManager.addDemande(formData);
-            const clientPassword = generatePassword();
-            const client = createClientAccount(formData, demande.id, clientPassword);
-            
-            // Envoyer les emails avec identifiants
-            sendCompleteEmails(formData, demande, clientPassword)
-                .then((response) => {
-                    console.log('Emails envoyés avec succès');
-                    
-                    // Message de succès optimisé mobile
-                    const successMessage = window.innerWidth <= 768 ? 
-                        `✅ Demande envoyée !\n\n📧 Vérifiez: ${formData.get('email')}\n🔐 Identifiants envoyés par email\n🆔 N°: ${demande.id}\n\nMerci !` :
-                        `✅ Votre demande a été envoyée avec succès !\n\n📧 Vérifiez votre email : ${formData.get('email')}\n🔐 Vous allez recevoir vos identifiants d'accès\n🆔 Numéro de demande: ${demande.id}\n\nConsultez votre boîte email (et spams) pour accéder à votre espace client.\n\nMerci de votre confiance !`;
-                    
-                    showNotification(successMessage);
-                    
-                    // Reset du formulaire
-                    form.reset();
-                    const priceHint = document.getElementById('priceHint');
-                    if (priceHint) priceHint.remove();
-                })
-                .catch((error) => {
-                    console.error('Erreur envoi emails:', error);
-                    
-                    const errorMessage = window.innerWidth <= 768 ?
-                        `❌ Erreur d'envoi\n\nSolutions:\n• Vérifiez votre connexion\n• Format tel: +33...\n• Réessayez\n\n📞 +33 766 306 016\n💬 WhatsApp disponible` :
-                        `❌ Erreur lors de l'envoi de votre demande.\n\nUne erreur technique s'est produite.\n\nSolutions possibles:\n• Vérifiez votre connexion internet\n• Vérifiez le format de votre numéro (+33...)\n• Réessayez dans quelques instants\n• Contactez-nous directement\n\n📞 +33 766 306 016\n📧 mohamed.oudiai@icloud.com\n💬 WhatsApp disponible`;
-                    
-                    showNotification(errorMessage, 'error');
-                })
-                .finally(() => {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                });
-        }
-
-        // Créer automatiquement un compte client amélioré
-        function createClientAccount(formData, demandeId, password) {
-            const clients = dataManager.getClients();
-            
-            // Vérifier si le client existe déjà
-            let existingClient = clients.find(c => c.email === formData.get('email'));
-            
-            if (existingClient) {
-                // Ajouter la nouvelle demande au client existant
-                if (!existingClient.demandes.includes(demandeId)) {
-                    existingClient.demandes.push(demandeId);
+        function checkExistingSession() {
+            const savedUser = localStorage.getItem(STORAGE_KEYS.currentUser);
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    showDashboard();
+                } catch (error) {
+                    console.error('Erreur session:', error);
+                    localStorage.removeItem(STORAGE_KEYS.currentUser);
                 }
-                dataManager.saveClients(clients);
-                return existingClient;
             }
-            
-            // Créer nouveau client
-            const newClient = {
-                id: 'CLIENT-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
-                email: formData.get('email'),
-                nom: formData.get('prenom') + ' ' + formData.get('nom'),
-                telephone: formData.get('telephone'),
-                password: password,
-                dateCreation: new Date().toISOString(),
-                statutCompte: 'Actif',
-                demandes: [demandeId]
-            };
-            
-            clients.push(newClient);
-            dataManager.saveClients(clients);
-            
-            console.log('Nouveau client créé automatiquement:', newClient.email);
-            return newClient;
         }
 
-        // Générer mot de passe aléatoire
+        function setupEventHandlers() {
+            // Formulaire de connexion
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            
+            // Gestion des modals
+            window.addEventListener('click', function(event) {
+                const forgotModal = document.getElementById('forgotPasswordModal');
+                const settingsModal = document.getElementById('settingsModal');
+                const confirmModal = document.getElementById('confirmDeleteModal');
+                
+                if (event.target === forgotModal) closeForgotPassword();
+                if (event.target === settingsModal) closeSettings();
+                if (event.target === confirmModal) cancelDeleteAccount();
+            });
+        }
+
+        // === AUTHENTIFICATION ===
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (!email || !password) {
+                showNotification('⚠️ Veuillez remplir tous les champs', 'error');
+                return;
+            }
+
+            const loginBtn = document.getElementById('loginBtn');
+            const originalText = loginBtn.textContent;
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<span class="loading"></span> Connexion...';
+
+            // Simulation de délai réseau
+            setTimeout(() => {
+                const clients = getClients();
+                const client = clients.find(c => c.email === email && c.password === password);
+                
+                if (client) {
+                    currentUser = client;
+                    localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(client));
+                    showNotification('✅ Connexion réussie !', 'success');
+                    showDashboard();
+                } else {
+                    showNotification('❌ Email ou mot de passe incorrect', 'error');
+                }
+                
+                loginBtn.disabled = false;
+                loginBtn.textContent = originalText;
+            }, 1000);
+        }
+
+        function showDashboard() {
+            // Masquer la section de connexion
+            document.getElementById('loginSection').style.display = 'none';
+            
+            // Afficher le header et le dashboard
+            document.getElementById('clientHeader').classList.remove('hidden');
+            document.getElementById('clientDashboard').classList.add('active');
+            
+            // Mettre à jour l'interface
+            document.getElementById('userName').textContent = currentUser.nom;
+            
+            // Charger les données
+            loadUserData();
+        }
+
+        function logout() {
+            // Nettoyer les données
+            localStorage.removeItem(STORAGE_KEYS.currentUser);
+            currentUser = null;
+            uploadedDocuments = [];
+            
+            // Réinitialiser l'interface
+            document.getElementById('clientHeader').classList.add('hidden');
+            document.getElementById('clientDashboard').classList.remove('active');
+            document.getElementById('loginSection').style.display = 'flex';
+            
+            // Reset du formulaire
+            document.getElementById('loginForm').reset();
+            
+            showNotification('👋 Déconnexion réussie', 'success');
+        }
+
+        // === RÉCUPÉRATION MOT DE PASSE ===
+        function openForgotPassword() {
+            document.getElementById('forgotPasswordModal').style.display = 'block';
+        }
+
+        function closeForgotPassword() {
+            document.getElementById('forgotPasswordModal').style.display = 'none';
+            document.getElementById('forgotEmail').value = '';
+        }
+
+        function sendPasswordReset() {
+            const email = document.getElementById('forgotEmail').value.trim();
+            
+            if (!email) {
+                showNotification('⚠️ Veuillez saisir votre adresse email', 'error');
+                return;
+            }
+
+            const clients = getClients();
+            const client = clients.find(c => c.email === email);
+            
+            if (!client) {
+                showNotification('❌ Aucun compte trouvé avec cette adresse', 'error');
+                return;
+            }
+
+            const forgotBtn = document.getElementById('forgotBtn');
+            const originalText = forgotBtn.textContent;
+            forgotBtn.disabled = true;
+            forgotBtn.innerHTML = '<span class="loading"></span> Envoi en cours...';
+
+            // Générer nouveau mot de passe
+            const newPassword = generatePassword();
+            
+            // Mettre à jour le mot de passe
+            const clientIndex = clients.findIndex(c => c.email === email);
+            if (clientIndex !== -1) {
+                clients[clientIndex].password = newPassword;
+                localStorage.setItem(STORAGE_KEYS.clients, JSON.stringify(clients));
+            }
+
+            // Simuler l'envoi d'email
+            setTimeout(() => {
+                const emailParams = {
+                    to_email: email,
+                    client_name: client.nom,
+                    new_password: newPassword,
+                    login_link: window.location.href
+                };
+
+                if (typeof emailjs !== 'undefined') {
+                    emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.templateId, emailParams)
+                        .then(() => {
+                            showNotification('📧 Nouveau mot de passe envoyé par email !', 'success');
+                            closeForgotPassword();
+                        })
+                        .catch(() => {
+                            showNotification('⚠️ Erreur d\'envoi. Contactez le support.', 'error');
+                        });
+                } else {
+                    showNotification('⚠️ Service email indisponible', 'error');
+                }
+
+                forgotBtn.disabled = false;
+                forgotBtn.textContent = originalText;
+            }, 1500);
+        }
+
         function generatePassword() {
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
             let password = '';
@@ -1379,89 +1448,381 @@
             return password;
         }
 
-        // Envoyer emails complets avec identifiants
-        function sendCompleteEmails(formData, demande, clientPassword) {
-            console.log('Envoi emails avec identifiants client');
-            
-            const baseParams = {
-                client_name: formData.get('prenom') + ' ' + formData.get('nom'),
-                client_email: formData.get('email'),
-                client_phone: formData.get('telephone'),
-                service_type: getServiceDisplayName(formData.get('service')),
-                urgence_level: formData.get('urgence') || 'Normal',
-                client_message: formData.get('message') || 'Aucun message spécifique',
-                request_date: new Date().toLocaleDateString('fr-FR') + ' à ' + new Date().toLocaleTimeString('fr-FR'),
-                request_id: demande.id,
-                estimated_price: dataManager.getServicePrice(formData.get('service'))
-            };
-
-            // Paramètres pour l'admin
-            const adminParams = {
-                ...baseParams,
-                admin_email: EMAIL_CONFIG.adminEmail
-            };
-
-            // Documents requis selon le service
-            const documentsRequis = getDocumentsRequis(formData.get('service'));
-            const documentsText = documentsRequis.map(doc => `• ${doc}`).join('\n');
-
-            // Paramètres pour le client avec identifiants
-            const clientParams = {
-                ...baseParams,
-                to_email: formData.get('email'),
-                login_email: formData.get('email'),
-                login_password: clientPassword,
-                client_access_link: window.location.origin + '/client.html',
-                documents_required: documentsText,
-                has_credentials: true
-            };
-
-            return Promise.all([
-                // Email à l'admin
-                emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.templateId, adminParams),
-                // Email client avec identifiants
-                emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.clientTemplateId, clientParams)
-            ]);
+        // === PARAMÈTRES UTILISATEUR ===
+        function openSettings() {
+            document.getElementById('newPhone').value = currentUser.telephone || '';
+            document.getElementById('settingsModal').style.display = 'block';
         }
 
-        // Documents requis par service
-        function getDocumentsRequis(service) {
-            const documentsMap = {
-                'micro-entreprise': [
-                    'Pièce d\'identité (recto-verso)',
-                    'Justificatif de domicile (moins de 3 mois)',
-                    'Attestation de domiciliation (si nécessaire)',
-                    'Diplômes ou certificats (si activité réglementée)'
-                ],
-                'titre-sejour': [
-                    'Passeport (toutes les pages)',
-                    'Visa ou titre de séjour actuel',
-                    'Justificatif de domicile (moins de 3 mois)',
-                    'Photos d\'identité récentes',
-                    'Justificatifs de ressources (3 derniers bulletins)',
-                    'Contrat de travail ou attestation employeur'
-                ],
-                'prefecture': [
-                    'Pièce d\'identité',
-                    'Justificatif de domicile',
-                    'Formulaire de demande complété'
-                ],
-                'etat-civil': [
-                    'Pièce d\'identité',
-                    'Justificatif de domicile',
-                    'Documents d\'état civil existants'
-                ],
-                'logement': [
-                    'Pièce d\'identité',
-                    'Justificatifs de revenus (3 derniers bulletins)',
-                    'Contrat de travail',
-                    'Relevé d\'identité bancaire'
-                ]
-            };
-            return documentsMap[service] || ['Pièce d\'identité', 'Justificatif de domicile'];
+        function closeSettings() {
+            document.getElementById('settingsModal').style.display = 'none';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('newPhone').value = '';
+        }
+
+        function updateAccount() {
+            const newPassword = document.getElementById('newPassword').value.trim();
+            const newPhone = document.getElementById('newPhone').value.trim();
+            
+            const clients = getClients();
+            const clientIndex = clients.findIndex(c => c.email === currentUser.email);
+            
+            if (clientIndex === -1) {
+                showNotification('❌ Erreur: compte non trouvé', 'error');
+                return;
+            }
+
+            let updated = false;
+
+            if (newPassword) {
+                clients[clientIndex].password = newPassword;
+                currentUser.password = newPassword;
+                updated = true;
+            }
+
+            if (newPhone) {
+                clients[clientIndex].telephone = newPhone;
+                currentUser.telephone = newPhone;
+                updated = true;
+            }
+
+            if (updated) {
+                localStorage.setItem(STORAGE_KEYS.clients, JSON.stringify(clients));
+                localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(currentUser));
+                showNotification('✅ Paramètres mis à jour avec succès', 'success');
+                closeSettings();
+            } else {
+                showNotification('⚠️ Aucune modification effectuée', 'warning');
+            }
+        }
+
+        // === SUPPRESSION COMPTE ===
+        function confirmDeleteAccount() {
+            document.getElementById('confirmDeleteModal').style.display = 'block';
+        }
+
+        function cancelDeleteAccount() {
+            document.getElementById('confirmDeleteModal').style.display = 'none';
+        }
+
+        function deleteAccount() {
+            if (!currentUser) return;
+
+            // Supprimer toutes les données du client
+            const clients = getClients();
+            const demandes = getDemandes();
+            const clientDocuments = getClientDocuments();
+
+            // Filtrer les données
+            const remainingClients = clients.filter(c => c.email !== currentUser.email);
+            const remainingDemandes = demandes.filter(d => !currentUser.demandes || !currentUser.demandes.includes(d.id));
+            const remainingDocuments = clientDocuments.filter(doc => doc.clientEmail !== currentUser.email);
+
+            // Sauvegarder
+            localStorage.setItem(STORAGE_KEYS.clients, JSON.stringify(remainingClients));
+            localStorage.setItem(STORAGE_KEYS.demandes, JSON.stringify(remainingDemandes));
+            localStorage.setItem(STORAGE_KEYS.clientDocuments, JSON.stringify(remainingDocuments));
+            localStorage.removeItem(STORAGE_KEYS.currentUser);
+
+            showNotification('✅ Compte supprimé définitivement', 'success');
+
+            // Redirection après délai
+            setTimeout(() => {
+                logout();
+            }, 2000);
+        }
+
+        // === CHARGEMENT DES DONNÉES ===
+        function loadUserData() {
+            loadUserDocuments();
+            loadDemandes();
+            updateStats();
+        }
+
+        function loadUserDocuments() {
+            const allDocuments = getClientDocuments();
+            uploadedDocuments = allDocuments.filter(doc => doc.clientEmail === currentUser.email);
+        }
+
+        function loadDemandes() {
+            const demandes = getDemandes();
+            const userDemandes = demandes.filter(d => currentUser.demandes && currentUser.demandes.includes(d.id));
+            
+            const demandesList = document.getElementById('demandesList');
+            
+            if (userDemandes.length === 0) {
+                demandesList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <h3 class="empty-title">Aucune demande trouvée</h3>
+                        <p class="empty-message">Vos demandes apparaîtront ici une fois créées</p>
+                        <a href="../index.html" class="empty-action">Faire une nouvelle demande</a>
+                    </div>
+                `;
+                return;
+            }
+
+            demandesList.innerHTML = userDemandes.map(demande => {
+                const userDocs = uploadedDocuments.filter(doc => doc.demandeId === demande.id);
+                return createDemandeCard(demande, userDocs);
+            }).join('');
+
+            // Configurer les uploads pour chaque demande
+            userDemandes.forEach(demande => {
+                setupFileUpload(demande.id);
+            });
+        }
+
+        function createDemandeCard(demande, userDocs) {
+            return `
+                <div class="demande-item">
+                    <div class="demande-header">
+                        <div class="demande-id">📋 ${demande.id}</div>
+                        <div class="status-badge status-${demande.statut.replace(' ', '-')}">
+                            ${getStatusDisplayName(demande.statut)}
+                        </div>
+                    </div>
+                    
+                    <div class="demande-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Service</div>
+                            <div class="detail-value">${getServiceDisplayName(demande.service)}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Date de demande</div>
+                            <div class="detail-value">${formatDate(demande.dateComplete)}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Tarif</div>
+                            <div class="detail-value">${demande.prix}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Urgence</div>
+                            <div class="detail-value">${demande.urgence || 'Normal'}</div>
+                        </div>
+                    </div>
+                    
+                    ${demande.details && demande.details !== 'Aucun message' ? `
+                        <div style="margin-top: 1rem; padding: 1rem; background: var(--bg-light); border-radius: 10px;">
+                            <div class="detail-label">💬 Message</div>
+                            <div class="detail-value">${demande.details}</div>
+                        </div>
+                    ` : ''}
+                    
+                    ${createProgressTracker(demande.statut)}
+                    
+                    <div class="upload-section">
+                        <h4 class="upload-title">
+                            📎 Documents requis ${userDocs.length > 0 ? `(${userDocs.length} uploadé(s))` : ''}
+                        </h4>
+                        
+                        <div class="upload-area" onclick="triggerFileUpload('${demande.id}')">
+                            <div class="upload-icon">📁</div>
+                            <div class="upload-text">Cliquez pour uploader vos documents</div>
+                            <div class="upload-hint">Formats acceptés: PDF, JPG, PNG (max 10MB)</div>
+                        </div>
+                        
+                        <input type="file" id="fileInput-${demande.id}" multiple accept=".pdf,.jpg,.jpeg,.png" class="file-input">
+                        
+                        ${userDocs.length > 0 ? `
+                            <div class="uploaded-files">
+                                <h4 class="files-title">📎 Fichiers uploadés</h4>
+                                ${userDocs.map(doc => createFileItem(doc)).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function createProgressTracker(currentStatus) {
+            if (currentStatus === 'refuse') {
+                return `
+                    <div class="progress-section">
+                        <h4 class="progress-title">📊 Statut de la demande</h4>
+                        <div style="text-align: center; padding: 2rem;">
+                            <div class="step-circle refused" style="margin: 0 auto 1rem;">❌</div>
+                            <div class="step-label refused">Demande refusée</div>
+                            <p style="color: #dc3545; margin-top: 1rem;">
+                                Votre demande a été refusée. Contactez-nous pour plus d'informations.
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const steps = [
+                { id: 'nouveau', label: 'Reçue', number: 1 },
+                { id: 'en-cours', label: 'En cours', number: 2 },
+                { id: 'documents-requis', label: 'Documents', number: 3 },
+                { id: 'termine', label: 'Terminée', number: 4 }
+            ];
+            
+            const statusOrder = ['nouveau', 'en-cours', 'documents-requis', 'termine'];
+            const currentIndex = statusOrder.indexOf(currentStatus);
+            
+            return `
+                <div class="progress-section">
+                    <h4 class="progress-title">📊 Progression de votre demande</h4>
+                    <div class="progress-steps">
+                        ${steps.map((step, index) => {
+                            let stepClass = '';
+                            if (index < currentIndex || (currentStatus === 'termine' && index <= currentIndex)) {
+                                stepClass = 'completed';
+                            } else if (index === currentIndex) {
+                                stepClass = 'current';
+                            }
+                            
+                            return `
+                                <div class="progress-step">
+                                    <div class="step-circle ${stepClass}">${stepClass === 'completed' ? '✓' : step.number}</div>
+                                    <div class="step-label ${stepClass}">${step.label}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    <div style="text-align: center; margin-top: 1rem; color: #666;">
+                        Statut actuel: <strong>${getStatusDisplayName(currentStatus)}</strong>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createFileItem(doc) {
+            return `
+                <div class="file-item">
+                    <div class="file-info">
+                        ${doc.preview ? 
+                            `<img src="${doc.preview}" alt="Aperçu" class="file-preview">` : 
+                            `<div class="file-icon">📄</div>`
+                        }
+                        <div class="file-details">
+                            <div class="file-name">${doc.name}</div>
+                            <div class="file-meta">${formatFileSize(doc.size)} • ${formatDate(doc.uploadDate)}</div>
+                        </div>
+                    </div>
+                    <button class="remove-file" onclick="removeDocument('${doc.id}', event)">🗑️ Supprimer</button>
+                </div>
+            `;
+        }
+
+        // === GESTION DES FICHIERS ===
+        function setupFileUpload(demandeId) {
+            const input = document.getElementById(`fileInput-${demandeId}`);
+            if (input) {
+                input.onchange = function(event) {
+                    processFiles(event.target.files, demandeId);
+                };
+            }
+        }
+
+        function triggerFileUpload(demandeId) {
+            const input = document.getElementById(`fileInput-${demandeId}`);
+            if (input) {
+                input.click();
+            }
+        }
+
+        function processFiles(files, demandeId) {
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+            
+            Array.from(files).forEach(file => {
+                if (file.size > maxSize) {
+                    showNotification(`📋 Fichier trop volumineux: ${file.name}`, 'error');
+                    return;
+                }
+                
+                if (!allowedTypes.includes(file.type)) {
+                    showNotification(`📋 Type non supporté: ${file.name}`, 'error');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const docId = 'DOC-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+                    
+                    const document = {
+                        id: docId,
+                        name: file.name,
+                        type: file.type.startsWith('image/') ? 'image' : 'document',
+                        size: file.size,
+                        dataUrl: e.target.result,
+                        preview: file.type.startsWith('image/') ? e.target.result : null,
+                        demandeId: demandeId,
+                        clientEmail: currentUser.email,
+                        clientName: currentUser.nom,
+                        uploadDate: new Date().toISOString()
+                    };
+                    
+                    // Ajouter localement
+                    uploadedDocuments.push(document);
+                    
+                    // Synchroniser avec l'admin
+                    const existingDocuments = getClientDocuments();
+                    existingDocuments.push(document);
+                    localStorage.setItem(STORAGE_KEYS.clientDocuments, JSON.stringify(existingDocuments));
+                    
+                    showNotification(`✅ "${file.name}" uploadé avec succès`, 'success');
+                    loadDemandes();
+                    updateStats();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function removeDocument(docId, event) {
+            event.stopPropagation();
+            
+            if (confirm('🗑️ Supprimer ce document ?')) {
+                // Supprimer localement
+                uploadedDocuments = uploadedDocuments.filter(doc => doc.id !== docId);
+                
+                // Supprimer du stockage
+                const existingDocuments = getClientDocuments();
+                const filteredDocuments = existingDocuments.filter(doc => doc.id !== docId);
+                localStorage.setItem(STORAGE_KEYS.clientDocuments, JSON.stringify(filteredDocuments));
+                
+                showNotification('🗑️ Document supprimé', 'success');
+                loadDemandes();
+                updateStats();
+            }
+        }
+
+        // === STATISTIQUES ===
+        function updateStats() {
+            const demandes = getDemandes();
+            const userDemandes = demandes.filter(d => currentUser.demandes && currentUser.demandes.includes(d.id));
+            
+            const total = userDemandes.length;
+            const enCours = userDemandes.filter(d => ['nouveau', 'en-cours', 'documents-requis'].includes(d.statut)).length;
+            const terminees = userDemandes.filter(d => d.statut === 'termine').length;
+            const documentsCount = uploadedDocuments.length;
+            
+            document.getElementById('totalDemandes').textContent = total;
+            document.getElementById('demandesEnCours').textContent = enCours;
+            document.getElementById('demandesTerminees').textContent = terminees;
+            document.getElementById('documentsUploades').textContent = documentsCount;
+        }
+
+        function refreshData() {
+            showNotification('🔄 Actualisation des données...', 'success');
+            loadUserData();
         }
 
         // === FONCTIONS UTILITAIRES ===
+        function getClients() {
+            return JSON.parse(localStorage.getItem(STORAGE_KEYS.clients) || '[]');
+        }
+
+        function getDemandes() {
+            return JSON.parse(localStorage.getItem(STORAGE_KEYS.demandes) || '[]');
+        }
+
+        function getClientDocuments() {
+            return JSON.parse(localStorage.getItem(STORAGE_KEYS.clientDocuments) || '[]');
+        }
+
         function getServiceDisplayName(service) {
             const services = {
                 'micro-entreprise': 'Création Micro-Entreprise',
@@ -1479,45 +1840,38 @@
             return services[service] || service;
         }
 
-        function validateFormWithPhone(formData) {
-            const errors = [];
-            
-            const prenom = formData.get('prenom');
-            const nom = formData.get('nom');
-            const email = formData.get('email');
-            const service = formData.get('service');
-            const telephone = formData.get('telephone');
-            
-            if (!prenom || prenom.length < 2) {
-                errors.push('Le prénom doit contenir au moins 2 caractères');
-            }
-            
-            if (!nom || nom.length < 2) {
-                errors.push('Le nom doit contenir au moins 2 caractères');
-            }
-            
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!email || !emailRegex.test(email)) {
-                errors.push('Veuillez saisir une adresse email valide');
-            }
-            
-            if (!service) {
-                errors.push('Veuillez sélectionner un service');
-            }
-            
-            if (!telephone) {
-                errors.push('Le numéro de téléphone est obligatoire');
-            } else {
-                const phoneRegex = /^(\+33|0)[1-9][\d\s\-\.]{8,}$/;
-                if (!phoneRegex.test(telephone.replace(/\s/g, ''))) {
-                    errors.push('Format de téléphone invalide (ex: 06 12 34 56 78 ou +33 6 12 34 56 78)');
-                }
-            }
-            
-            return errors;
+        function getStatusDisplayName(status) {
+            const statuses = {
+                'nouveau': 'Nouveau',
+                'en-cours': 'En cours',
+                'documents-requis': 'Documents requis',
+                'termine': 'Terminé',
+                'refuse': 'Refusé'
+            };
+            return statuses[status] || status;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
         function showNotification(message, type = 'success') {
+            // Supprimer les notifications existantes
             const existingNotifications = document.querySelectorAll('.notification');
             existingNotifications.forEach(notif => notif.remove());
             
@@ -1527,11 +1881,13 @@
             
             document.body.appendChild(notification);
             
+            // Afficher
             setTimeout(() => {
                 notification.classList.add('show');
             }, 100);
             
-            const displayTime = window.innerWidth <= 768 ? 5000 : 6000; // Plus long sur mobile
+            // Masquer
+            const displayTime = window.innerWidth <= 768 ? 5000 : 4000;
             setTimeout(() => {
                 notification.classList.remove('show');
                 setTimeout(() => {
@@ -1542,204 +1898,13 @@
             }, displayTime);
         }
 
-        // === INITIALISATION MOBILE-OPTIMISÉE ===
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Site principal MonEntreprise.fr chargé - Version Mobile Optimisée');
-            
-            // Vérifier EmailJS
-            setTimeout(() => {
-                if (typeof emailjs !== 'undefined') {
-                    console.log('EmailJS prêt pour envoi');
-                } else {
-                    console.log('ATTENTION: EmailJS non disponible');
-                }
-            }, 1000);
-
-            // Navigation fluide améliorée
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
-                    if (target) {
-                        const headerHeight = document.querySelector('.header').offsetHeight;
-                        const targetPosition = target.offsetTop - headerHeight - 20;
-                        
-                        window.scrollTo({
-                            top: targetPosition,
-                            behavior: 'smooth'
-                        });
-                    }
-                });
-            });
-
-            // Animation au scroll améliorée
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            };
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, observerOptions);
-
-            document.querySelectorAll('.animate-on-scroll').forEach(el => {
-                observer.observe(el);
-            });
-
-            // Menu mobile amélioré
-            const hamburger = document.querySelector('.hamburger');
-            const navMenu = document.querySelector('.nav-menu');
-
-            if (hamburger && navMenu) {
-                hamburger.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    hamburger.classList.toggle('active');
-                    navMenu.classList.toggle('active');
-                });
-
-                // Fermer le menu quand on clique sur un lien
-                document.querySelectorAll('.nav-menu a').forEach(link => {
-                    link.addEventListener('click', () => {
-                        hamburger.classList.remove('active');
-                        navMenu.classList.remove('active');
-                    });
-                });
-
-                // Fermer le menu quand on clique en dehors
-                document.addEventListener('click', (e) => {
-                    if (!hamburger.contains(e.target) && !navMenu.contains(e.target)) {
-                        hamburger.classList.remove('active');
-                        navMenu.classList.remove('active');
-                    }
-                });
-            }
-
-            // Prix dynamique selon le service
-            const serviceSelect = document.getElementById('service');
-            if (serviceSelect) {
-                serviceSelect.addEventListener('change', function() {
-                    const selectedService = this.value;
-                    let recommendedPrice = '';
-                    
-                    switch(selectedService) {
-                        case 'micro-entreprise':
-                            recommendedPrice = 'Pack Premium (79€) recommandé';
-                            break;
-                        case 'titre-sejour':
-                        case 'prefecture':
-                        case 'etat-civil':
-                        case 'securite-sociale':
-                        case 'logement':
-                        case 'emploi':
-                        case 'transport':
-                        case 'fiscalite':
-                        case 'numerique':
-                            recommendedPrice = 'Pack Essentiel (29€) recommandé';
-                            break;
-                        default:
-                            recommendedPrice = '';
-                    }
-                    
-                    let priceHint = document.getElementById('priceHint');
-                    if (recommendedPrice) {
-                        if (!priceHint) {
-                            priceHint = document.createElement('p');
-                            priceHint.id = 'priceHint';
-                            priceHint.style.cssText = 'color: #667eea; font-size: 0.9rem; margin-top: 5px; font-weight: 600;';
-                            this.parentNode.appendChild(priceHint);
-                        }
-                        priceHint.textContent = recommendedPrice;
-                    } else if (priceHint) {
-                        priceHint.remove();
-                    }
-                });
-            }
-
-            // Format automatique du numéro de téléphone amélioré
-            const telephoneInput = document.getElementById('telephone');
-            if (telephoneInput) {
-                telephoneInput.addEventListener('input', function() {
-                    let value = this.value.replace(/[^\d+]/g, '');
-                    if (value.startsWith('0') && value.length > 1) {
-                        value = '+33 ' + value.substring(1);
-                    }
-                    // Formatage visuel amélioré
-                    if (value.startsWith('+33')) {
-                        value = value.replace(/(\+33)(\d)(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5 $6');
-                    }
-                    this.value = value;
-                });
-            }
-
-            // Gestion des touches pour le formulaire
-            const form = document.getElementById('mainForm');
-            if (form) {
-                form.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-                        e.preventDefault();
-                        handleFormSubmit();
-                    }
-                });
-            }
-
-            // Optimisation pour appareils tactiles
-            if ('ontouchstart' in window) {
-                document.body.classList.add('touch-device');
-                
-                // Améliorer les interactions tactiles
-                document.querySelectorAll('.btn, .service-card, .pricing-card').forEach(element => {
-                    element.style.cursor = 'pointer';
-                    element.addEventListener('touchstart', function() {
-                        this.style.transform = 'scale(0.98)';
-                    });
-                    element.addEventListener('touchend', function() {
-                        setTimeout(() => {
-                            this.style.transform = '';
-                        }, 150);
-                    });
-                });
-            }
-
-            console.log('Site principal initialisé avec optimisations mobiles complètes');
-        });
-
-        // Chat simulation amélioré
-        function openChat() {
-            const message = window.innerWidth <= 768 ? 
-                '💬 Chat en direct\n\nÉquipe disponible:\nLun-Ven 9h-18h\n\nContact immédiat:\n📞 +33 766 306 016\n📧 mohamed.oudiai@icloud.com' :
-                '💬 Chat en direct\n\nNotre équipe est disponible du lundi au vendredi de 9h à 18h.\n\nPour une assistance immédiate :\n📞 +33 766 306 016\n📧 mohamed.oudiai@icloud.com';
-            
-            alert(message);
-        }
-
-        // Interface pour connecter avec les autres systèmes
-        window.MonEntreprise = {
-            addDemande: (data) => dataManager.addDemande(data),
-            getDemandes: () => dataManager.getDemandes(),
-            updateStats: () => console.log('Stats mises à jour')
-        };
-
-        // Performance monitoring
-        window.addEventListener('load', function() {
-            console.log('MonEntreprise.fr - Système intégré chargé - Mobile Optimisé');
-            
-            // Log performance pour debug
-            if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_RELOAD) {
-                console.log('Page rechargée - EmailJS reinitializing');
-            }
-        });
-
         // Gestion des erreurs globales
         window.addEventListener('error', function(event) {
-            console.error('Erreur globale:', event.error);
-            if (event.error.message.includes('EmailJS')) {
-                showNotification('Erreur de service email. Veuillez rafraîchir la page.', 'error');
-            }
+            console.error('Erreur espace client:', event.error);
+            showNotification('⚠️ Une erreur inattendue s\'est produite', 'error');
         });
+
+        console.log('🏢 Espace Client MonEntreprise.fr initialisé avec succès');
     </script>
 </body>
 </html>
