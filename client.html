@@ -241,6 +241,37 @@
             border-radius: 25px;
         }
 
+        /* Debug Tools */
+        .debug-tools {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .debug-tools p {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .debug-tools button {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .debug-tools button.diagnostic {
+            background: #17a2b8;
+        }
+
         /* Dashboard */
         .dashboard {
             display: none;
@@ -973,6 +1004,13 @@
                 Vous n'avez pas reçu vos identifiants ? 
                 <a href="mailto:mohamed.oudiai@icloud.com" style="color: var(--primary-color);">Contactez-nous</a>
             </p>
+            
+            <!-- Debug Tools -->
+            <div class="debug-tools">
+                <p>🔧 Problème de connexion sur mobile ?</p>
+                <button type="button" onclick="resetTestData()">🔄 Recréer les données de test</button>
+                <button type="button" class="diagnostic" onclick="showDebugInfo()">🔍 Diagnostic système</button>
+            </div>
         </form>
     </div>
 
@@ -1035,7 +1073,7 @@
         let uploadInProgress = false;
         let deviceMode = 'auto'; // auto, desktop, mobile
 
-        // Détection d'appareil
+        // === DÉTECTION D'APPAREIL ===
         function detectDevice() {
             const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(navigator.userAgent);
             const isTablet = /iPad|Android(?!.*Mobile)/i.test(navigator.userAgent);
@@ -1101,7 +1139,7 @@
             const savedMode = localStorage.getItem(STORAGE_KEYS.deviceMode);
             const detection = detectDevice();
             
-            console.log('Détection appareil:', detection);
+            console.log('📱 Détection appareil:', detection);
             
             if (savedMode && savedMode !== 'auto') {
                 deviceMode = savedMode;
@@ -1136,47 +1174,21 @@
             }
         }
 
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Espace client MonEntreprise.fr chargé avec détection d\'appareil');
-            
-            // Initialiser le mode d'appareil
-            initializeDeviceMode();
-            
-            // Créer un client de test s'il n'existe pas
-            createTestClientIfNotExists();
-            
-            // Vérifier si l'utilisateur est déjà connecté
-            const savedUser = localStorage.getItem(STORAGE_KEYS.currentUser);
-            if (savedUser) {
-                try {
-                    currentUser = JSON.parse(savedUser);
-                    showDashboard();
-                } catch (error) {
-                    console.error('Erreur lors du chargement de l\'utilisateur:', error);
-                    localStorage.removeItem(STORAGE_KEYS.currentUser);
-                }
-            }
-
-            // Gestionnaire de connexion
-            document.getElementById('loginForm').addEventListener('submit', handleLogin);
-
-            // Gestionnaire de redimensionnement
-            window.addEventListener('resize', function() {
-                if (deviceMode === 'auto') {
-                    const detection = detectDevice();
-                    const autoMode = detection.isMobile ? 'mobile' : 'desktop';
-                    applyDeviceMode(autoMode);
-                }
-            });
-        });
-
         // === GESTION DU CLIENT DE TEST ===
         function createTestClientIfNotExists() {
             const clients = getClients();
             const testEmail = 'marie.martin@example.com';
             
-            if (!clients.find(c => c.email === testEmail)) {
+            console.log('🔍 Vérification client de test...');
+            console.log('Clients existants:', clients.length);
+            console.log('Recherche email:', testEmail);
+            
+            const existingClient = clients.find(c => c.email === testEmail);
+            console.log('Client trouvé:', existingClient ? 'OUI' : 'NON');
+            
+            if (!existingClient) {
+                console.log('🚀 Création du client de test...');
+                
                 // Créer plusieurs demandes de test avec différents statuts
                 const testDemandes = [
                     {
@@ -1321,13 +1333,52 @@
                 clients.push(testClient);
                 testDocuments.forEach(d => documents.push(d));
                 
-                localStorage.setItem(STORAGE_KEYS.demandes, JSON.stringify(demandes));
-                localStorage.setItem(STORAGE_KEYS.clients, JSON.stringify(clients));
-                localStorage.setItem(STORAGE_KEYS.documents, JSON.stringify(documents));
+                try {
+                    localStorage.setItem(STORAGE_KEYS.demandes, JSON.stringify(demandes));
+                    localStorage.setItem(STORAGE_KEYS.clients, JSON.stringify(clients));
+                    localStorage.setItem(STORAGE_KEYS.documents, JSON.stringify(documents));
+                    
+                    console.log('✅ Données sauvegardées avec succès');
+                    console.log('Client de test créé:', testClient);
+                    console.log('Demandes créées:', testDemandes.length);
+                    console.log('Documents créés:', testDocuments.length);
+                    
+                    // Vérification immédiate
+                    const verification = JSON.parse(localStorage.getItem(STORAGE_KEYS.clients) || '[]');
+                    console.log('Vérification sauvegarde - clients:', verification.length);
+                    
+                } catch (error) {
+                    console.error('❌ Erreur sauvegarde données test:', error);
+                }
+            } else {
+                console.log('✅ Client de test existe déjà');
+            }
+        }
+        
+        // Force la création des données de test à chaque chargement sur mobile
+        function ensureTestDataOnMobile() {
+            const detection = detectDevice();
+            if (detection.isMobile || detection.screenSize) {
+                console.log('📱 Appareil mobile détecté - vérification forcée des données');
                 
-                console.log('Client de test créé avec interface adaptative:', testClient);
-                console.log('Demandes de test créées:', testDemandes);
-                console.log('Documents de test créés:', testDocuments);
+                const clients = getClients();
+                const testClient = clients.find(c => c.email === 'marie.martin@example.com');
+                
+                if (!testClient) {
+                    console.log('🔄 Forçage création données de test sur mobile...');
+                    createTestClientIfNotExists();
+                    
+                    // Double vérification
+                    setTimeout(() => {
+                        const verification = getClients();
+                        const testFound = verification.find(c => c.email === 'marie.martin@example.com');
+                        console.log('Double vérification mobile:', testFound ? 'TROUVÉ' : 'ÉCHEC');
+                        
+                        if (!testFound) {
+                            showNotification('⚠️ Problème données test - Utilisez le bouton Reset', 'warning');
+                        }
+                    }, 500);
+                }
             }
         }
 
@@ -1338,33 +1389,136 @@
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
             
+            console.log('🔐 Tentative de connexion...');
+            console.log('Email saisi:', email);
+            console.log('Password saisi:', password ? '***masqué***' : 'VIDE');
+            
             if (!email || !password) {
                 showNotification('Veuillez remplir tous les champs', 'error');
                 return;
             }
 
+            // Diagnostic avant connexion
+            const clients = getClients();
+            console.log('📊 Diagnostic connexion:');
+            console.log('- Nombre clients en base:', clients.length);
+            console.log('- Clients disponibles:', clients.map(c => c.email));
+            
             const loginBtn = document.getElementById('loginBtn');
             const originalText = loginBtn.textContent;
             loginBtn.disabled = true;
-            loginBtn.innerHTML = '<span class="loading"></span> Connexion...';
+            loginBtn.innerHTML = '<span class="loading"></span> Vérification...';
 
-            // Simuler un délai de connexion
+            // Simuler un délai de connexion avec diagnostic
             setTimeout(() => {
-                const clients = getClients();
                 const client = clients.find(c => c.email === email && c.password === password);
                 
+                console.log('🔍 Résultat recherche client:');
+                console.log('- Client trouvé:', client ? 'OUI' : 'NON');
+                
                 if (client) {
+                    console.log('✅ Connexion réussie pour:', client.nom);
                     currentUser = client;
                     localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(client));
                     showNotification('Connexion réussie !', 'success');
                     showDashboard();
                 } else {
+                    console.log('❌ Échec connexion - vérification détaillée:');
+                    
+                    // Diagnostic détaillé en cas d'échec
+                    const emailMatch = clients.find(c => c.email === email);
+                    const passwordMatch = clients.find(c => c.password === password);
+                    
+                    console.log('- Email trouvé:', emailMatch ? 'OUI' : 'NON');
+                    console.log('- Password trouvé:', passwordMatch ? 'OUI' : 'NON');
+                    
+                    if (!emailMatch && email === 'marie.martin@example.com') {
+                        console.log('🚨 PROBLÈME: Client de test manquant - tentative de création...');
+                        createTestClientIfNotExists();
+                        
+                        setTimeout(() => {
+                            showNotification('Données de test recréées - Réessayez', 'warning');
+                            loginBtn.disabled = false;
+                            loginBtn.textContent = originalText;
+                        }, 1000);
+                        return;
+                    }
+                    
                     showNotification('Email ou mot de passe incorrect', 'error');
                 }
                 
                 loginBtn.disabled = false;
                 loginBtn.textContent = originalText;
             }, 1000);
+        }
+
+        // === FONCTIONS DE DEBUG ===
+        function resetTestData() {
+            console.log('🔄 Reset complet des données de test...');
+            
+            try {
+                // Supprimer toutes les données existantes
+                localStorage.removeItem(STORAGE_KEYS.clients);
+                localStorage.removeItem(STORAGE_KEYS.demandes);
+                localStorage.removeItem(STORAGE_KEYS.documents);
+                localStorage.removeItem(STORAGE_KEYS.currentUser);
+                
+                console.log('🗑️ Anciennes données supprimées');
+                
+                // Forcer la recréation
+                createTestClientIfNotExists();
+                
+                showNotification('✅ Données de test recréées avec succès !', 'success');
+                
+                // Vérification immédiate
+                setTimeout(() => {
+                    const clients = getClients();
+                    const testClient = clients.find(c => c.email === 'marie.martin@example.com');
+                    
+                    if (testClient) {
+                        showNotification('✅ Client de test confirmé - Vous pouvez vous connecter', 'success');
+                    } else {
+                        showNotification('⚠️ Problème persistant - Contactez le support', 'error');
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                console.error('❌ Erreur reset données:', error);
+                showNotification('❌ Erreur lors du reset - Actualisez la page', 'error');
+            }
+        }
+        
+        function showDebugInfo() {
+            const detection = detectDevice();
+            const clients = getClients();
+            const demandes = getDemandes();
+            const documents = getDocuments();
+            
+            const debugInfo = `
+🔍 DIAGNOSTIC SYSTÈME:
+
+📱 APPAREIL:
+- Mobile: ${detection.isMobile ? 'OUI' : 'NON'}
+- Tactile: ${detection.hasTouch ? 'OUI' : 'NON'}  
+- Écran < 768px: ${detection.screenSize ? 'OUI' : 'NON'}
+- User-Agent: ${navigator.userAgent.substring(0, 50)}...
+
+💾 DONNÉES:
+- Clients: ${clients.length}
+- Demandes: ${demandes.length}
+- Documents: ${documents.length}
+
+🔐 CLIENT DE TEST:
+- Email: marie.martin@example.com
+- Existe: ${clients.find(c => c.email === 'marie.martin@example.com') ? 'OUI' : 'NON'}
+
+🌐 NAVIGATEUR:
+- localStorage OK: ${typeof(Storage) !== "undefined" ? 'OUI' : 'NON'}
+- Cookies activés: ${navigator.cookieEnabled ? 'OUI' : 'NON'}
+            `.trim();
+            
+            console.log(debugInfo);
+            alert(debugInfo);
         }
 
         // === AFFICHAGE DU TABLEAU DE BORD ===
@@ -1894,6 +2048,44 @@
             }, 5000);
         }
 
+        // === INITIALISATION ===
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Espace client MonEntreprise.fr chargé avec détection d\'appareil');
+            
+            // Initialiser le mode d'appareil
+            initializeDeviceMode();
+            
+            // Créer un client de test s'il n'existe pas
+            createTestClientIfNotExists();
+            
+            // Vérification spéciale mobile
+            ensureTestDataOnMobile();
+            
+            // Vérifier si l'utilisateur est déjà connecté
+            const savedUser = localStorage.getItem(STORAGE_KEYS.currentUser);
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    showDashboard();
+                } catch (error) {
+                    console.error('Erreur lors du chargement de l\'utilisateur:', error);
+                    localStorage.removeItem(STORAGE_KEYS.currentUser);
+                }
+            }
+
+            // Gestionnaire de connexion
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+
+            // Gestionnaire de redimensionnement
+            window.addEventListener('resize', function() {
+                if (deviceMode === 'auto') {
+                    const detection = detectDevice();
+                    const autoMode = detection.isMobile ? 'mobile' : 'desktop';
+                    applyDeviceMode(autoMode);
+                }
+            });
+        });
+
         // === GESTION DES ERREURS GLOBALES ===
         window.addEventListener('error', function(event) {
             console.error('Erreur dans l\'espace client:', event.error);
@@ -1901,7 +2093,7 @@
         });
 
         // Log pour le débogage
-        console.log('Espace client MonEntreprise.fr initialisé avec interface adaptative PC/Mobile');
+        console.log('Espace client MonEntreprise.fr initialisé avec interface adaptative PC/Mobile et debugging avancé');
     </script>
 </body>
 </html>
