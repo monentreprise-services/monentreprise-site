@@ -10,20 +10,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- EmailJS pour récupération de mot de passe -->
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    <script>
-        // Initialisation EmailJS
-        (function(){
-            try {
-                emailjs.init("ntZTBB2BSKb64uZk8");
-                console.log('EmailJS initialisé pour espace client');
-            } catch (error) {
-                console.error('Erreur initialisation EmailJS:', error);
-            }
-        })();
-    </script>
-    
     <style>
         :root {
             --primary-color: #667eea;
@@ -54,21 +40,69 @@
             min-height: 100vh;
         }
 
-        /* Header Client */
-        .client-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: var(--white);
+        /* Device Detection Banner */
+        .device-detection {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 2000;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+        }
+
+        .device-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .device-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .device-switch {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .device-switch:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        /* Header */
+        .header {
+            background: var(--white);
+            box-shadow: var(--shadow);
             padding: 1rem 0;
             position: sticky;
-            top: 0;
+            top: 60px;
             z-index: 1000;
-            box-shadow: var(--shadow);
+            margin-top: 60px;
         }
 
         .header-content {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 1rem;
+            padding: 0 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -76,93 +110,65 @@
             gap: 1rem;
         }
 
-        .client-logo {
+        .logo {
             font-size: 1.5rem;
             font-weight: 700;
-            color: var(--white);
+            color: var(--primary-color);
         }
 
-        .client-logo::before {
-            content: "👤 ";
-            margin-right: 0.5rem;
-        }
-
-        .user-actions {
+        .user-info {
             display: flex;
             align-items: center;
             gap: 1rem;
             flex-wrap: wrap;
         }
 
-        .header-btn {
-            background: rgba(255, 255, 255, 0.2);
+        .logout-btn {
+            background: var(--error-color);
             color: var(--white);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: none;
             padding: 0.5rem 1rem;
-            border-radius: 25px;
+            border-radius: 5px;
             cursor: pointer;
             font-weight: 500;
             transition: var(--transition);
-            font-size: 0.9rem;
-            white-space: nowrap;
         }
 
-        .header-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        .header-btn.danger {
-            background: rgba(244, 67, 54, 0.8);
-            border-color: rgba(244, 67, 54, 1);
-        }
-
-        .header-btn.danger:hover {
-            background: rgba(244, 67, 54, 1);
-        }
-
-        .user-name {
-            font-weight: 600;
-            opacity: 0.9;
+        .logout-btn:hover {
+            background: #d32f2f;
         }
 
         /* Container */
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem 1rem;
+            padding: 2rem;
         }
 
-        /* Login Section */
-        .login-section {
+        /* Login Form */
+        .login-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 80vh;
-            padding: 2rem 1rem;
+            min-height: 100vh;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
-        .login-card {
+        .login-form {
             background: var(--white);
             padding: 3rem;
             border-radius: 20px;
             box-shadow: var(--shadow);
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
             text-align: center;
         }
 
-        .login-title {
+        .login-form h1 {
             color: var(--primary-color);
-            margin-bottom: 0.5rem;
-            font-size: 2rem;
-            font-weight: 700;
-        }
-
-        .login-subtitle {
-            color: var(--text-light);
             margin-bottom: 2rem;
-            font-size: 1rem;
+            font-size: 2rem;
         }
 
         .form-group {
@@ -177,20 +183,20 @@
             color: var(--text-dark);
         }
 
-        .form-group input, .form-group textarea, .form-group select {
+        .form-group input {
             width: 100%;
-            padding: 15px;
+            padding: 15px 20px;
             border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 1rem;
+            border-radius: 15px;
+            font-size: 1.1rem;
             transition: var(--transition);
             font-family: inherit;
         }
 
-        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+        .form-group input:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         }
 
         .btn {
@@ -199,14 +205,14 @@
             background: var(--primary-color);
             color: var(--white);
             border: none;
-            border-radius: 12px;
-            font-size: 1rem;
+            border-radius: 15px;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
         }
 
-        .btn:hover:not(:disabled) {
+        .btn:hover {
             background: var(--secondary-color);
             transform: translateY(-2px);
         }
@@ -217,134 +223,127 @@
             transform: none;
         }
 
-        .btn.danger {
-            background: var(--error-color);
+        /* Device-specific styling */
+        body.mobile-mode .login-form {
+            padding: 2rem 1.5rem;
+            border-radius: 15px;
         }
 
-        .btn.danger:hover:not(:disabled) {
-            background: #d32f2f;
+        body.mobile-mode .form-group input,
+        body.mobile-mode .btn {
+            padding: 18px 20px;
+            font-size: 1.2rem;
+            border-radius: 12px;
         }
 
-        .forgot-password {
-            text-align: center;
-            margin-top: 1rem;
+        body.desktop-mode .login-form {
+            padding: 3rem;
+            border-radius: 25px;
         }
 
-        .forgot-password a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 500;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .forgot-password a:hover {
-            text-decoration: underline;
-        }
-
-        .contact-info {
-            margin-top: 1.5rem;
-            font-size: 0.9rem;
-            color: var(--text-light);
-        }
-
-        .contact-info a {
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        .contact-info a:hover {
-            text-decoration: underline;
-        }
-
-        /* Dashboard Client */
-        .client-dashboard {
+        /* Dashboard */
+        .dashboard {
             display: none;
         }
 
-        .client-dashboard.active {
+        .dashboard.active {
             display: block;
         }
 
-        .welcome-banner {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: var(--white);
-            padding: 3rem 2rem;
-            border-radius: 20px;
-            text-align: center;
+        .welcome-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
             margin-bottom: 2rem;
-            position: relative;
-            overflow: hidden;
         }
 
-        .welcome-banner::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 100%;
-            height: 100%;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" patternUnits="userSpaceOnUse" width="100" height="100"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-            opacity: 0.1;
+        .welcome-section h1 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
         }
 
-        .welcome-title {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            position: relative;
-            z-index: 2;
+        /* Mode-specific welcome */
+        body.mobile-mode .welcome-section {
+            padding: 1.5rem;
+            text-align: center;
         }
 
-        .welcome-message {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            position: relative;
-            z-index: 2;
+        body.mobile-mode .welcome-section h1 {
+            font-size: 1.5rem;
         }
 
-        /* Stats Cards */
-        .stats-container {
+        body.desktop-mode .welcome-section {
+            padding: 2.5rem;
+        }
+
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
+        body.mobile-mode .stats-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        body.desktop-mode .stats-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
         .stat-card {
             background: var(--white);
-            padding: 2rem;
+            padding: 1.5rem;
             border-radius: 15px;
             box-shadow: var(--shadow);
             text-align: center;
             transition: var(--transition);
-            border-left: 4px solid var(--primary-color);
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        body.mobile-mode .stat-card {
+            padding: 1rem;
+            border-radius: 12px;
         }
 
         .stat-number {
-            font-size: 3rem;
+            font-size: 2rem;
             font-weight: 700;
             color: var(--primary-color);
             margin-bottom: 0.5rem;
         }
 
+        body.mobile-mode .stat-number {
+            font-size: 1.5rem;
+        }
+
         .stat-label {
             color: var(--text-light);
             font-weight: 500;
-            font-size: 1rem;
+        }
+
+        body.mobile-mode .stat-label {
+            font-size: 0.9rem;
         }
 
         /* Demandes Section */
-        .section-card {
+        .demandes-section {
             background: var(--white);
             padding: 2rem;
             border-radius: 15px;
             box-shadow: var(--shadow);
-            margin-bottom: 2rem;
+        }
+
+        body.mobile-mode .demandes-section {
+            padding: 1.5rem;
+            border-radius: 12px;
         }
 
         .section-header {
@@ -356,52 +355,40 @@
             gap: 1rem;
         }
 
+        body.mobile-mode .section-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
         .section-title {
-            font-size: 1.8rem;
-            font-weight: 700;
+            font-size: 1.5rem;
+            font-weight: 600;
             color: var(--text-dark);
         }
 
-        .refresh-btn {
-            background: var(--primary-color);
-            color: var(--white);
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transition);
+        body.mobile-mode .section-title {
+            font-size: 1.3rem;
         }
 
-        .refresh-btn:hover {
-            background: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-
-        /* Demande Card */
-        .demande-item {
-            border: 2px solid #e0e0e0;
+        .demande-card {
+            border: 1px solid #e0e0e0;
             border-radius: 15px;
             padding: 2rem;
             margin-bottom: 1.5rem;
             transition: var(--transition);
-            position: relative;
-            overflow: hidden;
+            background: var(--white);
         }
 
-        .demande-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 4px;
-            height: 100%;
-            background: var(--primary-color);
+        .demande-card:hover {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
         }
 
-        .demande-item:hover {
-            border-color: var(--primary-color);
-            box-shadow: var(--shadow);
+        body.mobile-mode .demande-card {
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
         }
 
         .demande-header {
@@ -413,8 +400,14 @@
             gap: 1rem;
         }
 
+        body.mobile-mode .demande-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+        }
+
         .demande-id {
-            font-weight: 700;
+            font-weight: 600;
             color: var(--primary-color);
             font-size: 1.1rem;
         }
@@ -422,10 +415,15 @@
         .status-badge {
             padding: 0.5rem 1rem;
             border-radius: 25px;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+        }
+
+        body.mobile-mode .status-badge {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
         }
 
         .status-nouveau {
@@ -438,11 +436,6 @@
             color: #f57c00;
         }
 
-        .status-documents-requis {
-            background: #ffebee;
-            color: #c62828;
-        }
-
         .status-termine {
             background: #e8f5e8;
             color: #388e3c;
@@ -453,24 +446,40 @@
             color: #c62828;
         }
 
-        /* Demande Details Grid */
+        .status-documents-requis {
+            background: #ffebee;
+            color: #c62828;
+        }
+
         .demande-details {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        body.mobile-mode .demande-details {
+            grid-template-columns: 1fr;
             gap: 1rem;
-            margin-bottom: 1.5rem;
         }
 
         .detail-item {
-            background: var(--bg-light);
+            display: flex;
+            flex-direction: column;
             padding: 1rem;
+            background: var(--bg-light);
             border-radius: 10px;
         }
 
+        body.mobile-mode .detail-item {
+            padding: 0.8rem;
+            border-radius: 8px;
+        }
+
         .detail-label {
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             color: var(--text-light);
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.5rem;
             text-transform: uppercase;
             font-weight: 600;
             letter-spacing: 0.5px;
@@ -479,118 +488,29 @@
         .detail-value {
             font-weight: 600;
             color: var(--text-dark);
+            font-size: 1.1rem;
+        }
+
+        body.mobile-mode .detail-value {
             font-size: 1rem;
-        }
-
-        /* Progress Tracker */
-        .progress-section {
-            background: #f8f9fa;
-            padding: 2rem;
-            border-radius: 15px;
-            margin: 1.5rem 0;
-        }
-
-        .progress-title {
-            text-align: center;
-            margin-bottom: 2rem;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .progress-steps {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: relative;
-            margin-bottom: 1rem;
-        }
-
-        .progress-steps::before {
-            content: '';
-            position: absolute;
-            top: 20px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #e0e0e0;
-            z-index: 1;
-        }
-
-        .progress-step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            z-index: 2;
-            background: var(--bg-light);
-            padding: 0 1rem;
-        }
-
-        .step-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #e0e0e0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white;
-            margin-bottom: 0.5rem;
-            transition: var(--transition);
-        }
-
-        .step-circle.completed {
-            background: #28a745;
-        }
-
-        .step-circle.current {
-            background: #ffc107;
-            color: #333;
-        }
-
-        .step-circle.refused {
-            background: #dc3545;
-        }
-
-        .step-label {
-            font-size: 0.8rem;
-            text-align: center;
-            color: #666;
-            font-weight: 500;
-        }
-
-        .step-label.completed {
-            color: #28a745;
-            font-weight: 600;
-        }
-
-        .step-label.current {
-            color: #ffc107;
-            font-weight: 600;
-        }
-
-        .step-label.refused {
-            color: #dc3545;
-            font-weight: 600;
         }
 
         /* Upload Section */
         .upload-section {
-            background: #f8f9fa;
+            margin-top: 2rem;
             padding: 2rem;
+            background: linear-gradient(135deg, var(--bg-light) 0%, #f0f4ff 100%);
             border-radius: 15px;
-            margin-top: 1.5rem;
+            border: 2px dashed #e0e0e0;
         }
 
-        .upload-title {
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--text-dark);
+        body.mobile-mode .upload-section {
+            padding: 1.5rem;
+            border-radius: 12px;
         }
 
         .upload-area {
-            border: 3px dashed #ccc;
+            border: 2px dashed #ccc;
             border-radius: 15px;
             padding: 3rem 2rem;
             text-align: center;
@@ -602,325 +522,257 @@
         .upload-area:hover {
             border-color: var(--primary-color);
             background: rgba(102, 126, 234, 0.05);
+            transform: translateY(-2px);
         }
 
         .upload-area.dragover {
             border-color: var(--primary-color);
             background: rgba(102, 126, 234, 0.1);
+            transform: scale(1.02);
         }
 
-        .upload-icon {
-            font-size: 3rem;
+        body.mobile-mode .upload-area {
+            padding: 2rem 1rem;
+            border-radius: 12px;
+        }
+
+        .upload-area h4 {
+            color: var(--primary-color);
             margin-bottom: 1rem;
+            font-size: 1.3rem;
         }
 
-        .upload-text {
+        body.mobile-mode .upload-area h4 {
             font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-dark);
+        }
+
+        .upload-area p {
+            color: var(--text-light);
+            font-size: 1rem;
             margin-bottom: 0.5rem;
         }
 
-        .upload-hint {
+        body.mobile-mode .upload-area p {
+            font-size: 0.9rem;
+        }
+
+        /* Documents Display */
+        .uploaded-documents {
+            margin-top: 1.5rem;
+        }
+
+        .document-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--white);
+            border: 1px solid #e0e0e0;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            transition: var(--transition);
+        }
+
+        .document-item:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        body.mobile-mode .document-item {
+            flex-direction: column;
+            text-align: center;
+            padding: 1rem;
+            border-radius: 12px;
+        }
+
+        .document-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        body.mobile-mode .document-info {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+        }
+
+        .document-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+        }
+
+        .document-size {
             font-size: 0.9rem;
             color: var(--text-light);
         }
 
-        .file-input {
-            display: none;
-        }
-
-        /* Uploaded Files */
-        .uploaded-files {
-            margin-top: 2rem;
-        }
-
-        .files-title {
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--text-dark);
-        }
-
-        .file-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem;
-            background: var(--white);
-            border-radius: 10px;
-            margin-bottom: 0.5rem;
-            border: 1px solid #e0e0e0;
-            transition: var(--transition);
-        }
-
-        .file-item:hover {
-            border-color: var(--primary-color);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .file-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex: 1;
-        }
-
-        .file-preview {
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
-            object-fit: cover;
-            border: 2px solid #e0e0e0;
-        }
-
-        .file-icon {
-            width: 50px;
-            height: 50px;
-            background: var(--bg-light);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-
-        .file-details {
-            flex: 1;
-        }
-
-        .file-name {
-            font-weight: 600;
-            color: var(--text-dark);
-            margin-bottom: 0.25rem;
-        }
-
-        .file-meta {
-            font-size: 0.8rem;
-            color: var(--text-light);
-        }
-
-        .remove-file {
-            background: var(--error-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
+        .document-status {
             padding: 0.5rem 1rem;
-            cursor: pointer;
+            border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
-            transition: var(--transition);
+            background: var(--success-color);
+            color: var(--white);
         }
 
-        .remove-file:hover {
-            background: #d32f2f;
+        /* Progress Tracker */
+        .progress-tracker {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e8f4fd 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border: 1px solid #e0e0e0;
         }
 
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: var(--text-light);
+        body.mobile-mode .progress-tracker {
+            padding: 1.5rem;
+            border-radius: 12px;
         }
 
-        .empty-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-
-        .empty-title {
-            font-size: 1.5rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-            font-weight: 600;
-        }
-
-        .empty-message {
-            font-size: 1rem;
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 2rem;
         }
 
-        .empty-action {
-            display: inline-block;
-            background: var(--primary-color);
-            color: var(--white);
-            padding: 1rem 2rem;
-            border-radius: 10px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: var(--transition);
+        body.mobile-mode .progress-steps {
+            flex-direction: column;
+            gap: 1rem;
         }
 
-        .empty-action:hover {
-            background: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 3000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            background-color: var(--white);
-            margin: 5% auto;
-            padding: 2rem;
-            border-radius: 20px;
-            width: 95%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
             position: relative;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
-        .modal-close {
+        .progress-step:not(:last-child)::after {
+            content: '';
             position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-light);
-            width: 40px;
-            height: 40px;
+            top: 25px;
+            right: -50%;
+            width: 100%;
+            height: 3px;
+            background: #e0e0e0;
+            z-index: 1;
+            border-radius: 2px;
+        }
+
+        body.mobile-mode .progress-step:not(:last-child)::after {
+            display: none;
+        }
+
+        .progress-step.completed::after {
+            background: #28a745;
+        }
+
+        .step-circle {
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
+            background: #e0e0e0;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: bold;
+            color: white;
+            z-index: 2;
+            position: relative;
+            font-size: 1.2rem;
             transition: var(--transition);
         }
 
-        .modal-close:hover {
-            background: var(--bg-light);
-            color: var(--text-dark);
+        .step-circle.completed {
+            background: #28a745;
+            transform: scale(1.1);
         }
 
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 1rem;
+        .step-circle.current {
+            background: #ffc107;
+            color: #333;
+            animation: pulse 2s infinite;
         }
 
-        /* Confirm Modal */
-        .confirm-modal {
-            display: none;
-            position: fixed;
-            z-index: 4000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.7);
-            backdrop-filter: blur(5px);
+        .step-circle.refused {
+            background: #dc3545;
         }
 
-        .confirm-content {
-            background: var(--white);
-            margin: 15% auto;
-            padding: 2rem;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 500px;
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .step-label {
+            margin-top: 1rem;
+            font-size: 0.9rem;
             text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-        }
-
-        .confirm-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-
-        .confirm-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: var(--error-color);
-        }
-
-        .confirm-message {
-            font-size: 1rem;
-            color: var(--text-light);
-            margin-bottom: 2rem;
-        }
-
-        .confirm-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn-confirm {
-            background: var(--error-color);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
+            color: #666;
             font-weight: 600;
-            transition: var(--transition);
         }
 
-        .btn-confirm:hover {
-            background: #d32f2f;
+        .step-label.completed {
+            color: #28a745;
         }
 
-        .btn-cancel {
-            background: var(--text-light);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transition);
+        .step-label.current {
+            color: #ffc107;
         }
 
-        .btn-cancel:hover {
-            background: #555;
+        .step-label.refused {
+            color: #dc3545;
         }
 
         /* Notifications */
         .notification {
             position: fixed;
-            top: 20px;
+            top: 80px;
             right: 20px;
-            padding: 1rem 2rem;
+            padding: 1rem 1.5rem;
             border-radius: 15px;
             color: var(--white);
             font-weight: 600;
             z-index: 10000;
             transform: translateX(400px);
-            transition: transform 0.3s ease;
-            max-width: 400px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.4s ease;
+            max-width: 350px;
+            word-wrap: break-word;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        body.mobile-mode .notification {
+            right: 10px;
+            left: 10px;
+            max-width: none;
+            transform: translateY(-100px);
+            top: 70px;
         }
 
         .notification.show {
             transform: translateX(0);
         }
 
+        body.mobile-mode .notification.show {
+            transform: translateY(0);
+        }
+
         .notification.success {
-            background: var(--success-color);
+            background: linear-gradient(135deg, var(--success-color) 0%, #45a049 100%);
         }
 
         .notification.error {
-            background: var(--error-color);
+            background: linear-gradient(135deg, var(--error-color) 0%, #e53935 100%);
         }
 
         .notification.warning {
-            background: var(--warning-color);
+            background: linear-gradient(135deg, var(--warning-color) 0%, #fb8c00 100%);
         }
 
         /* Loading Animation */
@@ -938,235 +790,227 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Hidden Class */
         .hidden {
             display: none !important;
         }
 
-        /* Responsive Design */
+        /* Upload progress */
+        .upload-progress {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: var(--white);
+            border-radius: 15px;
+            border: 1px solid #e0e0e0;
+        }
+
+        body.mobile-mode .upload-progress {
+            padding: 1rem;
+            border-radius: 12px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        /* Account info section */
+        .account-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        body.mobile-mode .account-info {
+            padding: 1rem;
+            border-radius: 12px;
+        }
+
+        .account-info h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .account-info p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        body.mobile-mode .account-info h3 {
+            font-size: 1.1rem;
+        }
+
+        body.mobile-mode .account-info p {
+            font-size: 0.8rem;
+        }
+
+        /* Responsive Improvements */
         @media (max-width: 768px) {
             .container {
-                padding: 1rem 0.5rem;
-            }
-
-            .login-card {
-                padding: 2rem 1.5rem;
-                margin: 1rem;
-            }
-
-            .login-title {
-                font-size: 1.5rem;
-            }
-
-            .welcome-banner {
-                padding: 2rem 1rem;
-            }
-
-            .welcome-title {
-                font-size: 2rem;
-            }
-
-            .stats-container {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            .section-header {
-                flex-direction: column;
-                align-items: stretch;
-                text-align: center;
-                gap: 0.5rem;
-            }
-
-            .demande-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.5rem;
-            }
-
-            .demande-details {
-                grid-template-columns: 1fr;
-            }
-
-            .progress-steps {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 1rem;
-            }
-
-            .progress-steps::before {
-                display: none;
-            }
-
-            .upload-area {
-                padding: 2rem 1rem;
-            }
-
-            .file-item {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 1rem;
-            }
-
-            .file-info {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .modal-content {
-                margin: 10% auto;
-                padding: 1.5rem;
-                width: 95%;
-            }
-
-            .notification {
-                left: 10px;
-                right: 10px;
-                transform: translateY(-100px);
-                max-width: none;
-            }
-
-            .notification.show {
-                transform: translateY(0);
+                padding: 1rem;
             }
 
             .header-content {
+                padding: 0 1rem;
                 flex-direction: column;
-                text-align: center;
                 gap: 0.5rem;
             }
 
-            .user-actions {
-                justify-content: center;
-                gap: 0.5rem;
+            .login-form {
+                margin: 1rem;
+                padding: 2rem 1.5rem;
             }
 
-            .header-btn {
+            .device-info {
+                gap: 1rem;
+            }
+
+            .device-badge,
+            .device-switch {
+                font-size: 0.9rem;
                 padding: 0.4rem 0.8rem;
-                font-size: 0.8rem;
             }
         }
 
         @media (max-width: 480px) {
-            .login-card {
+            .login-form {
                 padding: 1.5rem 1rem;
             }
 
-            .section-card {
-                padding: 1rem;
+            .device-detection {
+                padding: 0.8rem;
             }
 
-            .demande-item {
-                padding: 1rem;
-            }
-
-            .stat-number {
-                font-size: 2rem;
-            }
-
-            .welcome-title {
-                font-size: 1.5rem;
-            }
-
-            .section-title {
-                font-size: 1.3rem;
-            }
-
-            .confirm-actions {
+            .device-info {
                 flex-direction: column;
+                gap: 0.5rem;
             }
 
-            .upload-area {
-                padding: 1.5rem 0.5rem;
+            .container {
+                padding: 0.5rem;
             }
 
-            .upload-icon {
-                font-size: 2rem;
+            .demande-card {
+                margin-bottom: 1rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Header (caché par défaut, visible après connexion) -->
-    <header class="client-header hidden" id="clientHeader">
-        <div class="header-content">
-            <div class="client-logo">Espace Client MonEntreprise.fr</div>
-            <div class="user-actions">
-                <span class="user-name" id="userName">Utilisateur</span>
-                <button class="header-btn" onclick="openSettings()">⚙️ Paramètres</button>
-                <button class="header-btn danger" onclick="logout()">🚪 Déconnexion</button>
+    <!-- Device Detection Banner -->
+    <div class="device-detection" id="deviceBanner">
+        <div class="device-info">
+            <div class="device-badge" id="deviceBadge">
+                <span id="deviceIcon">🖥️</span>
+                <span id="deviceText">Mode PC</span>
             </div>
-        </div>
-    </header>
-
-    <!-- Section de Connexion -->
-    <div class="login-section" id="loginSection">
-        <div class="login-card">
-            <h1 class="login-title">🏢 Espace Client</h1>
-            <p class="login-subtitle">Connectez-vous avec vos identifiants reçus par email</p>
-            
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="email">📧 Adresse email</label>
-                    <input type="email" id="email" name="email" required placeholder="votre@email.com">
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">🔒 Mot de passe</label>
-                    <input type="password" id="password" name="password" required placeholder="Mot de passe reçu par email">
-                </div>
-                
-                <button type="submit" class="btn" id="loginBtn">
-                    Se connecter
-                </button>
-            </form>
-            
-            <div class="forgot-password">
-                <a onclick="openForgotPassword()">🔄 Mot de passe oublié ?</a>
-            </div>
-            
-            <div class="contact-info">
-                <p>Besoin d'aide ?</p>
-                <p>📞 <a href="tel:+33766306016">+33 766 306 016</a></p>
-                <p>📧 <a href="mailto:mohamed.oudiai@icloud.com">mohamed.oudiai@icloud.com</a></p>
+            <button class="device-switch" id="deviceSwitch" onclick="toggleDeviceMode()">
+                <span id="switchText">📱 Passer en mode Mobile</span>
+            </button>
+            <div style="font-size: 0.9rem; opacity: 0.8;">
+                <span id="deviceDetection">Détection automatique activée</span>
             </div>
         </div>
     </div>
 
-    <!-- Dashboard Client -->
-    <div class="client-dashboard" id="clientDashboard">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">MonEntreprise.fr</div>
+            <div class="user-info hidden" id="userInfo">
+                <span id="userName">Utilisateur</span>
+                <button class="logout-btn" onclick="logout()">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Login Form -->
+    <div class="login-container" id="loginContainer">
+        <form class="login-form" id="loginForm">
+            <h1>Espace Client</h1>
+            <p style="color: var(--text-light); margin-bottom: 2rem;">
+                Connectez-vous avec les identifiants reçus par email
+            </p>
+            
+            <!-- Account info -->
+            <div class="account-info">
+                <h3>🔐 Compte de Test</h3>
+                <p><strong>Email:</strong> marie.martin@example.com</p>
+                <p><strong>Mot de passe:</strong> client123</p>
+                <p style="margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.8;">
+                    Interface adaptée à votre appareil
+                </p>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required placeholder="votre@email.com" value="marie.martin@example.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" name="password" required placeholder="Mot de passe reçu par email" value="client123">
+            </div>
+            
+            <button type="submit" class="btn" id="loginBtn">
+                Se connecter
+            </button>
+            
+            <p style="margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-light);">
+                Vous n'avez pas reçu vos identifiants ? 
+                <a href="mailto:mohamed.oudiai@icloud.com" style="color: var(--primary-color);">Contactez-nous</a>
+            </p>
+        </form>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard">
         <div class="container">
-            <!-- Banner de Bienvenue -->
-            <div class="welcome-banner">
-                <h1 class="welcome-title">🎉 Bienvenue dans votre espace !</h1>
-                <p class="welcome-message">Gérez vos demandes et documents en toute simplicité</p>
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <h1>Bienvenue dans votre espace client</h1>
+                <p>Suivez vos demandes et gérez vos documents en toute simplicité</p>
+                <p style="margin-top: 1rem; color: var(--text-light);" id="deviceModeInfo">
+                    Interface optimisée pour votre appareil
+                </p>
             </div>
 
-            <!-- Statistiques -->
-            <div class="stats-container">
+            <!-- Stats -->
+            <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-number" id="totalDemandes">0</div>
-                    <div class="stat-label">📋 Demandes totales</div>
+                    <div class="stat-label">Demandes totales</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number" id="demandesEnCours">0</div>
-                    <div class="stat-label">⏳ En cours</div>
+                    <div class="stat-label">En cours</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number" id="demandesTerminees">0</div>
-                    <div class="stat-label">✅ Terminées</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="documentsUploades">0</div>
-                    <div class="stat-label">📎 Documents uploadés</div>
+                    <div class="stat-label">Terminées</div>
                 </div>
             </div>
 
-            <!-- Section des Demandes -->
-            <div class="section-card">
+            <!-- Demandes Section -->
+            <div class="demandes-section">
                 <div class="section-header">
-                    <h2 class="section-title">📋 Mes Demandes</h2>
-                    <button class="refresh-btn" onclick="refreshData()">🔄 Actualiser</button>
+                    <h2 class="section-title">Mes demandes</h2>
+                    <button class="btn" onclick="refreshDemandes()" style="width: auto; padding: 0.75rem 1.5rem;">
+                        🔄 Actualiser
+                    </button>
                 </div>
                 
                 <div id="demandesList">
@@ -1176,134 +1020,318 @@
         </div>
     </div>
 
-    <!-- Modal Mot de passe oublié -->
-    <div id="forgotPasswordModal" class="modal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeForgotPassword()">&times;</button>
-            <h2 class="modal-title">🔄 Récupération du mot de passe</h2>
-            <p style="margin-bottom: 1.5rem; color: var(--text-light);">
-                Entrez votre adresse email pour recevoir un nouveau mot de passe
-            </p>
-            <div class="form-group">
-                <label for="forgotEmail">📧 Adresse email</label>
-                <input type="email" id="forgotEmail" placeholder="votre@email.com" required>
-            </div>
-            <button class="btn" onclick="sendPasswordReset()" id="forgotBtn">
-                📤 Envoyer un nouveau mot de passe
-            </button>
-        </div>
-    </div>
-
-    <!-- Modal Paramètres -->
-    <div id="settingsModal" class="modal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeSettings()">&times;</button>
-            <h2 class="modal-title">⚙️ Paramètres du compte</h2>
-            
-            <div class="form-group">
-                <label for="newPassword">🔒 Nouveau mot de passe (optionnel)</label>
-                <input type="password" id="newPassword" placeholder="Laissez vide pour ne pas modifier">
-            </div>
-            
-            <div class="form-group">
-                <label for="newPhone">📞 Téléphone</label>
-                <input type="tel" id="newPhone" placeholder="+33 6 XX XX XX XX">
-            </div>
-            
-            <button class="btn" onclick="updateAccount()" style="margin-bottom: 2rem;">
-                💾 Sauvegarder les modifications
-            </button>
-            
-            <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;">
-            
-            <div style="background: #ffebee; padding: 1.5rem; border-radius: 10px; text-align: center;">
-                <h3 style="color: var(--error-color); margin-bottom: 1rem;">⚠️ Zone de danger</h3>
-                <p style="margin-bottom: 1.5rem; color: var(--text-light);">
-                    La suppression de votre compte est <strong>irréversible</strong>. Toutes vos données seront perdues.
-                </p>
-                <button class="btn danger" onclick="confirmDeleteAccount()">
-                    🗑️ Supprimer mon compte définitivement
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Confirmation suppression compte -->
-    <div id="confirmDeleteModal" class="confirm-modal">
-        <div class="confirm-content">
-            <div class="confirm-icon">⚠️</div>
-            <h3 class="confirm-title">Supprimer votre compte ?</h3>
-            <p class="confirm-message">
-                Cette action est <strong>irréversible</strong> !<br>
-                Toutes vos demandes et documents seront définitivement supprimés.
-            </p>
-            <div class="confirm-actions">
-                <button class="btn-confirm" onclick="deleteAccount()">🗑️ Oui, supprimer</button>
-                <button class="btn-cancel" onclick="cancelDeleteAccount()">❌ Annuler</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // Configuration des clés de stockage
+        // Configuration
         const STORAGE_KEYS = {
             clients: 'monentreprise_clients',
             demandes: 'monentreprise_demandes',
-            clientDocuments: 'monentreprise_client_documents',
-            currentUser: 'monentreprise_current_user'
+            documents: 'monentreprise_documents',
+            currentUser: 'monentreprise_current_user',
+            deviceMode: 'monentreprise_device_mode'
         };
 
-        const EMAIL_CONFIG = {
-            serviceId: 'service_2te46oj',
-            templateId: 'template_password_reset',
-            publicKey: 'ntZTBB2BSKb64uZk8'
-        };
-
-        // Variables globales
+        // État de l'application
         let currentUser = null;
-        let uploadedDocuments = [];
+        let uploadInProgress = false;
+        let deviceMode = 'auto'; // auto, desktop, mobile
 
-        // === INITIALISATION ===
+        // Détection d'appareil
+        function detectDevice() {
+            const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(navigator.userAgent);
+            const isTablet = /iPad|Android(?!.*Mobile)/i.test(navigator.userAgent);
+            const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            const screenSize = window.innerWidth < 768;
+            
+            // Score de mobilité (0 = desktop, 1 = mobile)
+            let mobileScore = 0;
+            if (isMobile) mobileScore += 0.4;
+            if (isTablet) mobileScore += 0.2;
+            if (hasTouch) mobileScore += 0.2;
+            if (screenSize) mobileScore += 0.2;
+            
+            return {
+                isMobile: mobileScore > 0.5,
+                isTablet: isTablet,
+                hasTouch: hasTouch,
+                screenSize: screenSize,
+                score: mobileScore,
+                userAgent: navigator.userAgent
+            };
+        }
+
+        function applyDeviceMode(mode) {
+            const body = document.body;
+            const deviceBadge = document.getElementById('deviceBadge');
+            const deviceIcon = document.getElementById('deviceIcon');
+            const deviceText = document.getElementById('deviceText');
+            const switchText = document.getElementById('switchText');
+            const deviceDetection = document.getElementById('deviceDetection');
+            const deviceModeInfo = document.getElementById('deviceModeInfo');
+            
+            // Nettoyer les classes précédentes
+            body.classList.remove('mobile-mode', 'desktop-mode');
+            
+            if (mode === 'mobile') {
+                body.classList.add('mobile-mode');
+                deviceIcon.textContent = '📱';
+                deviceText.textContent = 'Mode Mobile';
+                switchText.textContent = '🖥️ Passer en mode PC';
+                deviceModeInfo.textContent = 'Interface optimisée pour mobile';
+            } else {
+                body.classList.add('desktop-mode');
+                deviceIcon.textContent = '🖥️';
+                deviceText.textContent = 'Mode PC';
+                switchText.textContent = '📱 Passer en mode Mobile';
+                deviceModeInfo.textContent = 'Interface optimisée pour PC';
+            }
+            
+            // Mise à jour de la détection
+            if (deviceMode === 'auto') {
+                deviceDetection.textContent = 'Détection automatique activée';
+                deviceBadge.style.background = 'rgba(255,255,255,0.2)';
+            } else {
+                deviceDetection.textContent = 'Mode manuel sélectionné';
+                deviceBadge.style.background = 'rgba(255,255,255,0.3)';
+            }
+            
+            console.log(`Mode appliqué: ${mode}`);
+        }
+
+        function initializeDeviceMode() {
+            const savedMode = localStorage.getItem(STORAGE_KEYS.deviceMode);
+            const detection = detectDevice();
+            
+            console.log('Détection appareil:', detection);
+            
+            if (savedMode && savedMode !== 'auto') {
+                deviceMode = savedMode;
+                applyDeviceMode(savedMode);
+            } else {
+                deviceMode = 'auto';
+                const autoMode = detection.isMobile ? 'mobile' : 'desktop';
+                applyDeviceMode(autoMode);
+                
+                // Afficher une notification de détection automatique
+                setTimeout(() => {
+                    const deviceName = detection.isMobile ? 'mobile' : 'PC';
+                    showNotification(`Appareil ${deviceName} détecté automatiquement`, 'success');
+                }, 1000);
+            }
+        }
+
+        function toggleDeviceMode() {
+            const currentMode = document.body.classList.contains('mobile-mode') ? 'mobile' : 'desktop';
+            const newMode = currentMode === 'mobile' ? 'desktop' : 'mobile';
+            
+            deviceMode = newMode;
+            localStorage.setItem(STORAGE_KEYS.deviceMode, newMode);
+            applyDeviceMode(newMode);
+            
+            showNotification(`Basculement en mode ${newMode === 'mobile' ? 'Mobile' : 'PC'}`, 'success');
+            
+            // Recharger l'affichage si connecté
+            if (currentUser) {
+                loadDemandes();
+                updateStats();
+            }
+        }
+
+        // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🏢 Espace Client MonEntreprise.fr chargé');
+            console.log('Espace client MonEntreprise.fr chargé avec détection d\'appareil');
+            
+            // Initialiser le mode d'appareil
+            initializeDeviceMode();
+            
+            // Créer un client de test s'il n'existe pas
+            createTestClientIfNotExists();
             
             // Vérifier si l'utilisateur est déjà connecté
-            checkExistingSession();
-            
-            // Gestionnaires d'événements
-            setupEventHandlers();
-        });
-
-        function checkExistingSession() {
             const savedUser = localStorage.getItem(STORAGE_KEYS.currentUser);
             if (savedUser) {
                 try {
                     currentUser = JSON.parse(savedUser);
                     showDashboard();
                 } catch (error) {
-                    console.error('Erreur session:', error);
+                    console.error('Erreur lors du chargement de l\'utilisateur:', error);
                     localStorage.removeItem(STORAGE_KEYS.currentUser);
                 }
             }
-        }
 
-        function setupEventHandlers() {
-            // Formulaire de connexion
+            // Gestionnaire de connexion
             document.getElementById('loginForm').addEventListener('submit', handleLogin);
-            
-            // Gestion des modals
-            window.addEventListener('click', function(event) {
-                const forgotModal = document.getElementById('forgotPasswordModal');
-                const settingsModal = document.getElementById('settingsModal');
-                const confirmModal = document.getElementById('confirmDeleteModal');
-                
-                if (event.target === forgotModal) closeForgotPassword();
-                if (event.target === settingsModal) closeSettings();
-                if (event.target === confirmModal) cancelDeleteAccount();
+
+            // Gestionnaire de redimensionnement
+            window.addEventListener('resize', function() {
+                if (deviceMode === 'auto') {
+                    const detection = detectDevice();
+                    const autoMode = detection.isMobile ? 'mobile' : 'desktop';
+                    applyDeviceMode(autoMode);
+                }
             });
+        });
+
+        // === GESTION DU CLIENT DE TEST ===
+        function createTestClientIfNotExists() {
+            const clients = getClients();
+            const testEmail = 'marie.martin@example.com';
+            
+            if (!clients.find(c => c.email === testEmail)) {
+                // Créer plusieurs demandes de test avec différents statuts
+                const testDemandes = [
+                    {
+                        id: 'DEM-TEST-001',
+                        prenom: 'Marie',
+                        nom: 'Martin',
+                        email: testEmail,
+                        telephone: '06 11 22 33 44',
+                        service: 'micro-entreprise',
+                        prix: '79€',
+                        statut: 'nouveau',
+                        details: 'Demande de création de micro-entreprise pour activité de consultation',
+                        dateComplete: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // Il y a 2h
+                        urgence: 'Normal',
+                        statusHistory: [{
+                            date: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+                            oldStatus: '',
+                            newStatus: 'nouveau',
+                            comment: 'Demande créée pour test de l\'interface adaptative',
+                            updatedBy: 'system'
+                        }]
+                    },
+                    {
+                        id: 'DEM-TEST-002',
+                        prenom: 'Marie',
+                        nom: 'Martin',
+                        email: testEmail,
+                        telephone: '06 11 22 33 44',
+                        service: 'titre-sejour',
+                        prix: '120€',
+                        statut: 'en-cours',
+                        details: 'Renouvellement titre de séjour - documents à fournir',
+                        dateComplete: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // Il y a 1 jour
+                        urgence: 'Urgent',
+                        statusHistory: [
+                            {
+                                date: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+                                oldStatus: '',
+                                newStatus: 'nouveau',
+                                comment: 'Demande reçue',
+                                updatedBy: 'system'
+                            },
+                            {
+                                date: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
+                                oldStatus: 'nouveau',
+                                newStatus: 'en-cours',
+                                comment: 'Votre demande est maintenant en cours de traitement. Nous vous tiendrons informé de l\'avancement.',
+                                updatedBy: 'admin'
+                            }
+                        ]
+                    },
+                    {
+                        id: 'DEM-TEST-003',
+                        prenom: 'Marie',
+                        nom: 'Martin',
+                        email: testEmail,
+                        telephone: '06 11 22 33 44',
+                        service: 'prefecture',
+                        prix: '89€',
+                        statut: 'termine',
+                        details: 'Rendez-vous préfecture obtenu avec succès',
+                        dateComplete: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), // Il y a 2 jours
+                        urgence: 'Normal',
+                        statusHistory: [
+                            {
+                                date: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
+                                oldStatus: '',
+                                newStatus: 'nouveau',
+                                comment: 'Demande reçue',
+                                updatedBy: 'system'
+                            },
+                            {
+                                date: new Date(Date.now() - 1000 * 60 * 60 * 36).toISOString(),
+                                oldStatus: 'nouveau',
+                                newStatus: 'en-cours',
+                                comment: 'Traitement en cours',
+                                updatedBy: 'admin'
+                            },
+                            {
+                                date: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
+                                oldStatus: 'en-cours',
+                                newStatus: 'termine',
+                                comment: 'Félicitations ! Votre demande a été traitée avec succès. Le rendez-vous est confirmé.',
+                                updatedBy: 'admin'
+                            }
+                        ]
+                    }
+                ];
+                
+                // Créer le client de test
+                const testClient = {
+                    id: 'CLIENT-TEST-MARIE',
+                    nom: 'Marie Martin',
+                    email: testEmail,
+                    telephone: '06 11 22 33 44',
+                    password: 'client123',
+                    demandes: testDemandes.map(d => d.id),
+                    statutCompte: 'Actif',
+                    dateCreation: new Date().toISOString()
+                };
+
+                // Créer quelques documents de test
+                const testDocuments = [
+                    {
+                        id: 'DOC-TEST-001',
+                        name: 'passeport-marie-martin.pdf',
+                        size: 2456789,
+                        type: 'application/pdf',
+                        demandeId: 'DEM-TEST-001',
+                        clientName: 'Marie Martin',
+                        uploadDate: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // Il y a 30min
+                        status: 'uploaded'
+                    },
+                    {
+                        id: 'DOC-TEST-002',
+                        name: 'justificatif-domicile.jpg',
+                        size: 1234567,
+                        type: 'image/jpeg',
+                        demandeId: 'DEM-TEST-002',
+                        clientName: 'Marie Martin',
+                        uploadDate: new Date(Date.now() - 1000 * 60 * 60).toISOString(), // Il y a 1h
+                        status: 'uploaded'
+                    },
+                    {
+                        id: 'DOC-TEST-003',
+                        name: 'photo-identite.png',
+                        size: 987654,
+                        type: 'image/png',
+                        demandeId: 'DEM-TEST-002',
+                        clientName: 'Marie Martin',
+                        uploadDate: new Date(Date.now() - 1000 * 60 * 90).toISOString(), // Il y a 1h30
+                        status: 'uploaded'
+                    }
+                ];
+
+                // Sauvegarder
+                const demandes = getDemandes();
+                const clients = getClients();
+                const documents = getDocuments();
+                
+                testDemandes.forEach(d => demandes.push(d));
+                clients.push(testClient);
+                testDocuments.forEach(d => documents.push(d));
+                
+                localStorage.setItem(STORAGE_KEYS.demandes, JSON.stringify(demandes));
+                localStorage.setItem(STORAGE_KEYS.clients, JSON.stringify(clients));
+                localStorage.setItem(STORAGE_KEYS.documents, JSON.stringify(documents));
+                
+                console.log('Client de test créé avec interface adaptative:', testClient);
+                console.log('Demandes de test créées:', testDemandes);
+                console.log('Documents de test créés:', testDocuments);
+            }
         }
 
-        // === AUTHENTIFICATION ===
+        // === GESTION DE LA CONNEXION ===
         function handleLogin(event) {
             event.preventDefault();
             
@@ -1311,7 +1339,7 @@
             const password = document.getElementById('password').value.trim();
             
             if (!email || !password) {
-                showNotification('⚠️ Veuillez remplir tous les champs', 'error');
+                showNotification('Veuillez remplir tous les champs', 'error');
                 return;
             }
 
@@ -1320,7 +1348,7 @@
             loginBtn.disabled = true;
             loginBtn.innerHTML = '<span class="loading"></span> Connexion...';
 
-            // Simulation de délai réseau
+            // Simuler un délai de connexion
             setTimeout(() => {
                 const clients = getClients();
                 const client = clients.find(c => c.email === email && c.password === password);
@@ -1328,10 +1356,10 @@
                 if (client) {
                     currentUser = client;
                     localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(client));
-                    showNotification('✅ Connexion réussie !', 'success');
+                    showNotification('Connexion réussie !', 'success');
                     showDashboard();
                 } else {
-                    showNotification('❌ Email ou mot de passe incorrect', 'error');
+                    showNotification('Email ou mot de passe incorrect', 'error');
                 }
                 
                 loginBtn.disabled = false;
@@ -1339,475 +1367,337 @@
             }, 1000);
         }
 
+        // === AFFICHAGE DU TABLEAU DE BORD ===
         function showDashboard() {
-            // Masquer la section de connexion
-            document.getElementById('loginSection').style.display = 'none';
-            
-            // Afficher le header et le dashboard
-            document.getElementById('clientHeader').classList.remove('hidden');
-            document.getElementById('clientDashboard').classList.add('active');
-            
-            // Mettre à jour l'interface
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('dashboard').classList.add('active');
+            document.getElementById('userInfo').classList.remove('hidden');
             document.getElementById('userName').textContent = currentUser.nom;
             
-            // Charger les données
-            loadUserData();
-        }
-
-        function logout() {
-            // Nettoyer les données
-            localStorage.removeItem(STORAGE_KEYS.currentUser);
-            currentUser = null;
-            uploadedDocuments = [];
-            
-            // Réinitialiser l'interface
-            document.getElementById('clientHeader').classList.add('hidden');
-            document.getElementById('clientDashboard').classList.remove('active');
-            document.getElementById('loginSection').style.display = 'flex';
-            
-            // Reset du formulaire
-            document.getElementById('loginForm').reset();
-            
-            showNotification('👋 Déconnexion réussie', 'success');
-        }
-
-        // === RÉCUPÉRATION MOT DE PASSE ===
-        function openForgotPassword() {
-            document.getElementById('forgotPasswordModal').style.display = 'block';
-        }
-
-        function closeForgotPassword() {
-            document.getElementById('forgotPasswordModal').style.display = 'none';
-            document.getElementById('forgotEmail').value = '';
-        }
-
-        function sendPasswordReset() {
-            const email = document.getElementById('forgotEmail').value.trim();
-            
-            if (!email) {
-                showNotification('⚠️ Veuillez saisir votre adresse email', 'error');
-                return;
-            }
-
-            const clients = getClients();
-            const client = clients.find(c => c.email === email);
-            
-            if (!client) {
-                showNotification('❌ Aucun compte trouvé avec cette adresse', 'error');
-                return;
-            }
-
-            const forgotBtn = document.getElementById('forgotBtn');
-            const originalText = forgotBtn.textContent;
-            forgotBtn.disabled = true;
-            forgotBtn.innerHTML = '<span class="loading"></span> Envoi en cours...';
-
-            // Générer nouveau mot de passe
-            const newPassword = generatePassword();
-            
-            // Mettre à jour le mot de passe
-            const clientIndex = clients.findIndex(c => c.email === email);
-            if (clientIndex !== -1) {
-                clients[clientIndex].password = newPassword;
-                localStorage.setItem(STORAGE_KEYS.clients, JSON.stringify(clients));
-            }
-
-            // Simuler l'envoi d'email
-            setTimeout(() => {
-                const emailParams = {
-                    to_email: email,
-                    client_name: client.nom,
-                    new_password: newPassword,
-                    login_link: window.location.href
-                };
-
-                if (typeof emailjs !== 'undefined') {
-                    emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.templateId, emailParams)
-                        .then(() => {
-                            showNotification('📧 Nouveau mot de passe envoyé par email !', 'success');
-                            closeForgotPassword();
-                        })
-                        .catch(() => {
-                            showNotification('⚠️ Erreur d\'envoi. Contactez le support.', 'error');
-                        });
-                } else {
-                    showNotification('⚠️ Service email indisponible', 'error');
-                }
-
-                forgotBtn.disabled = false;
-                forgotBtn.textContent = originalText;
-            }, 1500);
-        }
-
-        function generatePassword() {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
-            let password = '';
-            for (let i = 0; i < 8; i++) {
-                password += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return password;
-        }
-
-        // === PARAMÈTRES UTILISATEUR ===
-        function openSettings() {
-            document.getElementById('newPhone').value = currentUser.telephone || '';
-            document.getElementById('settingsModal').style.display = 'block';
-        }
-
-        function closeSettings() {
-            document.getElementById('settingsModal').style.display = 'none';
-            document.getElementById('newPassword').value = '';
-            document.getElementById('newPhone').value = '';
-        }
-
-        function updateAccount() {
-            const newPassword = document.getElementById('newPassword').value.trim();
-            const newPhone = document.getElementById('newPhone').value.trim();
-            
-            const clients = getClients();
-            const clientIndex = clients.findIndex(c => c.email === currentUser.email);
-            
-            if (clientIndex === -1) {
-                showNotification('❌ Erreur: compte non trouvé', 'error');
-                return;
-            }
-
-            let updated = false;
-
-            if (newPassword) {
-                clients[clientIndex].password = newPassword;
-                currentUser.password = newPassword;
-                updated = true;
-            }
-
-            if (newPhone) {
-                clients[clientIndex].telephone = newPhone;
-                currentUser.telephone = newPhone;
-                updated = true;
-            }
-
-            if (updated) {
-                localStorage.setItem(STORAGE_KEYS.clients, JSON.stringify(clients));
-                localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(currentUser));
-                showNotification('✅ Paramètres mis à jour avec succès', 'success');
-                closeSettings();
-            } else {
-                showNotification('⚠️ Aucune modification effectuée', 'warning');
-            }
-        }
-
-        // === SUPPRESSION COMPTE ===
-        function confirmDeleteAccount() {
-            document.getElementById('confirmDeleteModal').style.display = 'block';
-        }
-
-        function cancelDeleteAccount() {
-            document.getElementById('confirmDeleteModal').style.display = 'none';
-        }
-
-        function deleteAccount() {
-            if (!currentUser) return;
-
-            // Supprimer toutes les données du client
-            const clients = getClients();
-            const demandes = getDemandes();
-            const clientDocuments = getClientDocuments();
-
-            // Filtrer les données
-            const remainingClients = clients.filter(c => c.email !== currentUser.email);
-            const remainingDemandes = demandes.filter(d => !currentUser.demandes || !currentUser.demandes.includes(d.id));
-            const remainingDocuments = clientDocuments.filter(doc => doc.clientEmail !== currentUser.email);
-
-            // Sauvegarder
-            localStorage.setItem(STORAGE_KEYS.clients, JSON.stringify(remainingClients));
-            localStorage.setItem(STORAGE_KEYS.demandes, JSON.stringify(remainingDemandes));
-            localStorage.setItem(STORAGE_KEYS.clientDocuments, JSON.stringify(remainingDocuments));
-            localStorage.removeItem(STORAGE_KEYS.currentUser);
-
-            showNotification('✅ Compte supprimé définitivement', 'success');
-
-            // Redirection après délai
-            setTimeout(() => {
-                logout();
-            }, 2000);
-        }
-
-        // === CHARGEMENT DES DONNÉES ===
-        function loadUserData() {
-            loadUserDocuments();
             loadDemandes();
             updateStats();
         }
 
-        function loadUserDocuments() {
-            const allDocuments = getClientDocuments();
-            uploadedDocuments = allDocuments.filter(doc => doc.clientEmail === currentUser.email);
-        }
-
+        // === CHARGEMENT DES DEMANDES ===
         function loadDemandes() {
             const demandes = getDemandes();
-            const userDemandes = demandes.filter(d => currentUser.demandes && currentUser.demandes.includes(d.id));
+            const userDemandes = demandes.filter(d => currentUser.demandes.includes(d.id));
             
             const demandesList = document.getElementById('demandesList');
             
             if (userDemandes.length === 0) {
                 demandesList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">📭</div>
-                        <h3 class="empty-title">Aucune demande trouvée</h3>
-                        <p class="empty-message">Vos demandes apparaîtront ici une fois créées</p>
-                        <a href="../index.html" class="empty-action">Faire une nouvelle demande</a>
+                    <div style="text-align: center; padding: 3rem; color: var(--text-light);">
+                        <h3>Aucune demande trouvée</h3>
+                        <p>Vos demandes apparaîtront ici une fois créées</p>
                     </div>
                 `;
                 return;
             }
 
             demandesList.innerHTML = userDemandes.map(demande => {
-                const userDocs = uploadedDocuments.filter(doc => doc.demandeId === demande.id);
-                return createDemandeCard(demande, userDocs);
-            }).join('');
-
-            // Configurer les uploads pour chaque demande
-            userDemandes.forEach(demande => {
-                setupFileUpload(demande.id);
-            });
-        }
-
-        function createDemandeCard(demande, userDocs) {
-            return `
-                <div class="demande-item">
-                    <div class="demande-header">
-                        <div class="demande-id">📋 ${demande.id}</div>
-                        <div class="status-badge status-${demande.statut.replace(' ', '-')}">
-                            ${getStatusDisplayName(demande.statut)}
-                        </div>
-                    </div>
-                    
-                    <div class="demande-details">
-                        <div class="detail-item">
-                            <div class="detail-label">Service</div>
-                            <div class="detail-value">${getServiceDisplayName(demande.service)}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Date de demande</div>
-                            <div class="detail-value">${formatDate(demande.dateComplete)}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Tarif</div>
-                            <div class="detail-value">${demande.prix}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Urgence</div>
-                            <div class="detail-value">${demande.urgence || 'Normal'}</div>
-                        </div>
-                    </div>
-                    
-                    ${demande.details && demande.details !== 'Aucun message' ? `
-                        <div style="margin-top: 1rem; padding: 1rem; background: var(--bg-light); border-radius: 10px;">
-                            <div class="detail-label">💬 Message</div>
-                            <div class="detail-value">${demande.details}</div>
-                        </div>
-                    ` : ''}
-                    
-                    ${createProgressTracker(demande.statut)}
-                    
-                    <div class="upload-section">
-                        <h4 class="upload-title">
-                            📎 Documents requis ${userDocs.length > 0 ? `(${userDocs.length} uploadé(s))` : ''}
-                        </h4>
-                        
-                        <div class="upload-area" onclick="triggerFileUpload('${demande.id}')">
-                            <div class="upload-icon">📁</div>
-                            <div class="upload-text">Cliquez pour uploader vos documents</div>
-                            <div class="upload-hint">Formats acceptés: PDF, JPG, PNG (max 10MB)</div>
+                const documents = getDocumentsForDemande(demande.id);
+                
+                return `
+                    <div class="demande-card">
+                        <div class="demande-header">
+                            <div class="demande-id">${demande.id}</div>
+                            <div class="status-badge status-${demande.statut.replace(' ', '-')}">${getStatusDisplayName(demande.statut)}</div>
                         </div>
                         
-                        <input type="file" id="fileInput-${demande.id}" multiple accept=".pdf,.jpg,.jpeg,.png" class="file-input">
+                        <div class="demande-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Service</div>
+                                <div class="detail-value">${getServiceDisplayName(demande.service)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Date de demande</div>
+                                <div class="detail-value">${formatDate(demande.dateComplete)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Tarif</div>
+                                <div class="detail-value">${demande.prix}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Urgence</div>
+                                <div class="detail-value">${demande.urgence || 'Normal'}</div>
+                            </div>
+                        </div>
                         
-                        ${userDocs.length > 0 ? `
-                            <div class="uploaded-files">
-                                <h4 class="files-title">📎 Fichiers uploadés</h4>
-                                ${userDocs.map(doc => createFileItem(doc)).join('')}
+                        ${demande.details && demande.details !== 'Aucun message' ? `
+                            <div style="margin-top: 1.5rem; padding: 1.5rem; background: linear-gradient(135deg, var(--bg-light) 0%, #f0f4ff 100%); border-radius: 15px; border-left: 4px solid var(--primary-color);">
+                                <div class="detail-label">Message de la demande</div>
+                                <div class="detail-value" style="font-style: italic;">${demande.details}</div>
                             </div>
                         ` : ''}
-                    </div>
-                </div>
-            `;
-        }
-
-        function createProgressTracker(currentStatus) {
-            if (currentStatus === 'refuse') {
-                return `
-                    <div class="progress-section">
-                        <h4 class="progress-title">📊 Statut de la demande</h4>
-                        <div style="text-align: center; padding: 2rem;">
-                            <div class="step-circle refused" style="margin: 0 auto 1rem;">❌</div>
-                            <div class="step-label refused">Demande refusée</div>
-                            <p style="color: #dc3545; margin-top: 1rem;">
-                                Votre demande a été refusée. Contactez-nous pour plus d'informations.
-                            </p>
+                        
+                        ${createProgressTracker(demande.statut)}
+                        
+                        ${demande.statusHistory && demande.statusHistory.length > 1 ? `
+                            <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e8f4fd 100%); padding: 1.5rem; border-radius: 15px; margin: 1.5rem 0; border: 1px solid #e0e0e0;">
+                                <h4 style="margin-bottom: 1rem; color: var(--text-dark);">📋 Historique des modifications</h4>
+                                ${demande.statusHistory.slice().reverse().map(history => `
+                                    <div style="display: flex; align-items: flex-start; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid #e0e0e0;">
+                                        <div style="width: 35px; height: 35px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: white; flex-shrink: 0;">
+                                            ${getStatusIcon(history.newStatus)}
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <div style="font-weight: 600; color: var(--text-dark); margin-bottom: 0.25rem;">
+                                                ${history.oldStatus ? getStatusDisplayName(history.oldStatus) + ' → ' : ''}${getStatusDisplayName(history.newStatus)}
+                                            </div>
+                                            <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.5rem;">${formatDate(history.date)}</div>
+                                            ${history.comment ? `<div style="font-size: 0.9rem; color: var(--text-dark); font-style: italic; background: rgba(102, 126, 234, 0.1); padding: 0.8rem; border-radius: 8px;">"${history.comment}"</div>` : ''}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        
+                        <div class="upload-section">
+                            <h4 style="margin-bottom: 1rem; color: var(--text-dark); display: flex; align-items: center; gap: 0.5rem;">
+                                📄 Documents (${documents.length} fichier${documents.length > 1 ? 's' : ''})
+                            </h4>
+                            
+                            ${documents.length > 0 ? `
+                                <div class="uploaded-documents">
+                                    ${documents.map(doc => `
+                                        <div class="document-item">
+                                            <div class="document-info">
+                                                <span style="font-size: 2rem;">📄</span>
+                                                <div>
+                                                    <div class="document-name">${doc.name}</div>
+                                                    <div class="document-size">${formatFileSize(doc.size)} • ${formatDate(doc.uploadDate)}</div>
+                                                </div>
+                                            </div>
+                                            <div class="document-status">✅ Envoyé</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            
+                            <div class="upload-area" onclick="handleFileUpload('${demande.id}')" 
+                                 ondragover="handleDragOver(event)" 
+                                 ondragleave="handleDragLeave(event)"
+                                 ondrop="handleFileDrop(event, '${demande.id}')">
+                                <h4>📁 Ajouter des documents</h4>
+                                <p>Cliquez ou glissez-déposez vos documents ici</p>
+                                <p style="font-size: 0.8rem; opacity: 0.8; margin-top: 0.5rem;">
+                                    Formats acceptés: PDF, JPG, PNG (max 10MB par fichier)
+                                </p>
+                            </div>
                         </div>
                     </div>
                 `;
-            }
-
-            const steps = [
-                { id: 'nouveau', label: 'Reçue', number: 1 },
-                { id: 'en-cours', label: 'En cours', number: 2 },
-                { id: 'documents-requis', label: 'Documents', number: 3 },
-                { id: 'termine', label: 'Terminée', number: 4 }
-            ];
-            
-            const statusOrder = ['nouveau', 'en-cours', 'documents-requis', 'termine'];
-            const currentIndex = statusOrder.indexOf(currentStatus);
-            
-            return `
-                <div class="progress-section">
-                    <h4 class="progress-title">📊 Progression de votre demande</h4>
-                    <div class="progress-steps">
-                        ${steps.map((step, index) => {
-                            let stepClass = '';
-                            if (index < currentIndex || (currentStatus === 'termine' && index <= currentIndex)) {
-                                stepClass = 'completed';
-                            } else if (index === currentIndex) {
-                                stepClass = 'current';
-                            }
-                            
-                            return `
-                                <div class="progress-step">
-                                    <div class="step-circle ${stepClass}">${stepClass === 'completed' ? '✓' : step.number}</div>
-                                    <div class="step-label ${stepClass}">${step.label}</div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                    <div style="text-align: center; margin-top: 1rem; color: #666;">
-                        Statut actuel: <strong>${getStatusDisplayName(currentStatus)}</strong>
-                    </div>
-                </div>
-            `;
+            }).join('');
         }
 
-        function createFileItem(doc) {
-            return `
-                <div class="file-item">
-                    <div class="file-info">
-                        ${doc.preview ? 
-                            `<img src="${doc.preview}" alt="Aperçu" class="file-preview">` : 
-                            `<div class="file-icon">📄</div>`
-                        }
-                        <div class="file-details">
-                            <div class="file-name">${doc.name}</div>
-                            <div class="file-meta">${formatFileSize(doc.size)} • ${formatDate(doc.uploadDate)}</div>
-                        </div>
-                    </div>
-                    <button class="remove-file" onclick="removeDocument('${doc.id}', event)">🗑️ Supprimer</button>
-                </div>
-            `;
-        }
-
-        // === GESTION DES FICHIERS ===
-        function setupFileUpload(demandeId) {
-            const input = document.getElementById(`fileInput-${demandeId}`);
-            if (input) {
-                input.onchange = function(event) {
-                    processFiles(event.target.files, demandeId);
-                };
-            }
-        }
-
-        function triggerFileUpload(demandeId) {
-            const input = document.getElementById(`fileInput-${demandeId}`);
-            if (input) {
-                input.click();
-            }
-        }
-
-        function processFiles(files, demandeId) {
-            const maxSize = 10 * 1024 * 1024; // 10MB
-            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
-            
-            Array.from(files).forEach(file => {
-                if (file.size > maxSize) {
-                    showNotification(`📋 Fichier trop volumineux: ${file.name}`, 'error');
-                    return;
-                }
-                
-                if (!allowedTypes.includes(file.type)) {
-                    showNotification(`📋 Type non supporté: ${file.name}`, 'error');
-                    return;
-                }
-                
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const docId = 'DOC-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
-                    
-                    const document = {
-                        id: docId,
-                        name: file.name,
-                        type: file.type.startsWith('image/') ? 'image' : 'document',
-                        size: file.size,
-                        dataUrl: e.target.result,
-                        preview: file.type.startsWith('image/') ? e.target.result : null,
-                        demandeId: demandeId,
-                        clientEmail: currentUser.email,
-                        clientName: currentUser.nom,
-                        uploadDate: new Date().toISOString()
-                    };
-                    
-                    // Ajouter localement
-                    uploadedDocuments.push(document);
-                    
-                    // Synchroniser avec l'admin
-                    const existingDocuments = getClientDocuments();
-                    existingDocuments.push(document);
-                    localStorage.setItem(STORAGE_KEYS.clientDocuments, JSON.stringify(existingDocuments));
-                    
-                    showNotification(`✅ "${file.name}" uploadé avec succès`, 'success');
-                    loadDemandes();
-                    updateStats();
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function removeDocument(docId, event) {
-            event.stopPropagation();
-            
-            if (confirm('🗑️ Supprimer ce document ?')) {
-                // Supprimer localement
-                uploadedDocuments = uploadedDocuments.filter(doc => doc.id !== docId);
-                
-                // Supprimer du stockage
-                const existingDocuments = getClientDocuments();
-                const filteredDocuments = existingDocuments.filter(doc => doc.id !== docId);
-                localStorage.setItem(STORAGE_KEYS.clientDocuments, JSON.stringify(filteredDocuments));
-                
-                showNotification('🗑️ Document supprimé', 'success');
-                loadDemandes();
-                updateStats();
-            }
-        }
-
-        // === STATISTIQUES ===
+        // === MISE À JOUR DES STATISTIQUES ===
         function updateStats() {
             const demandes = getDemandes();
-            const userDemandes = demandes.filter(d => currentUser.demandes && currentUser.demandes.includes(d.id));
+            const userDemandes = demandes.filter(d => currentUser.demandes.includes(d.id));
             
             const total = userDemandes.length;
-            const enCours = userDemandes.filter(d => ['nouveau', 'en-cours', 'documents-requis'].includes(d.statut)).length;
+            const enCours = userDemandes.filter(d => 
+                d.statut === 'nouveau' || d.statut === 'en-cours' || d.statut === 'documents-requis').length;
             const terminees = userDemandes.filter(d => d.statut === 'termine').length;
-            const documentsCount = uploadedDocuments.length;
             
             document.getElementById('totalDemandes').textContent = total;
             document.getElementById('demandesEnCours').textContent = enCours;
             document.getElementById('demandesTerminees').textContent = terminees;
-            document.getElementById('documentsUploades').textContent = documentsCount;
         }
 
-        function refreshData() {
-            showNotification('🔄 Actualisation des données...', 'success');
-            loadUserData();
+        // === ACTUALISATION DES DEMANDES ===
+        function refreshDemandes() {
+            showNotification('Actualisation des données...', 'success');
+            
+            // Recharger les données du client depuis localStorage
+            const clients = getClients();
+            const updatedUser = clients.find(c => c.email === currentUser.email);
+            if (updatedUser) {
+                currentUser = updatedUser;
+                localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(updatedUser));
+            }
+            
+            loadDemandes();
+            updateStats();
+        }
+
+        // === GESTION DE L'UPLOAD DE FICHIERS ===
+        function handleFileUpload(demandeId) {
+            if (uploadInProgress) {
+                showNotification('Upload en cours, veuillez patienter...', 'warning');
+                return;
+            }
+            
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.multiple = true;
+            input.accept = '.pdf,.jpg,.jpeg,.png';
+            
+            input.onchange = function(event) {
+                const files = Array.from(event.target.files);
+                if (files.length > 0) {
+                    processFiles(files, demandeId);
+                }
+            };
+            
+            input.click();
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(event) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('dragover');
+        }
+
+        function handleFileDrop(event, demandeId) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('dragover');
+            
+            if (uploadInProgress) {
+                showNotification('Upload en cours, veuillez patienter...', 'warning');
+                return;
+            }
+            
+            const files = Array.from(event.dataTransfer.files);
+            if (files.length > 0) {
+                processFiles(files, demandeId);
+            }
+        }
+
+        function processFiles(files, demandeId) {
+            // Vérifications
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+            
+            const invalidFiles = files.filter(file => 
+                file.size > maxSize || !allowedTypes.includes(file.type)
+            );
+            
+            if (invalidFiles.length > 0) {
+                const invalidNames = invalidFiles.map(f => f.name).join(', ');
+                showNotification(`Fichiers invalides (trop volumineux ou format non supporté): ${invalidNames}`, 'error');
+                return;
+            }
+            
+            uploadInProgress = true;
+            uploadFiles(files, demandeId);
+        }
+
+        function uploadFiles(files, demandeId) {
+            const totalFiles = files.length;
+            let uploadedFiles = 0;
+            
+            showNotification(`Upload de ${totalFiles} fichier(s) en cours...`, 'warning');
+            
+            // Simuler l'upload avec une barre de progression
+            const progressContainer = document.createElement('div');
+            progressContainer.className = 'upload-progress';
+            progressContainer.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <span style="font-weight: 600;">📤 Upload en cours...</span>
+                    <span id="uploadPercentage" style="font-weight: 600; color: var(--primary-color);">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="uploadProgressFill" style="width: 0%"></div>
+                </div>
+                <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-light);" id="uploadStatus">
+                    Préparation de l'upload...
+                </div>
+            `;
+            
+            // Trouver la zone d'upload correspondante et ajouter la barre de progression
+            const uploadAreas = document.querySelectorAll('.upload-area');
+            let targetUploadArea = null;
+            uploadAreas.forEach(area => {
+                if (area.onclick.toString().includes(demandeId)) {
+                    targetUploadArea = area;
+                    area.parentNode.appendChild(progressContainer);
+                }
+            });
+            
+            // Simuler l'upload de chaque fichier
+            files.forEach((file, index) => {
+                setTimeout(() => {
+                    // Créer l'objet document
+                    const document = {
+                        id: 'DOC-' + Date.now() + '-' + index,
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        demandeId: demandeId,
+                        clientName: currentUser.nom,
+                        uploadDate: new Date().toISOString(),
+                        status: 'uploaded'
+                    };
+                    
+                    // Sauvegarder le document
+                    saveDocument(document);
+                    
+                    uploadedFiles++;
+                    const progress = Math.round((uploadedFiles / totalFiles) * 100);
+                    
+                    // Mettre à jour la barre de progression
+                    const progressFill = document.getElementById('uploadProgressFill');
+                    const percentageSpan = document.getElementById('uploadPercentage');
+                    const statusSpan = document.getElementById('uploadStatus');
+                    
+                    if (progressFill) progressFill.style.width = progress + '%';
+                    if (percentageSpan) percentageSpan.textContent = progress + '%';
+                    if (statusSpan) statusSpan.textContent = `Upload de ${file.name} terminé (${uploadedFiles}/${totalFiles})`;
+                    
+                    // Si tous les fichiers sont uploadés
+                    if (uploadedFiles === totalFiles) {
+                        setTimeout(() => {
+                            uploadInProgress = false;
+                            progressContainer.remove();
+                            showNotification(`✅ ${totalFiles} fichier(s) uploadé(s) avec succès !`, 'success');
+                            
+                            // Recharger les demandes pour afficher les nouveaux documents
+                            loadDemandes();
+                        }, 500);
+                    }
+                    
+                }, (index + 1) * 1500); // Délai progressif pour simuler l'upload
+            });
+        }
+
+        // === GESTION DES DOCUMENTS ===
+        function saveDocument(document) {
+            const documents = getDocuments();
+            documents.push(document);
+            localStorage.setItem(STORAGE_KEYS.documents, JSON.stringify(documents));
+            console.log('Document sauvegardé:', document);
+        }
+
+        function getDocuments() {
+            return JSON.parse(localStorage.getItem(STORAGE_KEYS.documents) || '[]');
+        }
+
+        function getDocumentsForDemande(demandeId) {
+            const documents = getDocuments();
+            return documents.filter(doc => doc.demandeId === demandeId);
+        }
+
+        // === DÉCONNEXION ===
+        function logout() {
+            localStorage.removeItem(STORAGE_KEYS.currentUser);
+            currentUser = null;
+            
+            document.getElementById('dashboard').classList.remove('active');
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('userInfo').classList.add('hidden');
+            
+            // Reset du formulaire
+            document.getElementById('loginForm').reset();
+            document.getElementById('email').value = 'marie.martin@example.com';
+            document.getElementById('password').value = 'client123';
+            
+            showNotification('Déconnexion réussie', 'success');
         }
 
         // === FONCTIONS UTILITAIRES ===
@@ -1817,10 +1707,6 @@
 
         function getDemandes() {
             return JSON.parse(localStorage.getItem(STORAGE_KEYS.demandes) || '[]');
-        }
-
-        function getClientDocuments() {
-            return JSON.parse(localStorage.getItem(STORAGE_KEYS.clientDocuments) || '[]');
         }
 
         function getServiceDisplayName(service) {
@@ -1851,15 +1737,126 @@
             return statuses[status] || status;
         }
 
+        function getStatusIcon(status) {
+            const icons = {
+                'nouveau': '📋',
+                'en-cours': '⏳',
+                'documents-requis': '📄',
+                'termine': '✅',
+                'refuse': '❌'
+            };
+            return icons[status] || '📋';
+        }
+
+        function createProgressTracker(currentStatus) {
+            if (currentStatus === 'refuse') {
+                return `
+                    <div class="progress-tracker">
+                        <h4 style="margin-bottom: 1rem; color: var(--text-dark);">🚫 Statut de la demande</h4>
+                        <div style="text-align: center; padding: 2rem;">
+                            <div class="step-circle refused" style="margin: 0 auto 1rem; width: 60px; height: 60px; font-size: 1.5rem;">❌</div>
+                            <div class="step-label refused" style="font-size: 1.1rem;">Demande refusée</div>
+                            <p style="color: #dc3545; margin-top: 1rem; font-size: 0.9rem; background: rgba(220, 53, 69, 0.1); padding: 1rem; border-radius: 8px;">
+                                Votre demande a été refusée. Consultez l'historique pour plus de détails ou contactez notre équipe.
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const steps = [
+                { id: 'nouveau', label: 'Reçue', number: 1 },
+                { id: 'en-cours', label: 'En cours', number: 2 },
+                { id: 'termine', label: 'Terminée', number: 3 }
+            ];
+            
+            const statusOrder = ['nouveau', 'en-cours', 'documents-requis', 'termine'];
+            let currentIndex = statusOrder.indexOf(currentStatus);
+            
+            // Traitement spécial pour "documents-requis"
+            if (currentStatus === 'documents-requis') {
+                currentIndex = 1; // Considérer comme "en cours"
+            }
+            
+            let stepsHtml = '';
+            steps.forEach((step, index) => {
+                let stepClass = '';
+                if (index < currentIndex || (currentStatus === 'termine' && index <= currentIndex)) {
+                    stepClass = 'completed';
+                } else if (index === currentIndex) {
+                    stepClass = 'current';
+                }
+                
+                stepsHtml += `
+                    <div class="progress-step ${stepClass}">
+                        <div class="step-circle ${stepClass}">${stepClass === 'completed' ? '✓' : step.number}</div>
+                        <div class="step-label ${stepClass}">${step.label}</div>
+                    </div>
+                `;
+            });
+            
+            let statusMessage = '';
+            let statusColor = 'var(--text-light)';
+            switch(currentStatus) {
+                case 'nouveau':
+                    statusMessage = 'Votre demande a été reçue et sera traitée prochainement.';
+                    statusColor = '#1976d2';
+                    break;
+                case 'en-cours':
+                    statusMessage = 'Votre demande est actuellement en cours de traitement.';
+                    statusColor = '#f57c00';
+                    break;
+                case 'documents-requis':
+                    statusMessage = '📋 Des documents complémentaires sont requis. Veuillez les uploader ci-dessous.';
+                    statusColor = '#c62828';
+                    break;
+                case 'termine':
+                    statusMessage = '🎉 Votre demande a été traitée avec succès !';
+                    statusColor = '#388e3c';
+                    break;
+                default:
+                    statusMessage = 'Statut en cours de mise à jour...';
+            }
+            
+            return `
+                <div class="progress-tracker">
+                    <h4 style="margin-bottom: 1.5rem; color: var(--text-dark);">🔄 Progression de votre demande</h4>
+                    <div class="progress-steps">
+                        ${stepsHtml}
+                    </div>
+                    <div style="text-align: center; margin-top: 2rem; padding: 1.5rem; background: rgba(102, 126, 234, 0.05); border-radius: 12px; border: 1px solid rgba(102, 126, 234, 0.1);">
+                        <div style="font-weight: 600; color: var(--text-dark); margin-bottom: 0.8rem; font-size: 1.1rem;">
+                            Statut actuel: <span style="color: ${statusColor};">${getStatusDisplayName(currentStatus)}</span>
+                        </div>
+                        <div style="color: var(--text-dark); font-size: 0.95rem; line-height: 1.5;">
+                            ${statusMessage}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
         function formatDate(dateString) {
             const date = new Date(dateString);
-            return date.toLocaleDateString('fr-FR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 1) {
+                return 'Aujourd\'hui à ' + date.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'});
+            } else if (diffDays === 2) {
+                return 'Hier à ' + date.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'});
+            } else if (diffDays <= 7) {
+                return `Il y a ${diffDays - 1} jour${diffDays > 2 ? 's' : ''} à ` + date.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'});
+            } else {
+                return date.toLocaleDateString('fr-FR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
         }
 
         function formatFileSize(bytes) {
@@ -1881,30 +1878,30 @@
             
             document.body.appendChild(notification);
             
-            // Afficher
+            // Afficher la notification
             setTimeout(() => {
                 notification.classList.add('show');
             }, 100);
             
-            // Masquer
-            const displayTime = window.innerWidth <= 768 ? 5000 : 4000;
+            // Masquer la notification après 5 secondes
             setTimeout(() => {
                 notification.classList.remove('show');
                 setTimeout(() => {
                     if (notification.parentNode) {
                         notification.parentNode.removeChild(notification);
                     }
-                }, 300);
-            }, displayTime);
+                }, 400);
+            }, 5000);
         }
 
-        // Gestion des erreurs globales
+        // === GESTION DES ERREURS GLOBALES ===
         window.addEventListener('error', function(event) {
-            console.error('Erreur espace client:', event.error);
-            showNotification('⚠️ Une erreur inattendue s\'est produite', 'error');
+            console.error('Erreur dans l\'espace client:', event.error);
+            showNotification('Une erreur inattendue s\'est produite', 'error');
         });
 
-        console.log('🏢 Espace Client MonEntreprise.fr initialisé avec succès');
+        // Log pour le débogage
+        console.log('Espace client MonEntreprise.fr initialisé avec interface adaptative PC/Mobile');
     </script>
 </body>
 </html>
